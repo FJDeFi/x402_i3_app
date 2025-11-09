@@ -1,0 +1,131 @@
+use anchor_lang::prelude::*;
+
+declare_id!("CHECKIN_PROGRAM_ID_HERE");
+
+/// Program entry
+#[program]
+pub mod checkin {
+    use super::*;
+
+    /// 初始化用户账户（PDA）。也可以跳过这一步，直接在 `check_in` 里用 `init_if_needed`，
+    /// 但为了清晰，这里单独给一个初始化入口。
+    pub fn initialize_user(ctx: Context<InitializeUser>) -> Result<()> {
+        let user_pda = &mut ctx.accounts.user_pda;
+        user_pda.user = ctx.accounts.user.key();
+        user_pda.last_day_index = -1; // -1 表示从未签到
+        user_pda.streak = 0;
+        user_pda.total_credits = 0;
+        user_pda.bump = *ctx.bumps.get("user_pda").ok_or(ErrorCode::BumpNotFound)?;
+        Ok(())
+    }
+
+    /// 每日签到：同日只能一次；隔日续签 streak，否则重置为 1；credits 按固定增量（可后续扩展）。
+    pub fn check_in(ctx: Context<CheckIn>) -> Result<()> {
+        let clock = Clock::get()?;
+        let day_index = clock.unix_timestamp.div_euclid(SECONDS_PER_DAY);
+
+        let user_pda = &mut ctx.accounts.user_pda;
+        require_keys_eq!(user_pda.user, ctx.accounts.user.key(), ErrorCode::UserMismatch);
+
+        // 同日重复签到直接报错
+        require!(day_index > user_pda.last_day_index, ErrorCode::AlreadyCheckedInToday);
+
+        // 计算连续天数
+        if user_pda.last_day_index >= 0 && day_index == user_pda.last_day_index + 1 {
+            user_pda.streak = user_pda.streak.saturating_add(1);
+        } else {
+            user_pda.streak = 1;
+        }
+
+        // 累计积分（先用固定 1，后续可按 streak 等策略调整）
+        let credit_delta: u64 = 1;
+        user_pda.total_credits = user_pda.total_credits.saturating_add(credit_delta);
+        user_pda.last_day_index = day_index;
+
+        emit!(CheckedIn {
+            user: ctx.accounts.user.key(),
+            day_index,
+            streak: user_pda.streak,
+            credits_after: user_pda.total_credits,
+        });
+
+        Ok(())
+    }
+}
+
+/// 用户签到状态账户（PDA）
+/// seeds = ["checkin", user_pubkey]
+#[account]
+pub struct UserPda {
+    pub user: Pubkey,        // 32
+    pub last_day_index: i64, // 8
+    pub streak: u32,         // 4
+    pub total_credits: u64,  // 8
+    pub bump: u8,            // 1
+    // padding for alignment (optional)
+    // 32 + 8 + 4 + 8 + 1 = 53 -> with 8 byte discriminator = 61
+}
+impl UserPda {
+    pub const LEN: usize = 8  // discriminator
+        + 32  // user
+        + 8   // last_day_index
+        + 4   // streak
+        + 8   // total_credits
+        + 1;  // bump
+}
+
+/// 事件：前端/索引服务用它更新 UI / 榜单
+#[event]
+pub struct CheckedIn {
+    pub user: Pubkey,
+    pub day_index: i64,
+    pub streak: u32,
+    pub credits_after: u64,
+}
+
+/// 初始化用户账户
+#[derive(Accounts)]
+pub struct InitializeUser<'info> {
+    #[account(mut)]
+    pub user: Signer<'info>,
+
+    /// PDA：按用户公钥派生
+    #[account(
+        init,
+        payer = user,
+        space = UserPda::LEN,
+        seeds = [SEED_USER, user.key().as_ref()],
+        bump,
+    )]
+    pub user_pda: Account<'info, UserPda>,
+
+    pub system_program: Program<'info, System>,
+}
+
+/// 每日签到上下文
+#[derive(Accounts)]
+pub struct CheckIn<'info> {
+    #[account(mut)]
+    pub user: Signer<'info>,
+
+    /// 需要是该用户的 PDA
+    #[account(
+        mut,
+        seeds = [SEED_USER, user.key().as_ref()],
+        bump = user_pda.bump,
+    )]
+    pub user_pda: Account<'info, UserPda>,
+}
+
+const SEED_USER: &[u8] = b"checkin";
+const SECONDS_PER_DAY: i64 = 86_400;
+
+#[error_code]
+pub enum ErrorCode {
+    #[msg("The PDA bump seed is missing.")]
+    BumpNotFound,
+    #[msg("You have already checked in today.")]
+    AlreadyCheckedInToday,
+    #[msg("Signer does not match the PDA owner.")]
+    UserMismatch,
+}

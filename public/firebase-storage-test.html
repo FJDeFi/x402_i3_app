@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Storage 测试 - Model Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .upload-section {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .upload-section.dragover {
+            border-color: #007bff;
+            background: #f0f8ff;
+        }
+        .data-preview {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .model-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            background: white;
+        }
+        .model-name {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .model-details {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Firebase Storage 测试 - Model Data</h1>
+        
+        <div class="status info">
+            <strong>功能说明：</strong> 测试从 Firebase Storage 读取 model-data.js 文件，并展示数据
+        </div>
+
+        <div class="status info">
+            <strong>当前状态：</strong>
+            <div id="storageStatus">正在检查...</div>
+            <div id="dataStatus">等待数据...</div>
+        </div>
+
+        <!-- 上传区域 -->
+        <div class="upload-section" id="uploadSection">
+            <h3>📁 上传 Model Data 到 Storage</h3>
+            <p>拖拽 model-data.js 文件到这里，或点击选择文件</p>
+            <input type="file" id="fileInput" accept=".js" style="display: none;">
+            <button onclick="document.getElementById('fileInput').click()">选择文件</button>
+            <button onclick="uploadToStorage()" id="uploadBtn" disabled>上传到 Storage</button>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div>
+            <button onclick="downloadFromStorage()">📥 从 Storage 下载</button>
+            <button onclick="clearData()">🗑️ 清除数据</button>
+            <button onclick="showStats()">📊 显示统计</button>
+        </div>
+
+        <!-- 统计信息 -->
+        <div class="stats" id="statsSection" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-value" id="totalModels">-</div>
+                <div class="stat-label">总模型数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgRating">-</div>
+                <div class="stat-label">平均评分</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalUsage">-</div>
+                <div class="stat-label">总使用量</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="categories">-</div>
+                <div class="stat-label">分类数量</div>
+            </div>
+        </div>
+
+        <!-- 数据预览 -->
+        <h3>📋 Model Data 预览</h3>
+        <div class="data-preview" id="dataPreview">
+            <p>数据将在这里显示...</p>
+        </div>
+    </div>
+
+    <!-- 引入Firebase SDK -->
+    <script type="module">
+        // 导入Firebase SDK
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getStorage, ref, uploadBytes, getDownloadURL, listAll } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+        
+        // Firebase配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYdWqXjUfNbUAMW1cm8neZQGTBTA63pfM",
+            authDomain: "i3-testnet.firebaseapp.com",
+            projectId: "i3-testnet",
+            storageBucket: "i3-testnet.firebasestorage.app",
+            messagingSenderId: "892139814159",
+            appId: "1:892139814159:web:4df8548eef1d9bd9a1927a",
+            measurementId: "G-KCDG3D1FCC"
+        };
+
+        // 初始化Firebase
+        const app = initializeApp(firebaseConfig);
+        const storage = getStorage(app);
+        
+        let selectedFile = null;
+        let modelData = null;
+
+        // 页面加载完成后更新状态
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('storageStatus', '✅ Storage 服务已连接', 'success');
+            updateStatus('dataStatus', '等待上传或下载数据...', 'info');
+        });
+
+        // 文件选择处理
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            selectedFile = e.target.files[0];
+            if (selectedFile) {
+                document.getElementById('uploadBtn').disabled = false;
+                updateStatus('dataStatus', `已选择文件: ${selectedFile.name} (${(selectedFile.size / 1024).toFixed(2)} KB)`, 'info');
+            }
+        });
+
+        // 拖拽上传
+        const uploadSection = document.getElementById('uploadSection');
+        uploadSection.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+        uploadSection.addEventListener('dragleave', function() {
+            uploadSection.classList.remove('dragover');
+        });
+        uploadSection.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            selectedFile = e.dataTransfer.files[0];
+            if (selectedFile && selectedFile.name.endsWith('.js')) {
+                document.getElementById('fileInput').files = e.dataTransfer.files;
+                document.getElementById('uploadBtn').disabled = false;
+                updateStatus('dataStatus', `已选择文件: ${selectedFile.name} (${(selectedFile.size / 1024).toFixed(2)} KB)`, 'info');
+            }
+        });
+
+        // 上传到Storage
+        window.uploadToStorage = async function() {
+            if (!selectedFile) {
+                alert('请先选择文件');
+                return;
+            }
+
+            try {
+                updateStatus('dataStatus', '正在上传到 Storage...', 'info');
+                
+                const storageRef = ref(storage, 'model-data.js');
+                const snapshot = await uploadBytes(storageRef, selectedFile);
+                const downloadURL = await getDownloadURL(snapshot.ref);
+                
+                updateStatus('dataStatus', '✅ 文件上传成功！', 'success');
+                console.log('文件上传成功:', downloadURL);
+                
+                // 自动下载并解析
+                setTimeout(() => {
+                    downloadFromStorage();
+                }, 1000);
+                
+            } catch (error) {
+                updateStatus('dataStatus', `❌ 上传失败: ${error.message}`, 'error');
+                console.error('上传错误:', error);
+            }
+        };
+
+        // 从Storage下载
+        window.downloadFromStorage = async function() {
+            try {
+                updateStatus('dataStatus', '正在从 Storage 下载...', 'info');
+                
+                const storageRef = ref(storage, 'model-data.js');
+                const downloadURL = await getDownloadURL(storageRef);
+                
+                // 下载文件内容
+                const response = await fetch(downloadURL);
+                const fileContent = await response.text();
+                
+                // 解析JavaScript内容（提取MODEL_DATA对象）
+                try {
+                    // 简单的正则表达式提取，实际项目中可能需要更复杂的解析
+                    const modelDataMatch = fileContent.match(/const MODEL_DATA = ({[\s\S]*});/);
+                    if (modelDataMatch) {
+                        // 注意：这种解析方式在生产环境中不够安全，仅用于演示
+                        const modelDataStr = modelDataMatch[1];
+                        // 使用 Function 构造器来解析（仅用于演示）
+                        const parseFunction = new Function(`return ${modelDataStr}`);
+                        modelData = parseFunction();
+                        
+                        updateStatus('dataStatus', '✅ 数据下载并解析成功！', 'success');
+                        displayModelData();
+                    } else {
+                        throw new Error('无法找到 MODEL_DATA 对象');
+                    }
+                } catch (parseError) {
+                    updateStatus('dataStatus', `❌ 数据解析失败: ${parseError.message}`, 'error');
+                    console.error('解析错误:', parseError);
+                }
+                
+            } catch (error) {
+                updateStatus('dataStatus', `❌ 下载失败: ${error.message}`, 'error');
+                console.error('下载错误:', error);
+            }
+        };
+
+        // 显示模型数据
+        function displayModelData() {
+            if (!modelData) return;
+            
+            const preview = document.getElementById('dataPreview');
+            const models = Object.entries(modelData).slice(0, 10); // 只显示前10个
+            
+            let html = '<h4>前10个模型数据：</h4>';
+            models.forEach(([name, data]) => {
+                html += `
+                    <div class="model-item">
+                        <div class="model-name">${name}</div>
+                        <div class="model-details">
+                            <strong>用途:</strong> ${data.purpose.substring(0, 100)}...<br>
+                            <strong>分类:</strong> ${data.category} | 
+                            <strong>行业:</strong> ${data.industry} | 
+                            <strong>评分:</strong> ${data.rating} | 
+                            <strong>价格:</strong> ${data.tokenPrice} tokens
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `<p><em>显示 ${models.length} 个模型，总共 ${Object.keys(modelData).length} 个</em></p>`;
+            preview.innerHTML = html;
+        }
+
+        // 显示统计信息
+        window.showStats = function() {
+            if (!modelData) {
+                alert('请先下载数据');
+                return;
+            }
+            
+            const statsSection = document.getElementById('statsSection');
+            statsSection.style.display = 'grid';
+            
+            const models = Object.values(modelData);
+            const totalModels = models.length;
+            const avgRating = (models.reduce((sum, m) => sum + m.rating, 0) / totalModels).toFixed(2);
+            const totalUsage = models.reduce((sum, m) => sum + m.usage, 0);
+            const categories = new Set(models.map(m => m.category)).size;
+            
+            document.getElementById('totalModels').textContent = totalModels;
+            document.getElementById('avgRating').textContent = avgRating;
+            document.getElementById('totalUsage').textContent = totalUsage.toLocaleString();
+            document.getElementById('categories').textContent = categories;
+        };
+
+        // 清除数据
+        window.clearData = function() {
+            modelData = null;
+            document.getElementById('dataPreview').innerHTML = '<p>数据已清除...</p>';
+            document.getElementById('statsSection').style.display = 'none';
+            updateStatus('dataStatus', '数据已清除', 'info');
+        };
+
+        // 更新状态显示
+        function updateStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = message;
+            element.className = type;
+        }
+    </script>
+</body>
+</html> 

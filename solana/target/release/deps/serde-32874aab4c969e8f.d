@@ -1,0 +1,14 @@
+/mnt/c/Users/FANFEI ZHI/i3_demo_new/solana/target/release/deps/libserde-32874aab4c969e8f.rmeta: /home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/lib.rs /home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/integer128.rs /home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/private/mod.rs /home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/private/de.rs /home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/private/ser.rs /mnt/c/Users/FANFEI\ ZHI/i3_demo_new/solana/target/release/build/serde-a8935e18b71fd7f2/out/private.rs
+
+/mnt/c/Users/FANFEI ZHI/i3_demo_new/solana/target/release/deps/libserde-32874aab4c969e8f.rlib: /home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/lib.rs /home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/integer128.rs /home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/private/mod.rs /home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/private/de.rs /home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/private/ser.rs /mnt/c/Users/FANFEI\ ZHI/i3_demo_new/solana/target/release/build/serde-a8935e18b71fd7f2/out/private.rs
+
+/mnt/c/Users/FANFEI ZHI/i3_demo_new/solana/target/release/deps/serde-32874aab4c969e8f.d: /home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/lib.rs /home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/integer128.rs /home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/private/mod.rs /home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/private/de.rs /home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/private/ser.rs /mnt/c/Users/FANFEI\ ZHI/i3_demo_new/solana/target/release/build/serde-a8935e18b71fd7f2/out/private.rs
+
+/home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/lib.rs:
+/home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/integer128.rs:
+/home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/private/mod.rs:
+/home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/private/de.rs:
+/home/fanfeizhi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-1.0.228/src/private/ser.rs:
+/mnt/c/Users/FANFEI\ ZHI/i3_demo_new/solana/target/release/build/serde-a8935e18b71fd7f2/out/private.rs:
+
+# env-dep:OUT_DIR=/mnt/c/Users/FANFEI ZHI/i3_demo_new/solana/target/release/build/serde-a8935e18b71fd7f2/out

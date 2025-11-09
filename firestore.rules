@@ -1,0 +1,30 @@
+﻿rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 钱包集合 - 开发期临时放开，生产环境需要更严格规则
+    match /wallets/{addr} {
+      allow read, write: if true; // 开发期临时放开
+    }
+    
+    // 用户集合 - 只有认证用户才能访问自己的数据
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+      
+      // 用户钱包子集合
+      match /wallets/{addr} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+
+    // 新增：基于钱包地址的用户档案（开发期开放，生产需收紧）
+    match /users_by_wallet/{addr} {
+      allow read, write: if true; // DEV ONLY
+    }
+
+    match /uploads/{uid}/{filename} {
+      allow write: if request.auth != null && request.auth.uid == uid;
+      allow read: if true; // or restrict
+    }
+    
+  }
+}

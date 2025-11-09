@@ -1,0 +1,22 @@
+[package]
+name = "checkin"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "checkin"
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+anchor-lang = { workspace = true }
+
+[features]
+default = []
+no-entrypoint = []
+cpi = []
+anchor-debug = []
+no-idl = []
+no-log-ix-name = []
+custom-heap = []
+custom-panic = []
+idl-build = ["anchor-lang/idl-build"]

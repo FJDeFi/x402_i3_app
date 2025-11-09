@@ -1,0 +1,1 @@
+{"rustc":16285725380928457773,"features":"[]","declared_features":"[\"std\"]","target":10889037578358917193,"profile":15657897354478470176,"path":10028149848446994435,"deps":[],"local":[{"CheckDepInfo":{"dep_info":"debug/.fingerprint/five8_core-50770665323f126f/dep-lib-five8_core","checksum":false}}],"rustflags":["-A","warnings"],"config":2069994364910194474,"compile_kind":0}

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligence Cubed - Firebase 测试</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #8b7cf6, #7c3aed);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        h1 {
+            color: #1f2937;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .status {
+            background: #f3f4f6;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .status h3 {
+            color: #374151;
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+        
+        .status p {
+            color: #6b7280;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .success {
+            color: #10b981;
+            font-weight: 600;
+        }
+        
+        .info {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        
+        .firebase-info {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .firebase-info h4 {
+            color: #92400e;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+        }
+        
+        .firebase-info p {
+            color: #92400e;
+            margin: 5px 0;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">I³</div>
+        <h1>Intelligence Cubed</h1>
+        <p class="subtitle">Firebase 集成测试页面</p>
+        
+        <div class="status">
+            <h3>系统状态</h3>
+            <p>Firebase 连接状态: <span id="firebaseStatus" class="info">正在初始化...</span></p>
+            <p>Analytics 服务: <span id="analyticsStatus" class="info">正在初始化...</span></p>
+            <p>项目 ID: <span id="projectId" class="info">i3-testnet</span></p>
+        </div>
+        
+        <div class="firebase-info">
+            <h4>Firebase 配置信息</h4>
+            <p>• 项目: i3-testnet</p>
+            <p>• 域名: i3-testnet.firebaseapp.com</p>
+            <p>• 存储: i3-testnet.firebasestorage.app</p>
+        </div>
+        
+        <div class="status">
+            <h3>使用说明</h3>
+            <p>• 此页面用于测试 Firebase 连接</p>
+            <p>• 打开浏览器控制台查看详细日志</p>
+            <p>• 如果看到"Firebase 初始化成功"说明配置正确</p>
+        </div>
+    </div>
+
+    <!-- 引入Firebase SDK (CDN) -->
+    <script type="module">
+        // 导入Firebase SDK
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
+        
+        // Firebase配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYdWqXjUfNbUAMW1cm8neZQGTBTA63pfM",
+            authDomain: "i3-testnet.firebaseapp.com",
+            projectId: "i3-testnet",
+            storageBucket: "i3-testnet.firebasestorage.app",
+            messagingSenderId: "892139814159",
+            appId: "1:892139814159:web:4df8548eef1d9bd9a1927a",
+            measurementId: "G-KCDG3D1FCC"
+        };
+
+        // 初始化Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        
+        // 等待页面加载完成后更新状态
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                // 更新Firebase状态
+                const firebaseStatus = document.getElementById('firebaseStatus');
+                const analyticsStatus = document.getElementById('analyticsStatus');
+                
+                if (app) {
+                    firebaseStatus.textContent = '已连接';
+                    firebaseStatus.className = 'success';
+                }
+                
+                if (analytics) {
+                    analyticsStatus.textContent = '已启用';
+                    analyticsStatus.className = 'success';
+                }
+                
+                console.log('✅ 页面状态已更新');
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 

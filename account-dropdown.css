@@ -1,0 +1,312 @@
+/* Account Dropdown Styles */
+
+.account-dropdown {
+    position: relative;
+}
+
+.dropdown-content {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    margin-top: 8px;
+}
+
+.dropdown-content.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: #374151;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    margin: 4px 8px;
+}
+
+.dropdown-item:hover {
+    background: #f9fafb;
+    color: #8b7cf6;
+}
+
+.dropdown-item.active {
+    background: #f3f4f6;
+    color: #8b7cf6;
+    font-weight: 600;
+}
+
+.dropdown-item svg {
+    flex-shrink: 0;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 8px 0;
+}
+
+/* Account button styling */
+.account-btn {
+  background: linear-gradient(135deg,#8b5cf6,#7c3aed);
+  color:#fff;
+  border:0;
+  border-radius:12px;
+  padding:12px 24px;
+  font-weight:600;
+  font-size:15px;
+  cursor:pointer;
+  transition:all .25s ease;
+  box-shadow:0 4px 12px rgba(139,92,246,.25);
+}
+.account-btn:hover {
+  background: linear-gradient(135deg,#7c3aed,#6d28d9);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow:0 6px 16px rgba(124,58,237,.30);
+}
+
+/* ==================== Social Tasks Styles ==================== */
+
+.tasks-section {
+    padding: 12px 0;
+    border-top: 1px solid #e5e7eb;
+}
+
+.tasks-header {
+    padding: 0 12px 8px 12px;
+}
+
+.tasks-header h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+    letter-spacing: 0.3px;
+}
+
+/* Task Item */
+.task-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    margin: 0 8px 8px 8px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.task-item:last-child {
+    margin-bottom: 0;
+}
+
+.task-item:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    transform: translateX(2px);
+}
+
+.task-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.task-icon {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    background: white;
+    border-radius: 50%;
+    border: 1px solid #e5e7eb;
+    flex-shrink: 0;
+}
+
+.task-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.task-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: #111827;
+    line-height: 1.2;
+}
+
+.task-reward {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #10b981;
+}
+
+.task-reward-icon {
+    width: 12px;
+    height: 12px;
+    object-fit: contain;
+}
+
+/* Task Button */
+.task-button {
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.task-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.task-button:active {
+    transform: translateY(0);
+}
+
+.task-button.completed {
+    background: #e5e7eb;
+    color: #6b7280;
+    cursor: default;
+    pointer-events: none;
+}
+
+.task-button.completed::before {
+    content: "✓ ";
+    margin-right: 2px;
+}
+
+.task-button.completed:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* 响应式调整 */
+@media (max-width: 480px) {
+    .task-item {
+        padding: 6px 10px;
+    }
+    
+    .task-icon {
+        width: 24px;
+        height: 24px;
+        font-size: 14px;
+    }
+    
+    .task-title {
+        font-size: 11px;
+    }
+    
+    .task-button {
+        padding: 5px 12px;
+        font-size: 10px;
+    }
+}
+
+/* === Brand Primary Button (同 Daily Check-in 风格) === */
+.btn-primary {
+  background: linear-gradient(135deg,#8b5cf6,#7c3aed);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: transform .2s ease, box-shadow .2s ease;
+  box-shadow: 0 4px 12px rgba(124,58,237,.25);
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(124,58,237,.32);
+}
+
+/* 让任务区标题与 .dropdown-item 左边 8px 对齐 */
+.tasks-section { padding: 12px 0; border-top: 1px solid #e5e7eb; }
+.tasks-header { padding: 0; margin: 8px 8px 6px 8px; }   /* ← 关键：与 .dropdown-item 的 margin 左 8px 对齐 */
+.tasks-header h3 { font-size: 13px; font-weight: 600; color: #374151; margin: 0; letter-spacing: .3px; }
+
+/* 调整任务项配色为品牌紫，去掉“绿色感” */
+.task-reward { color: #8b7cf6; }   /* 原 #10b981 -> 品牌紫 */
+.task-button {
+  padding: 8px 14px;
+  background: linear-gradient(135deg,#8b5cf6,#7c3aed);  /* 统一紫色 */
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.task-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(124,58,237,.32);
+}
+
+/* 完成态保持中性灰（可留） */
+.task-button.completed {
+  background: #e5e7eb;
+  color: #6b7280;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* 标题里的小图标（gift）与文字对齐 */
+.icon-inline {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  margin-right: 6px;
+  position: relative;
+  top: -1px;
+}
+
+/* 任务项里的图标容器允许放 <img> */
+.task-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 24px;
+  margin-right: 10px;
+}
+.task-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}

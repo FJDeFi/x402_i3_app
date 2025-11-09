@@ -1,0 +1,166 @@
+{
+  "accounts": [
+    {
+      "discriminator": [
+        182,
+        179,
+        144,
+        178,
+        135,
+        99,
+        143,
+        249
+      ],
+      "name": "UserPda"
+    }
+  ],
+  "address": "HDNJ2F8CMHksj2EzuutDZiHrduCyi4KLZGabpdCs5BfZ",
+  "errors": [
+    {
+      "code": 6000,
+      "msg": "Invalid authority for this user PDA",
+      "name": "InvalidAuthority"
+    },
+    {
+      "code": 6001,
+      "msg": "Arithmetic overflow",
+      "name": "Overflow"
+    }
+  ],
+  "instructions": [
+    {
+      "accounts": [
+        {
+          "docs": [
+            "访问同一 PDA：用已存的 bump 进行校验"
+          ],
+          "name": "user_pda",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          },
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": [],
+      "discriminator": [
+        223,
+        175,
+        165,
+        27,
+        123,
+        7,
+        54,
+        252
+      ],
+      "docs": [
+        "签到：更新最近一次 slot/时间与累计次数"
+      ],
+      "name": "checkin"
+    },
+    {
+      "accounts": [
+        {
+          "docs": [
+            "用户专属 PDA：种子 = [\"user\", authority]"
+          ],
+          "name": "user_pda",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          },
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true,
+          "writable": true
+        },
+        {
+          "address": "11111111111111111111111111111111",
+          "name": "system_program"
+        }
+      ],
+      "args": [],
+      "discriminator": [
+        111,
+        17,
+        185,
+        250,
+        60,
+        122,
+        38,
+        254
+      ],
+      "docs": [
+        "初始化用户的 PDA 账户"
+      ],
+      "name": "initialize_user"
+    }
+  ],
+  "metadata": {
+    "name": "checkin",
+    "spec": "0.1.0",
+    "version": "0.1.0"
+  },
+  "types": [
+    {
+      "name": "UserPda",
+      "type": {
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "last_checkin_slot",
+            "type": "u64"
+          },
+          {
+            "name": "last_checkin_ts",
+            "type": "i64"
+          },
+          {
+            "name": "count",
+            "type": "u64"
+          }
+        ],
+        "kind": "struct"
+      }
+    }
+  ]
+}

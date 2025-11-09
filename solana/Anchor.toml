@@ -1,0 +1,21 @@
+[programs.localnet]
+checkin = "HDNJ2F8CMHksj2EzuutDZiHrduCyi4KLZGabpdCs5BfZ"
+
+[programs.devnet]
+checkin = "HDNJ2F8CMHksj2EzuutDZiHrduCyi4KLZGabpdCs5BfZ"
+
+[programs.mainnet]
+checkin = "HDNJ2F8CMHksj2EzuutDZiHrduCyi4KLZGabpdCs5BfZ"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+# 你后面可以把这些脚本映射到 package.json
+build = "anchor build"
+deploy = "anchor deploy"
+test = "anchor test"

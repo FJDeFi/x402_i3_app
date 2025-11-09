@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Session</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="model-data.js"></script>
+    <script src="api-manager.js"></script>
+    <style>
+        body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:#f8fafc; color:#0f172a; }
+        .wrap { max-width: 980px; margin: 24px auto; padding: 0 16px; }
+        .card { background:#fff; border:1px solid #e5e7eb; border-radius: 12px; padding:16px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+        .muted { color:#64748b; }
+        textarea { width: 100%; min-height: 140px; border:1px solid #cbd5e1; border-radius: 8px; padding: 10px; }
+        .row { display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; }
+        .grow { flex: 1 1 360px; }
+        .pill { display:inline-block; padding:4px 8px; border:1px solid #e5e7eb; border-radius:9999px; margin-right:6px; background:#f8fafc; }
+        .header { font-weight: 700; font-size: 18px; margin-bottom: 8px; }
+        .chat { background:#fff; border:1px solid #e5e7eb; border-radius:12px; }
+        .chat-header { padding:10px 12px; border-bottom:1px solid #e5e7eb; font-weight:600; }
+        .chat-main { padding:12px; height:60vh; overflow:auto; }
+        .message { padding:10px 12px; border-radius:10px; margin:8px 0; white-space:pre-wrap; word-break:break-word; border:1px solid #e5e7eb; }
+        .message.user { background:#eef2ff; border-color:#c7d2fe; }
+        .message.assistant { background:#ecfeff; border-color:#a5f3fc; }
+        .message.system { background:#f8fafc; border-color:#e2e8f0; color:#475569; }
+        .chat-input { border-top:1px solid #e5e7eb; padding:10px; display:flex; gap:8px; align-items:center; flex-wrap:nowrap; }
+        .chat-input textarea { min-height: 80px; flex:1 1 auto; }
+        .btn { padding:8px 12px; border:1px solid #e5e7eb; border-radius:8px; background:#0ea5e9; color:#fff; cursor:pointer; }
+        .attach-bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+        .thumb { position:relative; width:64px; height:64px; }
+        .thumb img { width:64px; height:64px; object-fit:cover; border-radius:8px; border:1px solid #e5e7eb; }
+        .thumb button { position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:9999px; border:1px solid #e5e7eb; background:#fff; color:#374151; cursor:pointer; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div id="hdr" class="header"></div>
+        <div id="modelInfoCard" class="card" style="margin-bottom:16px; display:none;">
+            <div id="purposeText" class="muted"></div>
+            <div id="usecaseText" class="muted" style="margin-top:8px;"></div>
+        </div>
+        <div class="card" style="margin-bottom:16px;">
+            <div class="header">Input to this model (editable)</div>
+            <textarea id="modelInput" placeholder="Enter the input content for this model"></textarea>
+        </div>
+
+        <div class="chat" style="margin-bottom:16px;">
+            <div id="chatHeader" class="chat-header">Chat</div>
+            <div id="chatMessages" class="chat-main"></div>
+            <div id="thumbs" style="display:flex; gap:8px; flex-wrap:wrap; padding:8px 10px;"></div>
+            <div class="chat-input">
+                <textarea id="chatInput" placeholder="Type a message..."></textarea>
+                <button id="attachBtn" class="btn" style="background:#fff;color:#111827;border-color:#e5e7eb;">Attach</button>
+                <button id="sendBtn" class="btn">Send</button>
+                <input id="fileInput" type="file" accept="image/*" multiple style="display:none;" />
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+            <div class="header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                <span>Final Output (editable)</span>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button id="genOutputBtn" class="btn" style="background:#22c55e;border-color:#16a34a;">Generate from Conversation</button>
+                    <button id="applyToFlowBtn" class="btn" style="background:#0ea5e9;border-color:#0284c7;">Use in Workflow</button>
+                </div>
+            </div>
+            <textarea id="finalOutput" placeholder="Your final answer will appear here. You can edit before saving."></textarea>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        function getParams() { return new URLSearchParams(window.location.search); }
+        function decodeMaybe(val) { try { return decodeURIComponent(val || ''); } catch(_) { return String(val || ''); } }
+        function renderMarkdownSafe(s) { return (s || '').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+        function appendMessage(role, text) {
+            const box = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'message ' + role;
+            div.innerHTML = renderMarkdownSafe(text || '');
+            box.appendChild(div);
+            const nearBottom = (box.scrollHeight - box.scrollTop - box.clientHeight) < 40;
+            if (nearBottom) box.scrollTop = box.scrollHeight;
+            return div;
+        }
+
+        function appendUserImageMessage(text, dataUrls) {
+            const box = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'message user';
+            const textHtml = renderMarkdownSafe(text || '');
+            const grid = (dataUrls || []).map(u => `<img src="${u}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;"/>`).join('');
+            div.innerHTML = textHtml + (grid ? `<div style="margin-top:${text ? '6px' : '0'}; display:flex; flex-wrap:wrap; gap:8px;">${grid}</div>` : '');
+            box.appendChild(div);
+            const nearBottom = (box.scrollHeight - box.scrollTop - box.clientHeight) < 40;
+            if (nearBottom) box.scrollTop = box.scrollHeight;
+            return div;
+        }
+
+        const params = getParams();
+        const modelName = params.get('tryModel') || params.get('model');
+        const runId = params.get('flowRunId') || '';
+        const step = params.get('flowStep') || '';
+
+        // Inputs may arrive as: flowInput (string) OR parents (JSON: [{name,value}] )
+        let parentInputs = [];
+        const parentsJson = params.get('parents');
+        if (parentsJson) {
+            try { parentInputs = JSON.parse(decodeMaybe(parentsJson)) || []; } catch(_) { parentInputs = []; }
+        } else {
+            const single = params.get('flowInput');
+            if (single != null) parentInputs = [{ name: 'input', value: decodeMaybe(single) }];
+        }
+
+        // Header shows only the model name (optional flow context)
+        document.getElementById('hdr').textContent = modelName ? `Model: ${modelName}` : 'Model: (unknown)';
+
+        // Minimal chat impl using api-manager
+        const mergedForChat = parentInputs
+            .map(p => {
+                if (!p) return '';
+                const name = (p.name || '').toString();
+                const isDefault = name.trim().toLowerCase() === 'input' || !name.trim();
+                const label = isDefault ? 'Input from the previous step' : `Input from ${name}`;
+                return `${label}:\n${p.value || ''}`;
+            })
+            .filter(Boolean)
+            .join('\n\n');
+
+        const header = document.getElementById('chatHeader');
+        if (modelName && header) header.textContent = modelName;
+
+        // Build SYSTEM prompt from the model's description (purpose + use case)
+        let systemPromptFromModel = '';
+        try {
+            if (typeof getModelData === 'function' && modelName) {
+                const md = getModelData(modelName);
+                if (md) {
+                    systemPromptFromModel = [
+                        md.purpose || '',
+                        md.useCase ? `Use Case: ${md.useCase}` : '',
+                        md.category ? `Category: ${md.category}` : '',
+                        md.industry ? `Industry: ${md.industry}` : ''
+                    ]
+                        .filter(Boolean)
+                        .join('\n\n');
+
+                    // Populate info card under the header
+                    const infoCard = document.getElementById('modelInfoCard');
+                    const purposeEl = document.getElementById('purposeText');
+                    const usecaseEl = document.getElementById('usecaseText');
+                    if (infoCard && (md.purpose || md.useCase)) {
+                        if (purposeEl) purposeEl.innerHTML = md.purpose ? `<strong>Purpose:</strong> ${renderMarkdownSafe(md.purpose)}` : '';
+                        if (usecaseEl) usecaseEl.innerHTML = md.useCase ? `<strong>Use Case:</strong> ${renderMarkdownSafe(md.useCase)}` : '';
+                        infoCard.style.display = '';
+                    }
+                }
+            }
+        } catch(_) {}
+
+        const inputEl = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const genBtn = document.getElementById('genOutputBtn');
+        const applyBtn = document.getElementById('applyToFlowBtn');
+        const finalOutputEl = document.getElementById('finalOutput');
+        const modelInputEl = document.getElementById('modelInput');
+        const attachBtn = document.getElementById('attachBtn');
+        const fileInput = document.getElementById('fileInput');
+        const thumbs = document.getElementById('thumbs');
+        const attachmentFiles = new Map(); // objectURL -> File
+
+        // Persist and prefill the dedicated model input card
+        const inputStorageKey = `interactive:modelInput:${modelName || 'unknown'}:${runId || ''}:${step || ''}`;
+        try {
+            const saved = localStorage.getItem(inputStorageKey);
+            if (saved != null) {
+                modelInputEl.value = saved;
+            } else if (mergedForChat) {
+                modelInputEl.value = mergedForChat;
+            }
+        } catch (_) { if (mergedForChat) modelInputEl.value = mergedForChat; }
+        function persistModelInput() {
+            try { localStorage.setItem(inputStorageKey, modelInputEl.value || ''); } catch (_) {}
+        }
+        modelInputEl.addEventListener('input', persistModelInput);
+        modelInputEl.addEventListener('blur', persistModelInput);
+
+        // Seed conversation: show the original model output as the first assistant message, if available.
+        // Otherwise, preload the previous-step input into the textbox.
+        async function seedInitialAssistant() {
+            // Prefer explicit seedAssistant passed via URL
+            const p = new URLSearchParams(location.search);
+            const seedAssistant = p.get('seedAssistant');
+            if (seedAssistant && seedAssistant.trim()) {
+                const decoded = decodeMaybe(seedAssistant);
+                appendMessage('assistant', decoded);
+                try { const outEl = document.getElementById('finalOutput'); if (outEl) outEl.value = decoded; } catch (_) {}
+                return;
+            }
+            // Fallback to saved output
+            const originalKey = `flow:interactiveOutput:${runId || ''}:${step || ''}`;
+            try {
+                const original = localStorage.getItem(originalKey);
+                if (original && original.trim()) {
+                    appendMessage('assistant', original);
+                    try { const outEl = document.getElementById('finalOutput'); if (outEl) outEl.value = original; } catch (_) {}
+                    return;
+                }
+            } catch (_) {}
+            // Otherwise leave assistant empty, and help user with prefilled input
+            if (mergedForChat) inputEl.value = mergedForChat;
+        }
+
+        seedInitialAssistant();
+
+        // Build combined hidden system prompt per request
+        function buildSystemPrompt(extra) {
+            const userInputForModel = (modelInputEl && modelInputEl.value) ? modelInputEl.value : '';
+            const hiddenInputLine = userInputForModel ? `INPUT to be analysis: [${userInputForModel}]` : '';
+            return [systemPromptFromModel, hiddenInputLine, (extra || '').trim()].filter(Boolean).join('\n\n');
+        }
+
+        function getTranscript() {
+            try {
+                const box = document.getElementById('chatMessages');
+                const parts = [];
+                box.querySelectorAll('.message').forEach(m => {
+                    const role = m.classList.contains('user') ? 'User' : (m.classList.contains('assistant') ? 'Assistant' : 'System');
+                    parts.push(`${role}: ${m.textContent || ''}`);
+                });
+                return parts.join('\n');
+            } catch (_) { return ''; }
+        }
+
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                try {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                } catch (e) { reject(e); }
+            });
+        }
+        async function send() {
+            const q = (inputEl.value || '').trim();
+            if (!q && attachmentFiles.size === 0) return;
+            // Prepare image data URLs both for display and API
+            const images = [];
+            for (const [, f] of attachmentFiles) {
+                try { const dataUrl = await readFileAsDataURL(f); if (dataUrl) images.push(dataUrl); } catch (_) {}
+            }
+            if (images.length) {
+                appendUserImageMessage(q, images);
+            } else if (q) {
+                appendMessage('user', q);
+            }
+            inputEl.value = '';
+            const assistantEl = appendMessage('assistant', 'Generating…');
+            let full = '';
+            try {
+                // Keep attachments and thumbnails until the popup is closed
+                const hasImages = images.length > 0;
+
+                const call = hasImages
+                    ? (images.length === 1
+                        ? window.apiManager.streamModelRequestWithImage(modelName || 'Custom-Model', q || 'Please analyze the attached image.', images[0], { systemPrompt: buildSystemPrompt('') }, {
+                            onStart() {},
+                            onDelta(token) { full += token; assistantEl.innerHTML = renderMarkdownSafe(full); const box = document.getElementById('chatMessages'); box.scrollTop = box.scrollHeight; },
+                            onDone(finalText) { assistantEl.innerHTML = renderMarkdownSafe(finalText); try { const outEl = document.getElementById('finalOutput'); if (outEl) outEl.value = finalText || ''; } catch (_) {} },
+                            onError(err) { assistantEl.textContent = 'error: ' + (err?.message || 'Unknown error'); }
+                        })
+                        : window.apiManager.streamModelRequestWithImages(modelName || 'Custom-Model', q || 'Please analyze the attached images.', images, { systemPrompt: buildSystemPrompt('') }, {
+                            onStart() {},
+                            onDelta(token) { full += token; assistantEl.innerHTML = renderMarkdownSafe(full); const box = document.getElementById('chatMessages'); box.scrollTop = box.scrollHeight; },
+                            onDone(finalText) { assistantEl.innerHTML = renderMarkdownSafe(finalText); try { const outEl = document.getElementById('finalOutput'); if (outEl) outEl.value = finalText || ''; } catch (_) {} },
+                            onError(err) { assistantEl.textContent = 'error: ' + (err?.message || 'Unknown error'); }
+                        }))
+                    : window.apiManager.streamModelRequest(
+                    modelName || 'Custom-Model',
+                    q,
+                    { systemPrompt: buildSystemPrompt('') },
+                    {
+                        onStart() {},
+                        onDelta(token) {
+                            full += token;
+                            assistantEl.innerHTML = renderMarkdownSafe(full);
+                            const box = document.getElementById('chatMessages');
+                            box.scrollTop = box.scrollHeight;
+                        },
+                        onDone(finalText) {
+                            assistantEl.innerHTML = renderMarkdownSafe(finalText);
+                            try { const outEl = document.getElementById('finalOutput'); if (outEl) outEl.value = finalText || ''; } catch (_) {}
+                        },
+                        onError(err) {
+                            assistantEl.textContent = 'error: ' + (err?.message || 'Unknown error');
+                        }
+                    }
+                );
+            } catch (err) {
+                assistantEl.textContent = 'error: ' + (err?.message || 'Unknown error');
+            }
+        }
+        sendBtn.onclick = send;
+        inputEl.addEventListener('keydown', (e) => {
+            if ((e.key === 'Enter' && !e.shiftKey)) {
+                e.preventDefault();
+                send();
+            }
+        });
+
+        // Attachment handlers
+        attachBtn.onclick = () => fileInput && fileInput.click();
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files || []);
+            files.forEach((f) => {
+                const url = URL.createObjectURL(f);
+                attachmentFiles.set(url, f);
+                const cell = document.createElement('div');
+                cell.className = 'thumb';
+                cell.innerHTML = `<img src="${url}"/><button title="Remove">×</button>`;
+                const btn = cell.querySelector('button');
+                btn.onclick = () => { try { thumbs.removeChild(cell); attachmentFiles.delete(url); URL.revokeObjectURL(url); } catch (_) {} };
+                thumbs.appendChild(cell);
+            });
+            try { e.target.value = ''; } catch (_) {}
+        });
+
+        // Reclaim object URLs when the popup is closed
+        window.addEventListener('beforeunload', () => {
+            try { attachmentFiles.forEach((_, url) => { try { URL.revokeObjectURL(url); } catch (_) {} }); } catch (_) {}
+        });
+
+        // Generate final output from conversation transcript (editable)
+        genBtn.onclick = async () => {
+            const transcript = getTranscript();
+            const prompt = [
+                'You are to produce a concise final answer based strictly on the following conversation between User and Assistant.\n',
+                'Rules:',
+                '- Produce a single, self-contained final answer for the user.\n',
+                '- Do not include chain-of-thought or step-by-step reasoning.\n',
+                '- If multiple options were discussed, select the best and justify briefly.\n',
+                '- Be actionable and structured.\n',
+                '',
+                'Conversation:\n' + transcript
+            ].join('\n');
+
+            const anchor = appendMessage('assistant', '⏳ Generating final output…');
+            let full = '';
+            try {
+                await window.apiManager.streamModelRequest(
+                    modelName || 'Custom-Model',
+                    prompt,
+                    { systemPrompt: buildSystemPrompt(`You are ${modelName}. Provide only the final answer.`) },
+                    {
+                        onStart() {},
+                        onDelta(t) { full += t; anchor.innerHTML = renderMarkdownSafe(full); },
+                        onDone(finalText) {
+                            anchor.innerHTML = renderMarkdownSafe(finalText);
+                            finalOutputEl.value = finalText || '';
+                        },
+                        onError(err) { anchor.textContent = 'error: ' + (err?.message || 'Unknown error'); }
+                    }
+                );
+            } catch (err) {
+                anchor.textContent = 'error: ' + (err?.message || 'Unknown error');
+            }
+        };
+
+        // Send final output back to parent (index.html) and close popup
+        applyBtn.onclick = () => {
+            try {
+                const text = (finalOutputEl && finalOutputEl.value) ? finalOutputEl.value : '';
+                if (!text.trim()) { alert('Please generate or enter the final output first.'); return; }
+                const payload = { type: 'i3:interactive:applyOutput', runId, step, text };
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage(payload, '*');
+                    try { if (window.parent && typeof window.parent.closeInteractiveModal === 'function') window.parent.closeInteractiveModal(); } catch (_) {}
+                } else if (window.opener) {
+                    window.opener.postMessage(payload, '*');
+                    try { window.close(); } catch (_) {}
+                } else {
+                    // Fallback: try to close self if standalone
+                    try { window.close(); } catch (_) {}
+                }
+            } catch (err) {
+                alert('Failed to send output to workflow: ' + (err?.message || err));
+            }
+        };
+    })();
+    </script>
+</body>
+</html>
+

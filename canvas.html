@@ -1,0 +1,1977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Workflow - Intelligence Cubed</title>
+    <link rel="icon" type="image/svg+xml" href="/svg/i3-token-logo.svg">
+    <link rel="icon" type="image/png" sizes="192x192" href="/png/i3-token-logo.png">  <!-- 可选: 准备一张 192x192 PNG -->
+    <link rel="apple-touch-icon" sizes="192x192" href="/png/i3-token-logo.png">
+    <link rel="preload" as="image" href="/svg/chains/ethereum.svg">
+    <link rel="preload" as="image" href="/svg/chains/bnb.svg">
+    <link rel="preload" as="image" href="/svg/chains/polygon-zkevm.svg">
+    <link rel="preload" as="image" href="/svg/chains/arbitrum.svg">
+    <link rel="preload" as="image" href="/svg/chains/optimism.svg">
+    <link rel="preload" as="image" href="/svg/chains/solana.svg">
+    <link rel="preload" as="image" href="/svg/chains/base.svg">
+    <link rel="preload" as="image" href="/svg/chains/zksync.svg">
+    <link rel="preload" as="image" href="/svg/chains/opbnb.svg">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="modelverse.css">
+    <link rel="stylesheet" href="canvas.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <script src="https://c0f4f41c-2f55-4863-921b-sdk-docs.github.io/cdn/metamask-sdk.js"></script>
+    
+    <!-- Base Account SDK -->
+    <script src="https://unpkg.com/@base-org/account/dist/base-account.min.js"></script>
+    
+    <script>
+        // 简单的初始化
+        window.cdpConnect = async function() {
+            if (!window.createBaseAccountSDK) {
+                throw new Error('Base Account SDK not loaded');
+            }
+            
+            const provider = window.createBaseAccountSDK({
+                appName: 'Intelligence Cubed',
+                appLogoUrl: 'https://intelligencecubed.netlify.app/png/i3-token-logo.png'
+            }).getProvider();
+            
+            // 直接请求账户连接，跳过复杂的身份验证流程
+            const accounts = await provider.request({
+                method: 'eth_requestAccounts'
+            });
+            
+            if (accounts && accounts.length > 0) {
+                return { address: accounts[0] };
+            }
+            
+            throw new Error('No accounts returned');
+        };
+
+    </script>
+
+    <!-- 仅在旧浏览器需要；现代浏览器也可以保留，不会有副作用 -->
+    <script async src="https://ga.jspm.io/npm:es-module-shims@1.10.0/dist/es-module-shims.js"></script>
+
+    <script type="module-shim">
+	  // ========= AppKit loader with CDN fallback (fixed 1.8.4) =========
+	  const PROJECT_ID = '87a5da024dea0385e2d43dcad60b4935';
+	  async function load(kind) {
+	    if (kind === 'unpkg') {
+	      const { createAppKit } = await import('https://unpkg.com/@reown/appkit@1.8.4/dist/index.js?module');
+	      const nets = await import('https://unpkg.com/@reown/appkit@1.8.4/networks/index.js?module');
+	      return { createAppKit, nets };
+	    }
+	    if (kind === 'jsdelivr') {
+	      const { createAppKit } = await import('https://cdn.jsdelivr.net/npm/@reown/appkit@1.8.4/+esm');
+	      const nets = await import('https://cdn.jsdelivr.net/npm/@reown/appkit@1.8.4/networks/+esm');
+	      return { createAppKit, nets };
+	    }
+	    // esm.sh 作为第三备选
+	    const { createAppKit } = await import('https://esm.sh/@reown/appkit@1.8.4');
+	    const nets = await import('https://esm.sh/@reown/appkit@1.8.4/networks');
+	    return { createAppKit, nets };
+	  }
+	  let mod;
+	  try { mod = await load('unpkg'); }
+	  catch { try { mod = await load('jsdelivr'); } catch { mod = await load('esmsh'); } }
+	  const { createAppKit, nets } = mod;
+	  // ① 读取"首选网络"（你模块里 setPreferredNetwork 写入的）
+	  const pref = (window.getPreferredNetwork && window.getPreferredNetwork()) || { key: 'ethereum', kind: 'evm' };
+	  // ② I3 → AppKit 网络映射（按你当前 1.8.4 可用的 nets 字段来对齐）
+	  const map = {
+	    ethereum:  nets.mainnet,
+	    sepolia:   nets.sepolia,     // 测试链可选
+	    polygon:   nets.polygon,
+	    bnb:       nets.bsc,
+	    arbitrum:  nets.arbitrum,
+	    optimism:  nets.optimism,
+	    avalanche: nets.avalanche,
+	    fantom:    nets.fantom,
+	    gnosis:    nets.gnosis,
+	    linea:     nets.linea,
+	    scroll:    nets.scroll,
+	    zksync:    nets.zksync
+	    // 如需 base / polygonZkEvm，请确认 1.8.4 是否暴露相应键后再补：
+	    // base: nets.base,
+	    // 'polygon-zkevm': nets.polygonZkEvm,
+	  };
+	  // ③ 允许在 AppKit 弹窗里展示的链（你现在 index 原本列的我都保留了）
+	  const allowKeys = [
+	    'ethereum','sepolia','polygon','bnb','arbitrum','optimism',
+	    'avalanche','fantom','gnosis','linea','scroll','zksync'
+	  ];
+	  // 如果用户在模块里选了 Solana（kind === 'solana'），AppKit 依然只管 EVM，
+	  // 这里就把默认链回退到 ethereum，避免无效首选
+	  const effectivePrefKey = (pref.kind === 'evm' && map[pref.key]) ? pref.key : 'ethereum';
+	  // ④ 计算默认链 & 列表（把默认链置顶，其他按 allowKeys 顺序去重追加）
+	  const defaultNet = map[effectivePrefKey] || nets.mainnet;
+	  const allowedList = allowKeys.map(k => map[k]).filter(Boolean);
+	  const networks = [defaultNet, ...allowedList.filter(n => n !== defaultNet)];
+	  // ⑤ 创建 AppKit —— 1.8.4 有的版本支持 defaultNetwork，没有也不报错
+	  const modal = createAppKit({
+	    projectId: PROJECT_ID,
+	    networks,
+	    // 某些版本支持；若控制台提示不识别可以忽略这行
+	    defaultNetwork: defaultNet,
+	    metadata: {
+	      name: 'Intelligence Cubed',
+	      description: 'AI Terminal for Web3',
+	      url: 'https://intelligencecubed.netlify.app',
+	      icons: ['https://intelligencecubed.netlify.app/png/i3-token-logo.png']
+	    }
+	  });
+	  // 暴露给业务代码
+	  window.appkit = modal;
+	  // 兼容你现有 initializeWalletConnect 的等待逻辑
+	  window.dispatchEvent(new Event('reownAppKitLoaded'));
+	  console.log('[OK] AppKit loaded', { defaultNet, networks, modal });
+	</script>
+
+    <script type="module-shim">
+	  import {
+	    Connection,
+	    clusterApiUrl,
+	    PublicKey
+	  } from 'https://esm.sh/@solana/web3.js@1.95.3';
+	  window.SOL = { Connection, clusterApiUrl, PublicKey };
+	</script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="account-dropdown.css">
+    <style>
+		.wallet-modal {
+		  display: flex !important;            /* 始终 flex 布局 */
+		  align-items: center !important;      /* 始终垂直居中 */
+		  justify-content: center !important;  /* 始终水平居中 */
+		  position: fixed !important;
+		  inset: 0 !important;
+		  z-index: 10000;
+		  background: rgba(0,0,0,.4);          /* ✅ 正确写法 */
+		  opacity: 0;
+		  transition: opacity .25s ease;
+		  pointer-events: none;                /* 关闭时不可点击 */
+		}
+		.wallet-modal.show {
+		  opacity: 1;
+		  pointer-events: auto;                /* 打开时可点击 */
+		}
+		.wallet-modal-content {
+		  position: relative;
+		  background: #fff;
+		  border-radius: 24px;
+		  padding: 36px;
+		  max-width: 440px;
+		  width: 92%;
+		  max-height: 80vh;
+		  overflow-y: auto;
+		  box-shadow: 0 12px 40px rgba(0,0,0,.12); /* ✅ 正确写法 */
+		  transform: scale(.95);
+		  opacity: 0;
+		  transition: transform .25s ease, opacity .25s ease;
+		}
+		.wallet-modal.show .wallet-modal-content {
+		  transform: scale(1);
+		  opacity: 1;
+		}
+
+        /* 移除可能导致问题的动画 */
+        @keyframes modalSlideIn {
+            to { transform: none !important; }
+        }
+
+        .wallet-modal-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .wallet-modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .wallet-modal-subtitle {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        .wallet-close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #6b7280;
+        }
+
+        .wallet-close-btn:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        /* 钱包选项卡片 */
+        /* 更紧凑的卡片与行距 */
+		.wallet-option {
+		  display: flex;
+		  align-items: center;
+          justify-content: center;
+		  gap: 12px;
+		  padding: 12px 14px;          /* 原 20px -> 更紧凑 */
+		  border: 1px solid #e5e7eb;
+		  border-radius: 8px;          /* 原 16px/24px -> 8px */
+		  background: #fff;
+		  transition: background .2s ease, border-color .2s ease, transform .2s ease;
+		}
+		.wallet-option:hover {
+		  border-color: #d1d5db;
+		  background: #f9fafb;         /* 去掉大面积渐变 */
+		  transform: translateY(-1px);
+		}
+		/* 列表项间距更紧凑 */
+		.wallet-options { 
+		  display: flex; 
+		  flex-direction: column; 
+		  gap: 12px;                   /* 原 16px -> 12px */
+		}
+
+		/* 钱包文字信息 */
+		/* 标题文字：沉稳、左对齐，不漂浮 */
+		.wallet-name {
+		  font-size: 14px;
+		  font-weight: 500;
+		  color: #111827;
+		  line-height: 1;
+
+		}
+		/* 副标题（如果使用）弱化显示，同样左齐 */
+		.wallet-description {
+		  font-size: 12px;
+		  color: #6b7280;
+		  line-height: 1.2;
+		}
+		/* 状态与箭头 */
+		.wallet-status.status-available { background: rgba(16,185,129,.1); color:#059669; }
+        .wallet-icon-wrap{
+		  width:24px;
+		  height:24px;
+		  display:flex;
+		  align-items:center;
+		  justify-content:center;
+		  flex-shrink:0;            /* 防止挤压 */
+		}
+		/* 放 <img> 的情况 */
+		.wallet-icon-wrap img{
+		  width:100%;
+		  height:100%;
+		  object-fit:contain;       /* 等比不变形 */
+		  display:block;
+		}
+		/* 放 <svg> 直插的情况 */
+		.wallet-icon-wrap svg{
+		  width:24px;
+		  height:24px;
+		  display:block;
+		}
+
+        /* Account 按钮右侧的小图标 */
+		#walletTypeIcon {
+		  width: 18px;
+		  height: 18px;
+		  margin-left: 8px;
+		  vertical-align: middle;
+		  display: none;        /* 默认隐藏，连接后再显示 */
+		  object-fit: contain;  /* 防止变形 */
+		}
+
+        .wallet-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #6b7280;    /* 灰色，低调一点 */
+            font-weight: 400;
+        }
+
+
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            .wallet-modal-content {
+                padding: 24px;
+                margin: 20px;
+                width: calc(100% - 40px);
+            }
+
+            .wallet-modal-title {
+                font-size: 1.25rem;
+            }
+
+            .wallet-name {
+                font-size: 1rem;
+            }
+        }
+
+/* Network modal (独立于 wallet modal) */
+		.network-modal {
+		  position: fixed;
+		  inset: 0;
+		  display: flex;
+		  align-items: center;
+		  justify-content: center;
+		  background: rgba(17, 24, 39, 0.6);
+		  backdrop-filter: blur(2px);
+		  opacity: 0;
+		  pointer-events: none;
+		  transition: opacity .25s ease;
+		  z-index: 9999;
+		}
+		.network-modal.show {
+		  opacity: 1;
+		  pointer-events: auto;
+		}
+		.network-modal-content {
+		  width: min(420px, 92vw);
+		  background: #fff;
+		  border-radius: 12px;                  /* 圆角更小，更紧凑 */
+		  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+		  padding: 24px 24px 20px;
+		  transform: scale(.95);
+		  opacity: 0;
+		  transition: transform .25s ease, opacity .25s ease;
+		}
+		.network-modal.show .network-modal-content {
+		  transform: scale(1);
+		  opacity: 1;
+		}
+		.network-modal-header {
+		  display: flex;
+		  align-items: center;
+		  justify-content: space-between;
+		  margin-bottom: 24px;
+		}
+		.network-modal-title {
+		  font-size: 18px;
+		  font-weight: 600;
+		  color: #1f2937;
+		}
+		.network-modal-subtitle {
+		  font-size: 13px;
+		  color: #6b7280;
+		  margin-top: 4px;
+		}
+		.network-close-btn {
+		  border: none;
+		  background: transparent;
+		  font-size: 18px;
+		  line-height: 1;
+		  cursor: pointer;
+		  color: #6b7280;
+		  transition: color .2s ease;
+		}
+		.network-close-btn:hover {
+		  color: #111827;
+		}
+		.network-modal-footer {
+		  text-align: center;
+		  margin-top: 16px;
+		  font-size: 13px;
+		  color: #6b7280;
+		}
+		/* 弹窗里的按钮样式：更紧凑，规整 */
+		.network-modal-content .wallet-option {
+		  display: flex;
+		  align-items: center;       /* 图标 + 文字垂直居中 */
+		  justify-content: flex-start;
+		  gap: 12px;
+		  padding: 12px 14px;        /* 紧凑内边距 */
+		  border: 1px solid #e5e7eb;
+		  border-radius: 8px;        /* 小圆角 */
+		  background: #fff;
+		  transition: background .2s ease, border-color .2s ease, transform .2s ease;
+		}
+		.network-modal-content .wallet-option:hover {
+		  border-color: #d1d5db;
+		  background: #f9fafb;       /* 简单浅灰 hover */
+		  transform: translateY(-1px);
+		}
+		.network-modal-content .wallet-name {
+		  font-size: 14px;
+		  font-weight: 500;
+		  color: #111827;
+		}
+		.network-modal-content .wallet-description {
+		  font-size: 12px;
+		  color: #6b7280;
+		}
+
+        /* --- Current Network badge --- */
+		.network-badge{
+		  display:inline-flex; align-items:center; gap:8px;
+		  background:#f3f4f6; color:#1f2937;
+		  border:1px solid #e5e7eb; border-radius:999px;
+		  padding:6px 12px; margin-right:12px;
+		  height:34px; line-height:1; white-space:nowrap;
+		}
+		.network-badge__icon{ width:20px; height:20px; object-fit:contain; display:block }
+		.network-badge__text{ font-size:14px; font-weight:600; letter-spacing:.2px }
+		.network-badge__caret{ width:16px; height:16px; opacity:.6 }
+		@media (max-width: 768px){
+		  .network-badge{ display:none !important; }
+		}
+
+        /* Follow X Modal */
+        .follow-x-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+            z-index: 10001;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .follow-x-modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .follow-x-modal-content {
+            position: relative;
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+            transform: scale(0.95);
+            transition: transform 0.25s ease;
+        }
+
+        .follow-x-modal.show .follow-x-modal-content {
+            transform: scale(1);
+        }
+
+        .follow-x-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-size: 18px;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .follow-x-close:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .follow-x-modal-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .follow-x-modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .follow-x-modal-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        .follow-x-input-group {
+            margin-bottom: 20px;
+        }
+
+        .follow-x-input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .follow-x-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .follow-x-input {
+            flex: 1;
+            padding: 12px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #111827;
+            transition: all 0.2s ease;
+        }
+
+        .follow-x-input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .follow-x-input:readonly {
+            background: #f9fafb;
+            color: #6b7280;
+        }
+
+        .follow-x-button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #1da1f2, #0c85d0);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .follow-x-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(29, 161, 242, 0.3);
+        }
+
+        .confirm-button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 8px;
+        }
+
+        .confirm-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .confirm-button:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-message {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .status-message.pending {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
+        .status-message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .status-message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        @media (max-width: 480px) {
+            .follow-x-modal-content {
+                padding: 24px;
+                width: 95%;
+            }
+            
+            .follow-x-input-wrapper {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .follow-x-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <!-- Left Section -->
+            <div class="header-left">
+                <div class="logo" onclick="window.location.href='index.html'" style="cursor: pointer;">
+                    <img src="svg/I3 logo.svg" alt="Intelligence Cubed" class="logo-image" style="height: 40px; width: auto;">
+                </div>
+                <nav class="nav-menu">
+                    <button class="nav-item" onclick="window.location.href='index.html'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                        Chats
+                    </button>
+                    <button class="nav-item" onclick="window.location.href='modelverse.html'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <path d="m2 17 10 5 10-5" stroke="currentColor" stroke-width="2"/>
+                            <path d="m2 12 10 5 10-5" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        Modelverse
+                    </button>
+                    <button class="nav-item" onclick="window.location.href='benchmark.html'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                        Benchmark
+                    </button>
+                    <button class="nav-item active">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <path d="M9 9h6v6H9z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                        Canvas
+                    </button>
+                    <button class="nav-item" onclick="window.location.href='workflow.html'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <path d="m2 17 10 5 10-5" stroke="currentColor" stroke-width="2"/>
+                            <path d="m2 12 10 5 10-5" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        Workflows
+                    </button>
+                    <button class="nav-item" onclick="window.location.href='mycart.html'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M7 4V2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M5 4h14l-1 14H6L5 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        My Cart
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Right Section -->
+			<div class="header-right">
+                <button id="networkBadge" class="network-badge" type="button" style="display:none" onclick="openNetworkPickerModal()">
+				  <img class="network-badge__icon" src="" alt="">
+				  <span class="network-badge__text">Network</span>
+			        <svg class="network-badge__caret" width="12" height="12" viewBox="0 0 24 24">
+				        <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/>
+				    </svg>
+				</button>
+			  <div class="user-section">
+			    <div id="accountDropdownMount"></div>
+			  </div>
+			</div>
+        </div>
+    </header>
+
+
+    <script>
+	(function syncRenderNetworkBadge(){
+	  try {
+	    // 1) 读取本地"首选网络"（你已有 getPreferredNetwork）
+	    var pref = (window.getPreferredNetwork && window.getPreferredNetwork()) || null;
+	    // 2) 快速映射（仅用于首屏，不依赖任何 SDK）
+	    var ICON = {
+	      ethereum: '/svg/chains/ethereum.svg',
+	      bnb:      '/svg/chains/bnb.svg',
+	      polygon:  '/svg/chains/polygon-zkevm.svg',
+	      arbitrum: '/svg/chains/arbitrum.svg',
+	      optimism: '/svg/chains/optimism.svg',
+	      solana:   '/svg/chains/solana.svg',
+          opbnb:   '/svg/chains/opbnb.svg',
+          zksync:   '/svg/chains/zksync.svg',
+          base:   '/svg/chains/base.svg',   
+	    };
+	    var NAME = {
+	      ethereum: 'Ethereum',
+	      bnb:      'BNB Chain',
+	      polygon:  'Polygon',
+	      arbitrum: 'Arbitrum',
+	      optimism: 'Optimism',
+	      solana:   'Solana',
+          opbnb:   'opBNB',
+          zksync:   'Zksync',
+          base:   'Base',
+	    };
+	    // 3) 找到徽章节点（你按钮里已有这些 id）
+	    var badge  = document.getElementById('networkBadge');
+	    var iconEl = document.getElementById('networkBadgeIcon');
+	    var textEl = document.getElementById('networkBadgeText');
+	    if (!badge || !iconEl || !textEl) return;
+	    // 4) 计算首屏 key：Solana 直接显示 solana，其它默认 ethereum
+	    var key  = (pref && pref.key)  || 'ethereum';
+	    var kind = (pref && pref.kind) || 'evm';
+	    if (kind === 'solana') key = 'solana';
+	    // 5) 同步渲染，不等 SDK
+	    iconEl.src = ICON[key] || ICON.ethereum;
+	    iconEl.alt = NAME[key] || 'Network';
+	    textEl.textContent = NAME[key] || 'Network';
+	    badge.style.display = 'inline-flex';
+	    badge.style.visibility = 'visible'; // 解除初始隐藏
+	  } catch (e) {
+	    // 静默失败，避免阻塞首屏
+	  }
+	})();
+	</script>
+
+    <!-- Main Canvas Layout -->
+    <div class="canvas-layout">
+        <!-- Left Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>My Models</h3>
+                <button class="sidebar-toggle-btn" onclick="toggleSidebar()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12h18M3 6h18M3 18h18"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="sidebar-content">
+                <!-- Search Bar -->
+                <div class="search-section">
+                    <input type="text" id="modelSearch" class="search-input" placeholder="Search models..." onkeyup="filterModels()">
+                </div>
+
+                <!-- Token Models Section -->
+                <div class="models-section">
+                    <div class="section-header">
+                        <h4 class="section-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M12 1v6m0 6v6"/>
+                                <path d="m21 12-6-3-6 3-6-3"/>
+                            </svg>
+                            Token Models
+                        </h4>
+                        <span class="models-count" id="modelsCount">0 models</span>
+                    </div>
+
+                    <!-- Models List -->
+                    <div class="models-list" id="modelsList">
+                        <!-- Models will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Canvas Area -->
+        <div class="canvas-area" id="canvasArea">
+            <!-- Canvas Header -->
+            <div class="canvas-header">
+                <div class="canvas-title">
+                    <h2>Workflow Canvas</h2>
+                    <p class="canvas-subtitle">Drag models from sidebar to create workflow nodes</p>
+                </div>
+                <div class="canvas-controls">
+                    <button class="control-btn" onclick="clearCanvas()" title="Clear Canvas">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18"/>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                        </svg>
+                        Clear
+                    </button>
+                    <button class="control-btn save-run-btn" onclick="showSaveRunModal()" title="Save and Run Workflow" id="saveRunBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                            <polyline points="17,21 17,13 7,13 7,21"/>
+                            <polyline points="7,3 7,8 15,8"/>
+                        </svg>
+                        Save and Run
+                    </button>
+                    <button class="control-btn run-btn" onclick="runSelectedWorkflow()" title="Run Workflow" id="runBtn" style="display: none;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5,3 19,12 5,21"/>
+                        </svg>
+                        Run
+                    </button>
+                </div>
+            </div>
+
+            <!-- Canvas Workspace -->
+            <div class="canvas-workspace" id="canvasWorkspace">
+                <!-- Drop Zone -->
+                <div class="drop-zone" id="dropZone" style="display: none;">
+                    <div class="drop-zone-content">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="16"/>
+                            <line x1="8" y1="12" x2="16" y2="12"/>
+                        </svg>
+                        <h3>Drop Model Here</h3>
+                        <p>Release to create a workflow node</p>
+                    </div>
+                </div>
+
+                <!-- SVG for connections -->
+                <svg class="connections-svg" id="connectionsSvg">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#8b7cf6"/>
+                        </marker>
+                    </defs>
+                    <g id="connectionsGroup"></g>
+                </svg>
+
+                <!-- Workflow Nodes Container -->
+                <div class="workflow-nodes" id="workflowNodes">
+                    <!-- Workflow nodes will be created here -->
+                </div>
+            </div>
+
+            <!-- Workflow Guide -->
+            <div class="workflow-guide">
+                <div class="guide-step">
+                    <span class="step-number">1</span>
+                    <span class="step-text">Drag models</span>
+                </div>
+                <div class="guide-arrow">→</div>
+                <div class="guide-step">
+                    <span class="step-number">2</span>
+                    <span class="step-text">Connect nodes</span>
+                </div>
+                <div class="guide-arrow">→</div>
+                <div class="guide-step">
+                    <span class="step-number">3</span>
+                    <span class="step-text">Run workflow</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save and Run Modal -->
+    <div id="saveRunModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Save and Run Workflow</h2>
+                <button class="close-btn" onclick="hideSaveRunModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="workflowName">Workflow Name:</label>
+                    <input type="text" id="workflowName" placeholder="Enter workflow name" required>
+                </div>
+                <div class="form-group">
+                    <label for="workflowDescription">Description:</label>
+                    <textarea id="workflowDescription" placeholder="Describe your workflow"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn cancel-btn" onclick="hideSaveRunModal()">Cancel</button>
+                <button class="action-btn save-btn" onclick="saveAndRunWorkflow()">Save & Run</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="contract-config.js"></script>
+    <script src="model-data.js"></script>
+    <script src="account-dropdown.js"></script>
+    <script type="module" src="chains.js"></script>
+    <script type="module" src="solana-wallet.js"></script>
+    <script type="module" src="solana-checkin.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="canvas.js"></script>
+    <script src="social-tasks.js"></script>
+
+    <script src="wallet-manager.js"></script>
+	<script src="wallet-integration.js"></script>
+    <script src="onchain-checkin.js"></script>
+        <!-- Follow X Modal -->
+    <div id="followXModal" class="follow-x-modal">
+        <div class="follow-x-modal-content">
+            <button class="follow-x-close" onclick="closeFollowXModal()">✕</button>
+            
+            <div class="follow-x-modal-header">
+                <h2 class="follow-x-modal-title">Follow the Team</h2>
+                <p class="follow-x-modal-subtitle">
+                    Follow @I3_Cubed on X (Twitter) and enter your Twitter handle to complete the task.
+                </p>
+            </div>
+
+            <div class="follow-x-input-group">
+                <label>1. Follow our X account</label>
+                <div class="follow-x-input-wrapper">
+                    <input type="text" class="follow-x-input" value="I3_Cubed" readonly>
+                    <button class="follow-x-button" onclick="openTwitterProfile()">
+                        Follow
+                    </button>
+                </div>
+            </div>
+
+            <div class="follow-x-input-group">
+                <label>2. Enter your Twitter handle</label>
+                <div class="follow-x-input-wrapper">
+                    <input type="text" 
+                           id="twitterHandleInput" 
+                           class="follow-x-input" 
+                           placeholder="@YourTwitterHandle">
+                </div>
+            </div>
+
+            <button class="confirm-button" onclick="confirmFollowX()">
+                Confirm
+            </button>
+
+            <div id="followXStatus" class="status-message" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function(){
+        try { injectAccountDropdown('#accountDropdownMount'); } catch (e) { console.warn('injectAccountDropdown failed:', e); }
+      });
+    </script>
+
+    <!-- Google 认证功能 - 直接内联实现 -->
+    <script>
+        // Firebase 配置 - 请替换为您的实际配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYdWqXjUfNbUAMWlcm8neZQGTBTA63pfM",
+            authDomain: "i3-testnet.firebaseapp.com",
+            projectId: "i3-testnet",
+            storageBucket: "i3-testnet.firebasestorage.app",
+            messagingSenderId: "892139814159",
+            appId: "1:892139814159:web:4df8548eef1d9bd9a1927a",
+            measurementId: "G-KCDG3D1FCC"
+        };
+
+
+        // 配置验证函数
+        function validateFirebaseConfig() {
+            const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+            const missingFields = requiredFields.filter(field => !firebaseConfig[field] || firebaseConfig[field] === '');
+            
+            if (missingFields.length > 0) {
+                console.error('❌ Firebase 配置缺少字段:', missingFields);
+                return false;
+            }
+            
+            // 检查 API Key 格式
+            if (!firebaseConfig.apiKey.startsWith('AIzaSy') || firebaseConfig.apiKey.length < 30) {
+                console.error('❌ Firebase API Key 格式不正确');
+                return false;
+            }
+            
+            console.log('✅ Firebase 配置验证通过');
+            return true;
+        }
+
+        // 全局变量
+        let firebaseApp = null;
+        let firebaseAuth = null;
+        let firebaseDb = null;
+        let currentUser = null;
+
+        // 初始化 Firebase - 修复时序问题
+        async function initializeFirebase() {
+            try {
+                // 首先验证配置
+                if (!validateFirebaseConfig()) {
+                    throw new Error('Firebase 配置验证失败，请检查配置信息');
+                }
+                
+                console.log('🚀 开始初始化 Firebase...');
+                
+                // 动态加载 Firebase SDK
+                const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js');
+                const { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');
+                const { getFirestore, initializeFirestore, doc, setDoc, getDoc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js');
+                
+                // 初始化应用
+                firebaseApp = initializeApp(firebaseConfig);
+                firebaseAuth = getAuth(firebaseApp);
+                // Connect to the named Firestore database for this project
+                try {
+                    firebaseDb = initializeFirestore(firebaseApp, {}, 'i3-testnet');
+                } catch (e) {
+                    console.warn('initializeFirestore failed, falling back to default database:', e);
+                    firebaseDb = getFirestore(firebaseApp);
+                }
+                // 暴露到全局以便其他脚本访问
+                window.firebaseApp = firebaseApp;
+                window.firebaseAuth = firebaseAuth;
+                window.firebaseDb = firebaseDb;
+                // 记录已连接的 Firestore 数据库名称
+                try {
+                    const proj = (firebaseDb && firebaseDb._databaseId && firebaseDb._databaseId.projectId) || firebaseConfig.projectId;
+                    const dbId = (firebaseDb && firebaseDb._databaseId && firebaseDb._databaseId.database) || '(default)';
+                    console.log('✅ Firestore ready:', { projectId: proj, databaseId: dbId });
+                } catch (_) {}
+                
+                // 🔑 关键修复：暴露到 window,方便其他脚本 & Console 调试
+                Object.assign(window, { firebaseApp, firebaseAuth, firebaseDb });
+                
+                // Notify listeners that Firebase is ready
+                try { window.dispatchEvent(new Event('firebaseReady')); } catch (_) {}
+                
+                console.log('✅ Firebase 初始化成功');
+                
+                // 设置认证状态监听器
+                onAuthStateChanged(firebaseAuth, async (user) => {
+                    if (user) {
+                        console.log('用户已登录:', user.email);
+                        currentUser = user;
+                        // 🔑 让其他逻辑识别已登录
+                        window.currentUser = user;
+                        // 记录登录时间与次数
+                        try {
+                            await upsertUserLogin(user);
+                            console.log('🕒 Google login at (client):', new Date().toISOString());
+                        } catch (e) { console.warn('记录登录时间失败(可忽略):', e); }
+                        // 若钱包已连接，自动将钱包保存到 users/<uid>
+                        try {
+                            if (window.walletManager && window.walletManager.isConnected && window.walletManager.walletAddress) {
+                                const address = window.walletManager.walletAddress;
+                                if (window.ethereum && typeof window.ethereum.request === 'function') {
+                                    window.ethereum.request({ method: 'eth_chainId' }).then((cid) => {
+                                        if (typeof window.onWalletConnected === 'function') window.onWalletConnected(address, cid);
+                                    }).catch(() => {
+                                        if (typeof window.onWalletConnected === 'function') window.onWalletConnected(address);
+                                    });
+                                } else if (typeof window.onWalletConnected === 'function') {
+                                    window.onWalletConnected(address);
+                                }
+                            }
+                        } catch (linkErr) {
+                            console.warn('自动链接钱包到用户失败（可忽略）:', linkErr);
+                        }
+                        updateUIForSignedInUser(user);
+                        loadUserData(user.uid);
+                    } else {
+                        console.log('用户已退出');
+                        currentUser = null;
+                        window.currentUser = null; // 可选
+                        updateUIForSignedOutUser();
+                    }
+                });
+                
+                // 更新状态显示（元素可能不存在，做防御性判断）
+                (function(){
+                    const el = document.getElementById('googleSignInStatus');
+                })();
+                
+                // 🔑 关键修复：Firebase 初始化成功后，重新绑定登录按钮事件并启用按钮
+                bindGoogleSignInEvent();
+                
+                // 启用登录按钮（元素可能不存在）
+                (function(){
+                    const googleSignInBtn = document.getElementById('googleSignInBtn');
+                    if (googleSignInBtn) {
+                        googleSignInBtn.disabled = false;
+                        googleSignInBtn.style.opacity = '1';
+                        googleSignInBtn.style.cursor = 'pointer';
+                        console.log('✅ Google 登录按钮已启用');
+                    }
+                })();
+                
+            } catch (error) {
+                console.error('❌ Firebase 初始化失败:', error);
+                const el = document.getElementById('googleSignInStatus');
+                if (el) el.textContent = 'Firebase 加载失败，请刷新页面重试';
+            }
+        }
+
+        // Google 登录处理函数 - 安全版本
+        async function handleGoogleSignIn(mode) {
+            try {
+                // 双重检查：确保 Firebase 已初始化
+                if (!firebaseAuth || !firebaseApp) {
+                    console.error('❌ Firebase 未初始化');
+                    alert('Firebase 还未加载完成，请稍后再试');
+                    return;
+                }
+                
+                (function(){
+                    const el = document.getElementById('googleSignInStatus');
+                    if (el) el.textContent = 'Logging in...';
+                })();
+                
+                const { GoogleAuthProvider, signInWithPopup, signInWithRedirect } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');
+                const provider = new GoogleAuthProvider();
+                // 强制每次登录时都要求用户重新选择账户或输入密码
+                provider.setCustomParameters({
+                    prompt: 'login'
+                });
+                
+                // 当由钱包连接自动触发时，优先尝试弹窗，若被拦截则回退到重定向
+                if (mode === 'auto') {
+                    try {
+                        const result = await signInWithPopup(firebaseAuth, provider);
+                        console.log('✅ 登录成功:', result.user.email);
+                        (function(){
+                            const el = document.getElementById('googleSignInStatus');
+                            if (el) el.textContent = 'Log in successful！';
+                        })();
+                    } catch (popupErr) {
+                        const code = popupErr && popupErr.code;
+                        if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') {
+                            console.warn('Popup blocked or cancelled; falling back to redirect login');
+                            await signInWithRedirect(firebaseAuth, provider);
+                            // 页面将跳转进行登录
+                            return;
+                        }
+                        throw popupErr;
+                    }
+                } else {
+                    const result = await signInWithPopup(firebaseAuth, provider);
+                    console.log('✅ 登录成功:', result.user.email);
+                    (function(){
+                        const el = document.getElementById('googleSignInStatus');
+                        if (el) el.textContent = 'Log in successful！';
+                    })();
+                }
+                
+            } catch (error) {
+                console.error('❌ Log in failed:', error);
+                if (error.code === 'auth/unauthorized-domain') {
+                    const el = document.getElementById('googleSignInStatus');
+                    if (el) el.textContent = '域名未授权，请在 Firebase 控制台添加当前域名';
+                } else {
+                    const el = document.getElementById('googleSignInStatus');
+                    if (el) el.textContent = 'Log in failed: ' + error.message;
+                }
+            }
+        }
+
+        // Expose sign-in function globally so other scripts can invoke it
+        window.handleGoogleSignIn = handleGoogleSignIn;
+
+        // 🔑 关键修复：安全的按钮事件绑定函数
+        function bindGoogleSignInEvent() {
+            const googleSignInBtn = document.getElementById('googleSignInBtn');
+            if (googleSignInBtn) {
+                // 移除旧的事件监听器（如果有的话）
+                googleSignInBtn.replaceWith(googleSignInBtn.cloneNode(true));
+                
+                // 获取新的按钮引用
+                const newBtn = document.getElementById('googleSignInBtn');
+                
+                // 绑定新的事件监听器
+                newBtn.addEventListener('click', handleGoogleSignIn);
+                
+                console.log('✅ Google 登录按钮事件绑定成功');
+            }
+        }
+
+        // 更新已登录用户的 UI
+        function updateUIForSignedInUser(user) {
+            // 隐藏 Google 登录按钮（元素可能不存在）
+            (function(){
+                const btn = document.getElementById('googleSignInBtn');
+                if (btn) btn.style.display = 'none';
+                const status = document.getElementById('googleSignInStatus');
+                if (status) status.textContent = `Already Logged in: ${user.email}`;
+            })();
+            
+            // 保持钱包连接部分可见（元素可能不存在）
+            (function(){
+                const ws = document.getElementById('walletSection');
+                if (ws) ws.style.display = 'block';
+            })();
+            
+            // 更新账户按钮文本
+            const accountBtnText = document.getElementById('accountBtnText');
+            if (accountBtnText) {
+                accountBtnText.textContent = user.displayName || user.email;
+            }
+            
+            // 显示 logout 按钮
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.style.display = 'block';
+            }
+            
+            console.log('✅ 用户已登录，钱包功能保持可见，logout 按钮已激活');
+        }
+
+        // 更新未登录用户的 UI
+        function updateUIForSignedOutUser() {
+            // 显示 Google 登录按钮（元素可能不存在）
+            (function(){
+                const btn = document.getElementById('googleSignInBtn');
+                if (btn) btn.style.display = 'flex';
+                const status = document.getElementById('googleSignInStatus');
+            })();
+            
+            // 保持钱包连接部分可见（元素可能不存在）
+            (function(){
+                const ws = document.getElementById('walletSection');
+                if (ws) ws.style.display = 'block';
+            })();
+            
+            // 恢复账户按钮文本
+            const accountBtnText = document.getElementById('accountBtnText');
+            if (accountBtnText) {
+                accountBtnText.textContent = 'Login';
+            }
+            
+            // 隐藏 logout 按钮
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.style.display = 'none';
+            }
+            
+            console.log('❌ 用户已退出，钱包功能保持可见，logout 按钮已隐藏');
+        }
+
+        // 加载用户数据
+        async function loadUserData(uid) {
+            try {
+                if (!firebaseDb) return;
+                
+                const { doc, getDoc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js');
+                const userRef = doc(firebaseDb, 'users', uid);
+                const userDoc = await getDoc(userRef);
+                
+                if (userDoc.exists()) {
+                    console.log('用户数据已存在');
+                } else {
+                    // 创建新用户文档
+                    const userData = {
+                        uid: uid,
+                        email: currentUser.email,
+                        displayName: currentUser.displayName,
+                        photoURL: currentUser.photoURL,
+                        lastLogin: new Date(),
+                        createdAt: new Date(),
+                        isActive: true
+                    };
+                    
+                    await setDoc(userRef, userData);
+                    console.log('✅ 新用户文档已创建');
+                }
+            } catch (error) {
+                console.error('❌ 加载用户数据失败:', error);
+            }
+        }
+
+        // 确保用户文档存在并记录本次登录时间
+        async function upsertUserLogin(user) {
+            try {
+                if (!firebaseDb || !user || !user.uid) return;
+                const { doc, getDoc, setDoc, updateDoc, serverTimestamp, increment } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js');
+                const userRef = doc(firebaseDb, 'users', user.uid);
+                const snap = await getDoc(userRef);
+                if (!snap.exists()) {
+                    await setDoc(userRef, {
+                        uid: user.uid,
+                        email: user.email || null,
+                        displayName: user.displayName || null,
+                        photoURL: user.photoURL || null,
+                        createdAt: serverTimestamp(),
+                        isActive: true
+                    }, { merge: true });
+                }
+                await updateDoc(userRef, {
+                    lastLoginAt: serverTimestamp(),
+                    lastLoginClientAt: new Date().toISOString(),
+                    lastLoginProvider: 'google',
+                    lastLoginEmail: user.email || null,
+                    loginCount: increment(1)
+                });
+            } catch (e) {
+                console.warn('upsertUserLogin error:', e);
+            }
+        }
+
+        // 每日签到处理函数 - 支持 Admin 本地签到 + 普通用户链上签到
+        window.handleDailyCheckin = async function() {
+            try {
+                // 1. 检查钱包连接
+                if (!window.walletManager || !window.walletManager.isConnected) {
+                    alert('Please connect your MetaMask wallet to claim the daily check-in bonus.');
+                    return;
+                }
+
+                // 2. 判断是否为 Admin
+                const isAdminUser = window.isAdmin && window.isAdmin();
+                
+                if (isAdminUser) {
+                    // ===== Admin 用户 → 执行完整的本地签到 + Firebase 同步 =====
+                    console.log('🔑 Admin user detected, executing local check-in');
+                    
+                    const address = (window.walletManager.walletAddress || '').toLowerCase();
+                    
+                    if (window.firebaseDb && address) {
+                        const { doc, getDoc, setDoc, updateDoc, serverTimestamp } = 
+                            await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js');
+
+                        const walletRef = doc(window.firebaseDb, 'wallets', address);
+                        const snap = await getDoc(walletRef);
+
+                        let lastCheckinAt = null;
+                        let remoteTotalCheckins = 0;
+                        
+                        if (snap.exists()) {
+                            const data = snap.data() || {};
+                            lastCheckinAt = data.lastCheckinAt || null;
+                            remoteTotalCheckins = Number(data.totalCheckins || 0);
+                        } else {
+                            await setDoc(walletRef, {
+                                address: address,
+                                createdAt: serverTimestamp(),
+                                totalCheckins: 0
+                            }, { merge: true });
+                        }
+
+                        // 同步远端时间戳到本地
+                        if (lastCheckinAt && typeof lastCheckinAt.toMillis === 'function') {
+                            try { 
+                                localStorage.setItem('last_checkin_at', String(lastCheckinAt.toMillis())); 
+                            } catch (_) {}
+                        }
+
+                        // 执行本地签到
+                        const result = window.walletManager.dailyCheckin();
+                        if (!result || !result.success) {
+                            alert(result?.error || '签到失败，请稍后重试');
+                            return;
+                        }
+
+                        // 同步到 Firestore
+                        try {
+                            await updateDoc(walletRef, {
+                                lastCheckinAt: serverTimestamp(),
+                                totalCheckins: remoteTotalCheckins + 1,
+                                credits: window.walletManager.credits,
+                                lastUpdated: serverTimestamp(),
+                                lastCheckinType: 'local-admin'
+                            });
+                        } catch (e) {
+                            console.warn('⚠️ 更新 Firestore 失败（可忽略）：', e);
+                        }
+
+                        // 同步到 users_by_wallet
+                        try {
+                            const walletUserRef = doc(window.firebaseDb, 'users_by_wallet', address);
+                            await setDoc(walletUserRef, {
+                                lastCheckinAt: serverTimestamp(),
+                                totalCheckins: remoteTotalCheckins + 1,
+                                lastUpdated: serverTimestamp()
+                            }, { merge: true });
+                        } catch (e) {
+                            console.warn('⚠️ 同步失败（可忽略）：', e);
+                        }
+
+                        // 如果有 Google 账户，同步到 users/<uid>
+                        if (window.currentUser && window.currentUser.uid) {
+                            try {
+                                const userRef = doc(window.firebaseDb, 'users', window.currentUser.uid);
+                                await updateDoc(userRef, { lastUpdated: serverTimestamp() });
+                            } catch (e) {
+                                console.warn('⚠️ 同步到 users 失败（可忽略）：', e);
+                            }
+                        }
+
+                        return;
+                    }
+
+                    // Firebase 不可用时的降级处理
+                    const result = window.walletManager.dailyCheckin();
+                    if (!result || !result.success) {
+                        alert(result?.error || '签到失败，请稍后重试');
+                    }
+                    
+                } else {
+                    // ===== 普通用户 → 打开链上签到 Modal =====
+                    console.log('👤 Regular user detected, opening on-chain check-in modal');
+                    
+                    if (typeof window.openOnChainCheckInModal === 'function') {
+                        // 先加载用户状态
+                        if (typeof window.loadUserCheckInStatus === 'function') {
+                            await window.loadUserCheckInStatus();
+                        }
+                        window.openOnChainCheckInModal();
+                    } else {
+                        console.error('On-chain check-in modal function not found');
+                        alert('Check-in feature not available');
+                    }
+                }
+                
+            } catch (error) {
+                console.error('签到失败:', error);
+                alert('签到失败: ' + error.message);
+            }
+        };
+
+        // Global helper: clear ALL local data (localStorage and sessionStorage) ONLY.
+        // Does not sign out or disconnect wallet. Backward compatible signature.
+        // Usage:
+        //   window.clearAllLocalData();            // clear only
+        //   window.clearAllLocalData(true);        // confirm, then clear
+        //   window.clearAllLocalData({ reload: true, confirmFirst: true });
+        window.clearAllLocalData = async function(optionsOrConfirm) {
+            const opts = (typeof optionsOrConfirm === 'object') ? optionsOrConfirm : { confirmFirst: !!optionsOrConfirm };
+            const confirmFirst = !!opts.confirmFirst;
+            const reload = !!opts.reload;
+
+            try {
+                if (confirmFirst) {
+                    const ok = window.confirm('This will remove ALL local data for this site (including chat, workflows, wallet archives). Continue?');
+                    if (!ok) return;
+                }
+
+                // Clear storages only (no server-side changes)
+                try { localStorage.clear(); } catch (_) {}
+                try { if (window.sessionStorage) sessionStorage.clear(); } catch (_) {}
+                console.log('🧹 All local data cleared');
+
+                if (reload) {
+                    try { window.location.reload(); } catch (_) {}
+                }
+            } catch (err) {
+                console.error('Error clearing local data:', err);
+            }
+        };
+
+        // Google 登出处理函数
+        window.handleGoogleLogout = async function() {
+            try {
+                if (!firebaseAuth) {
+                    alert('Firebase 未初始化');
+                    return;
+                }
+                
+                // 从 firebase-auth 导入 signOut，而不是 firestore
+                const { signOut } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');
+                await signOut(firebaseAuth);
+                
+                console.log('✅ Google 登出成功');
+                
+                // 更新 UI 状态
+                updateUIForSignedOutUser();
+                
+                // 关闭下拉菜单
+                const dropdown = document.getElementById('accountDropdown');
+                if (dropdown) {
+                    dropdown.classList.remove('show');
+                }
+                
+            } catch (error) {
+                console.error('❌ 登出失败:', error);
+                alert('登出失败: ' + error.message);
+            }
+        };
+
+        // 显示钱包选择模态框 - 修复事件冒泡问题 + 延迟机制
+        window.showWalletSelectionModal = function(event) {
+            // 阻止事件冒泡，防止触发外部点击关闭
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            // 关闭下拉菜单
+            const dropdown = document.getElementById('accountDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+        
+            // 显示模态框
+            const modal = document.getElementById('walletModal');
+            modal.style.display = 'flex';
+            modal.classList.add('show');
+            
+            // 延迟启用外部点击关闭，避免竞态条件
+            setTimeout(() => {
+                modal.dataset.readyToClose = 'true';
+            }, 100);
+        };
+
+        // 关闭钱包模态框 - 完全复制自benchmark.html的工作版本
+        window.closeWalletModal = function() {
+            const modal = document.getElementById('walletModal');
+            if (modal) {
+                modal.classList.remove('show');
+                modal.dataset.readyToClose = 'false'; // 重置延迟标志
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        };
+
+        // 检查 Firebase 状态并显示钱包模态框
+        window.checkFirebaseAndShowWalletModal = function(event) {
+            if (!window.firebaseDb) {
+                alert('Firebase 加载中，请稍后再试...');
+                return;
+            }
+            showWalletSelectionModal(event);
+        };
+
+        // 测试函数 - 手动切换显示状态
+        window.testUI = function() {
+            const googleSignInBtn = document.getElementById('googleSignInBtn');
+            const walletSection = document.getElementById('walletSection');
+            
+            if (googleSignInBtn && walletSection) {
+                if (googleSignInBtn.style.display === 'none') {
+                    // 显示 Google 登录，隐藏钱包
+                    googleSignInBtn.style.display = 'flex';
+                    walletSection.style.display = 'none';
+                    console.log('✅ 显示 Google 登录，隐藏钱包功能');
+                } else {
+                    // 隐藏 Google 登录，显示钱包
+                    googleSignInBtn.style.display = 'none';
+                    walletSection.style.display = 'block';
+                    console.log('✅ 隐藏 Google 登录，显示钱包功能');
+                }
+            }
+        };
+
+        // 显示登录提示弹窗
+        function showLoginPromptModal() {
+            const modal = document.getElementById('loginPromptModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                modal.classList.add('show');
+                setTimeout(() => {
+                    modal.dataset.readyToClose = 'true';
+                }, 100);
+            }
+        }
+
+        // 关闭登录提示弹窗
+        function closeLoginPromptModal() {
+            const modal = document.getElementById('loginPromptModal');
+            if (modal) {
+                modal.classList.remove('show');
+                modal.dataset.readyToClose = 'false';
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        }
+
+        // 从提示弹窗触发 Google 登录
+        function handleGoogleSignInFromPrompt() {
+            closeLoginPromptModal();
+            handleGoogleSignIn();
+        }
+
+        // 从提示弹窗触发钱包连接
+        function connectWalletFromPrompt() {
+            closeLoginPromptModal();
+            showWalletSelectionModal();
+        }
+
+        // 初始化 Firebase 和 UI - 修复版本
+        function initializeFirebaseAndUI() {
+            // Guard to avoid double init
+            try { window._firebaseInitStarted = true; } catch (_) {}
+            console.log('🚀 开始初始化 Firebase 和 UI...');
+            
+            // 确保所有元素都存在
+            const googleSignInBtn = document.getElementById('googleSignInBtn');
+            const walletSection = document.getElementById('walletSection');
+            const googleSignInStatus = document.getElementById('googleSignInStatus');
+            
+            if (googleSignInBtn && walletSection && googleSignInStatus) {
+                console.log('✅ 所有 UI 元素已找到');
+                
+                // 初始化时显示 Google 登录和钱包功能
+                googleSignInBtn.style.display = 'flex';
+                walletSection.style.display = 'block';
+                
+                // 🔑 关键修复：初始时禁用按钮，等 Firebase 加载完成后再启用
+                googleSignInBtn.disabled = true;
+                googleSignInBtn.style.opacity = '0.6';
+                googleSignInBtn.style.cursor = 'not-allowed';
+                
+                // 初始时隐藏 logout 按钮
+                const logoutBtn = document.getElementById('logoutBtn');
+                if (logoutBtn) {
+                    logoutBtn.style.display = 'none';
+                }
+                
+                console.log('✅ UI 初始化完成，等待 Firebase 加载...');
+            } else {
+                console.error('❌ 某些 UI 元素未找到');
+            }
+            
+            // 初始化 Firebase
+            initializeFirebase();
+
+            // Optional auto Google login only if user explicitly enabled the setting
+            try {
+                const autoGoogle = (localStorage.getItem('autoGoogleOnWalletConnect') || 'off') === 'on';
+                if (autoGoogle && window.walletManager && window.walletManager.isConnected) {
+                    const attemptAutoLogin = () => {
+                        if (window.firebaseAuth && !window.firebaseAuth.currentUser && typeof window.handleGoogleSignIn === 'function') {
+                            window.handleGoogleSignIn('auto');
+                        }
+                    };
+                    attemptAutoLogin();
+                    setTimeout(attemptAutoLogin, 800);
+                }
+            } catch (_) {}
+        }
+
+        // Expose initialization functions globally for console/manual triggers
+        window.initializeFirebase = initializeFirebase;
+        window.initializeFirebaseAndUI = initializeFirebaseAndUI;
+
+        // 将钱包连接信息写入 Firestore（无需强制 Google 登录）
+        // 说明：
+        // - 若 currentUser 存在，则写入 users/<uid> 与其子集合 wallets/<address>
+        // - 无论是否登录，都会写入顶层 wallets/<address> 文档，便于独立管理钱包
+        window.onWalletConnected = async function(address, chainId, networkName) {
+            try {
+                if (!firebaseDb) throw new Error('Firebase 未初始化');
+                if (!address) throw new Error('address 不能为空');
+
+                const { doc, setDoc, getDoc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js');
+
+                // 1) 顶层集合：wallets/<address>
+                const walletRef = doc(firebaseDb, 'wallets', address);
+                await setDoc(walletRef, {
+                    address: address,
+                    chainId: chainId || null,
+                    networkName: networkName || null,
+                    lastConnectedAt: serverTimestamp(),
+                    credits: (window.walletManager && typeof window.walletManager.credits === 'number') ? window.walletManager.credits : 0
+                }, { merge: true });
+
+                // 1.5) 新增：wallet-only 用户档案 users_by_wallet/<address>（仅未登录时）
+                if (!window.currentUser || !window.currentUser.uid) {
+                    try {
+                        const walletUserRef = doc(firebaseDb, 'users_by_wallet', address.toLowerCase());
+                        const stageSnap = await getDoc(walletUserRef);
+                        if (stageSnap.exists()) {
+                            // 仅更新连接信息，保留首次 createdAt
+                            await updateDoc(walletUserRef, {
+                                lastConnectedAt: serverTimestamp(),
+                                chainId: chainId || null,
+                                networkName: networkName || null,
+                                userType: 'wallet-only'
+                            });
+                        } else {
+                            // 首次创建，写入 createdAt
+                            await setDoc(walletUserRef, {
+                                address: address,
+                                createdAt: serverTimestamp(),
+                                lastConnectedAt: serverTimestamp(),
+                                chainId: chainId || null,
+                                networkName: networkName || null,
+                                userType: 'wallet-only'
+                            }, { merge: true });
+                        }
+                    } catch (e) {
+                        console.warn('写入 users_by_wallet 失败（开发环境可忽略）:', e);
+                    }
+                }
+
+                // 2) 如已登录 Google，则同步到用户空间
+                if (window.currentUser && window.currentUser.uid) {
+                    const userRef = doc(firebaseDb, 'users', window.currentUser.uid);
+                    const userDocSnap = await getDoc(userRef);
+                    if (!userDocSnap.exists()) {
+                        await setDoc(userRef, {
+                            uid: window.currentUser.uid,
+                            email: window.currentUser.email || null,
+                            displayName: window.currentUser.displayName || null,
+                            createdAt: serverTimestamp(),
+                            isActive: true
+                        }, { merge: true });
+                    }
+
+                    // 尝试从 staging 文档(users_by_wallet)合并数据（不再合并 credits）
+                    let stagedTotalCheckins = 0;
+                    try {
+                        const walletUserRef = doc(firebaseDb, 'users_by_wallet', address.toLowerCase());
+                        const stageSnap = await getDoc(walletUserRef);
+                        if (stageSnap.exists()) {
+                            const s = stageSnap.data() || {};
+                            stagedTotalCheckins = Number(s.totalCheckins || 0);
+                        }
+                    } catch (e) {
+                        console.warn('读取 users_by_wallet staging 失败（可忽略）:', e);
+                    }
+
+                    await updateDoc(userRef, {
+                        primaryWallet: address,
+                        primaryChainId: chainId || null,
+                        primaryNetwork: networkName || null,
+                        walletLinkedAt: serverTimestamp(),
+                        walletOnlyProfile: address.toLowerCase()
+                    });
+
+                    const userWalletRef = doc(firebaseDb, 'users', window.currentUser.uid, 'wallets', address);
+                    await setDoc(userWalletRef, {
+                        address: address,
+                        chainId: chainId || null,
+                        networkName: networkName || null,
+                        lastConnectedAt: serverTimestamp(),
+                        totalCheckins: stagedTotalCheckins
+                    }, { merge: true });
+
+                    // 标记钱包与用户已链接
+                    try {
+                        await updateDoc(walletRef, {
+                            linkedUid: window.currentUser.uid,
+                            linkedAt: serverTimestamp()
+                        });
+                    } catch (e) {
+                        console.warn('标记钱包链接失败（可忽略）:', e);
+                    }
+
+                    // 标记 staging 文档为已链接（保留以兼容历史逻辑）
+                    try {
+                        const walletUserRef = doc(firebaseDb, 'users_by_wallet', address.toLowerCase());
+                        await setDoc(walletUserRef, {
+                            linked: true,
+                            linkedUid: window.currentUser.uid,
+                            linkedAt: serverTimestamp()
+                        }, { merge: true });
+                    } catch (e) {
+                        console.warn('标记 users_by_wallet 已链接失败（可忽略）:', e);
+                    }
+                }
+
+                // 3) UI 提示
+                const info = document.getElementById('walletInfo');
+                if (info) {
+                    info.style.display = 'block';
+                    info.textContent = `Connected Wallet: ${address}`;
+                }
+
+                // Log client-side connection time
+                console.log('🕒 Wallet connected at (client):', new Date().toISOString());
+
+                console.log('✅ 钱包信息已写入 Firestore', { address, chainId, networkName });
+                // 标记钱包已连接
+                localStorage.setItem('walletConnected', 'true');
+            } catch (err) {
+                console.error('❌ 写入钱包信息到 Firestore 失败:', err);
+                alert('保存钱包信息失败：' + err.message);
+            }
+        };
+
+        // —— 全局错误监听，便于排查初始化被阻断的问题 ——
+        window.addEventListener('error', function(e) {
+            try {
+                console.error('🌋 Global error caught:', e.error || e.message, e.filename, e.lineno, e.colno);
+            } catch (_) {}
+        });
+        window.addEventListener('unhandledrejection', function(e) {
+            try {
+                console.error('🌋 Unhandled promise rejection:', e.reason);
+            } catch (_) {}
+        });
+
+        // —— 兜底：如果此时DOM已准备好（极端时序或缓存导致监听丢失），立即初始化 ——
+        (function ensureInit() {
+            console.log('🔎 Inline Firebase script loaded, readyState:', document.readyState);
+            if (document.readyState === 'interactive' || document.readyState === 'complete') {
+                try {
+                    console.log('⏩ DOM 已就绪，立即调用 initializeFirebaseAndUI()');
+                    if (!window._firebaseInitStarted) initializeFirebaseAndUI();
+                } catch (err) {
+                    console.error('❌ 兜底初始化失败:', err);
+                }
+            } else {
+                console.log('⌛ 等待 DOMContentLoaded');
+            }
+        })();
+
+        // Ensure initialization once DOM is ready (in case script ran during 'loading')
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                if (!window._firebaseInitStarted) {
+                    console.log('⏩ DOMContentLoaded -> initializeFirebaseAndUI()');
+                    initializeFirebaseAndUI();
+                }
+            } catch (err) {
+                console.error('❌ DOMContentLoaded init failed:', err);
+            }
+        });
+        // Extra safety: also try on full window load
+        window.addEventListener('load', function() {
+            try {
+                if (!window._firebaseInitStarted) {
+                    console.log('⏩ window.load -> initializeFirebaseAndUI()');
+                    initializeFirebaseAndUI();
+                }
+            } catch (err) {
+                console.error('❌ window.load init failed:', err);
+            }
+        });
+    </script>
+
+    <!-- 钱包选择模态框 -->
+    <div id="walletModal" class="wallet-modal">
+        <div class="wallet-modal-content">
+            <button class="wallet-close-btn" onclick="closeWalletModal()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            
+            <div class="wallet-modal-header">
+                <h2 class="wallet-modal-title">Log in or sign up</h2>
+                <p class="wallet-modal-subtitle">Log in and connect wallet to earn I3 tokens</p>
+            </div>
+
+            <div class="wallet-options">
+                <!-- MetaMask 选项 -->
+                <div class="wallet-option available" onclick="connectMetaMaskWallet()">
+                    <span class="wallet-icon-wrap">
+                    <!-- 你自己的官方 SVG/PNG -->
+                        <img src="svg/metamask.svg" alt="MetaMask">
+                    </span>
+                    <div class="wallet-info">
+                        <div class="wallet-name">MetaMask</div>
+                    </div>
+                </div>
+
+                <!-- Update the WalletConnect option in your wallet modal -->
+                <div class="wallet-option available" onclick="connectWalletConnect()">
+                    <span class="wallet-icon-wrap">
+                    <!-- 你自己的官方 SVG/PNG -->
+                        <img src="svg/walletconnect.svg" alt="WalletConnect">
+                    </span>
+                    <div class="wallet-info">
+                        <div class="wallet-name">WalletConnect</div>
+                    </div>
+                </div>
+
+
+                <!-- Coinbase Wallet 选项  -->
+                <div class="wallet-option available" onclick="connectCoinbaseWallet()">
+                    <span class="wallet-icon-wrap">
+                    <!-- 你自己的官方 SVG/PNG -->
+                        <img src="svg/coinbase.svg" alt="Coinbase">
+                    </span>
+                    <div class="wallet-info">
+                        <div class="wallet-name">Coinbase Wallet</div>
+                    </div>
+                </div>
+
+                <!-- Phantom (Solana) -->
+				<div class="wallet-option available" onclick="connectSolanaPhantom()">
+				    <span class="wallet-icon-wrap">
+                    <!-- 你自己的官方 SVG/PNG -->
+                        <img src="svg/phantom.svg" alt="Phantom">
+                    </span>
+				  <div class="wallet-info">
+				    <div class="wallet-name">Phantom (Solana)</div>
+				  </div>
+				</div>
+
+                <div class="wallet-footer">
+                    By Intelligence Cubed
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+        <!-- 链上签到 Modal -->
+    <div id="onChainCheckInModal" class="wallet-modal" style="display: none;">
+        <div class="wallet-modal-content" style="max-width: 520px;">
+            <button class="wallet-close-btn" onclick="closeOnChainCheckInModal()">✕</button>
+            
+            <div class="wallet-modal-header">
+                <h2 class="wallet-modal-title">✅ Check-In on Chain</h2>
+                <p class="wallet-modal-subtitle">Complete your daily on-chain check-in to earn I3 credits</p>
+            </div>
+
+            <div id="userStatusSection" style="margin: 20px 0; padding: 16px; background: #f0fdf4; border-radius: 12px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                    <div>
+                        <p style="font-size: 12px; color: #059669; margin-bottom: 4px;">Current Streak</p>
+                        <p id="currentStreak" style="font-size: 24px; font-weight: 700; color: #10b981; margin: 0;">0 days</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <p style="font-size: 12px; color: #059669; margin-bottom: 4px;">Total Check-ins</p>
+                        <p id="totalCheckIns" style="font-size: 24px; font-weight: 700; color: #10b981; margin: 0;">0</p>
+                    </div>
+                </div>
+                <div style="padding-top: 12px; border-top: 1px solid #d1fae5;">
+                    <p style="font-size: 12px; color: #059669; margin-bottom: 4px;">Estimated Reward</p>
+                    <p id="nextReward" style="font-size: 20px; font-weight: 700; color: #10b981; margin: 0;">30 credits</p>
+                </div>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">Select Network</label>
+                <select id="chainSelector" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;">
+                    <option value="BSC">BNB Smart Chain (BSC)</option>
+                    <option value="OPBNB">opBNB Mainnet</option>
+                    <option value="SOLANA">Solana Devnet</option>
+                </select>
+            </div>
+
+            <div style="margin: 20px 0; padding: 12px; background: #fef3c7; border-radius: 8px; border: 1px solid #fcd34d;">
+                <p style="font-size: 13px; color: #92400e; margin: 0;">⛽ Gas fee: ~$0.03</p>
+            </div>
+
+            <button id="executeCheckInBtn" onclick="executeOnChainCheckIn()" 
+                    style="width: 100%; padding: 16px; background: linear-gradient(135deg, #10b981, #059669); 
+                           color: white; border: none; border-radius: 12px; 
+                           font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 12px;">
+                Check In Now
+            </button>
+
+            <div id="checkInLoading" style="display: none; text-align: center; padding: 20px;">
+                <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #e5e7eb; 
+                            border-top-color: #10b981; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <p id="loadingText" style="margin-top: 12px; color: #6b7280; font-size: 14px;">Processing...</p>
+            </div>
+
+            <p style="text-align: center; font-size: 12px; color: #6b7280; margin: 0;">
+                Recorded on blockchain for transparency.
+            </p>
+        </div>
+    </div>
+
+    <style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #executeCheckInBtn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+    #executeCheckInBtn:disabled { background: #d1d5db; cursor: not-allowed; }
+    </style>
+</body>
+</html>
