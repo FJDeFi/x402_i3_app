@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Workflow Leaderboard - Intelligence Cubed</title>
-    <link rel="icon" type="image/svg+xml" href="/svg/i3-token-logo.svg">
+    <link rel="icon" type="image/svg+xml" href="/svg/I3 logo.svg">
     <link rel="icon" type="image/png" sizes="192x192" href="/png/i3-token-logo.png">  <!-- 可选: 准备一张 192x192 PNG -->
     <link rel="apple-touch-icon" sizes="192x192" href="/png/i3-token-logo.png"> 
     <link rel="preload" as="image" href="/svg/chains/ethereum.svg">
@@ -21,9 +21,7 @@
     <link rel="stylesheet" href="workflow.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <script src="https://c0f4f41c-2f55-4863-921b-sdk-docs.github.io/cdn/metamask-sdk.js"></script>
-    
-    <!-- Base Account SDK -->
+<!-- Base Account SDK -->
     <script src="https://unpkg.com/@base-org/account/dist/base-account.min.js"></script>
     
     <script>
@@ -55,80 +53,11 @@
     <!-- 仅在旧浏览器需要；现代浏览器也可以保留，不会有副作用 -->
     <script async src="https://ga.jspm.io/npm:es-module-shims@1.10.0/dist/es-module-shims.js"></script>
 
-    <script type="module-shim">
-	  // ========= AppKit loader with CDN fallback (fixed 1.8.4) =========
-	  const PROJECT_ID = '87a5da024dea0385e2d43dcad60b4935';
-	  async function load(kind) {
-	    if (kind === 'unpkg') {
-	      const { createAppKit } = await import('https://unpkg.com/@reown/appkit@1.8.4/dist/index.js?module');
-	      const nets = await import('https://unpkg.com/@reown/appkit@1.8.4/networks/index.js?module');
-	      return { createAppKit, nets };
-	    }
-	    if (kind === 'jsdelivr') {
-	      const { createAppKit } = await import('https://cdn.jsdelivr.net/npm/@reown/appkit@1.8.4/+esm');
-	      const nets = await import('https://cdn.jsdelivr.net/npm/@reown/appkit@1.8.4/networks/+esm');
-	      return { createAppKit, nets };
-	    }
-	    // esm.sh 作为第三备选
-	    const { createAppKit } = await import('https://esm.sh/@reown/appkit@1.8.4');
-	    const nets = await import('https://esm.sh/@reown/appkit@1.8.4/networks');
-	    return { createAppKit, nets };
-	  }
-	  let mod;
-	  try { mod = await load('unpkg'); }
-	  catch { try { mod = await load('jsdelivr'); } catch { mod = await load('esmsh'); } }
-	  const { createAppKit, nets } = mod;
-	  // ① 读取"首选网络"（你模块里 setPreferredNetwork 写入的）
-	  const pref = (window.getPreferredNetwork && window.getPreferredNetwork()) || { key: 'ethereum', kind: 'evm' };
-	  // ② I3 → AppKit 网络映射（按你当前 1.8.4 可用的 nets 字段来对齐）
-	  const map = {
-	    ethereum:  nets.mainnet,
-	    sepolia:   nets.sepolia,     // 测试链可选
-	    polygon:   nets.polygon,
-	    bnb:       nets.bsc,
-	    arbitrum:  nets.arbitrum,
-	    optimism:  nets.optimism,
-	    avalanche: nets.avalanche,
-	    fantom:    nets.fantom,
-	    gnosis:    nets.gnosis,
-	    linea:     nets.linea,
-	    scroll:    nets.scroll,
-	    zksync:    nets.zksync
-	    // 如需 base / polygonZkEvm，请确认 1.8.4 是否暴露相应键后再补：
-	    // base: nets.base,
-	    // 'polygon-zkevm': nets.polygonZkEvm,
-	  };
-	  // ③ 允许在 AppKit 弹窗里展示的链（你现在 index 原本列的我都保留了）
-	  const allowKeys = [
-	    'ethereum','sepolia','polygon','bnb','arbitrum','optimism',
-	    'avalanche','fantom','gnosis','linea','scroll','zksync'
-	  ];
-	  // 如果用户在模块里选了 Solana（kind === 'solana'），AppKit 依然只管 EVM，
-	  // 这里就把默认链回退到 ethereum，避免无效首选
-	  const effectivePrefKey = (pref.kind === 'evm' && map[pref.key]) ? pref.key : 'ethereum';
-	  // ④ 计算默认链 & 列表（把默认链置顶，其他按 allowKeys 顺序去重追加）
-	  const defaultNet = map[effectivePrefKey] || nets.mainnet;
-	  const allowedList = allowKeys.map(k => map[k]).filter(Boolean);
-	  const networks = [defaultNet, ...allowedList.filter(n => n !== defaultNet)];
-	  // ⑤ 创建 AppKit —— 1.8.4 有的版本支持 defaultNetwork，没有也不报错
-	  const modal = createAppKit({
-	    projectId: PROJECT_ID,
-	    networks,
-	    // 某些版本支持；若控制台提示不识别可以忽略这行
-	    defaultNetwork: defaultNet,
-	    metadata: {
-	      name: 'Intelligence Cubed',
-	      description: 'AI Terminal for Web3',
-	      url: 'https://intelligencecubed.netlify.app',
-	      icons: ['https://intelligencecubed.netlify.app/png/i3-token-logo.png']
-	    }
-	  });
-	  // 暴露给业务代码
-	  window.appkit = modal;
-	  // 兼容你现有 initializeWalletConnect 的等待逻辑
-	  window.dispatchEvent(new Event('reownAppKitLoaded'));
-	  console.log('[OK] AppKit loaded', { defaultNet, networks, modal });
-	</script>
+    <script>
+      window.appkit = null;
+      window.dispatchEvent(new Event('reownAppKitLoaded'));
+      console.log('[AppKit] disabled: Phantom-only mode');
+    </script>
 
     <script type="module-shim">
 	  import {
@@ -871,12 +800,15 @@
     </div>
 
     <!-- Scripts -->
+    <script src="pricing.js"></script>
+    <script src="mcp-client.js"></script>
     <script src="model-data.js"></script>
     <script src="account-dropdown.js"></script>
     <script type="module" src="chains.js"></script>
     <script type="module" src="solana-wallet.js"></script>
     <script type="module" src="solana-checkin.js"></script>
     <script src="contract-config.js"></script>
+    <script src="config.js"></script>
     <script src="workflow.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <script src="social-tasks.js"></script>
@@ -1375,9 +1307,11 @@
 
                     // Firebase 不可用时的降级处理
                     const result = window.walletManager.dailyCheckin();
-                    if (!result || !result.success) {
-                        alert(result?.error || '签到失败，请稍后重试');
-                    }
+                    Promise.resolve(result).then(r => {
+                        if (!r || !r.success) {
+                            alert(r?.error || 'Check-in unavailable right now.');
+                        }
+                    });
                     
                 } else {
                     // ===== 普通用户 → 打开链上签到 Modal =====
@@ -1816,54 +1750,19 @@
             
             <div class="wallet-modal-header">
                 <h2 class="wallet-modal-title">Log in or sign up</h2>
-                <p class="wallet-modal-subtitle">Log in and connect wallet to earn I3 tokens</p>
+                <p class="wallet-modal-subtitle">Log in and connect wallet to earn USDC credits</p>
             </div>
 
             <div class="wallet-options">
-                <!-- MetaMask 选项 -->
-                <div class="wallet-option available" onclick="connectMetaMaskWallet()">
+                <div class="wallet-option available" onclick="connectSolanaPhantom()">
                     <span class="wallet-icon-wrap">
-                    <!-- 你自己的官方 SVG/PNG -->
-                        <img src="svg/metamask.svg" alt="MetaMask">
-                    </span>
-                    <div class="wallet-info">
-                        <div class="wallet-name">MetaMask</div>
-                    </div>
-                </div>
-
-                <!-- Update the WalletConnect option in your wallet modal -->
-                <div class="wallet-option available" onclick="connectWalletConnect()">
-                    <span class="wallet-icon-wrap">
-                    <!-- 你自己的官方 SVG/PNG -->
-                        <img src="svg/walletconnect.svg" alt="WalletConnect">
-                    </span>
-                    <div class="wallet-info">
-                        <div class="wallet-name">WalletConnect</div>
-                    </div>
-                </div>
-
-
-                <!-- Coinbase Wallet 选项  -->
-                <div class="wallet-option available" onclick="connectCoinbaseWallet()">
-                    <span class="wallet-icon-wrap">
-                    <!-- 你自己的官方 SVG/PNG -->
-                        <img src="svg/coinbase.svg" alt="Coinbase">
-                    </span>
-                    <div class="wallet-info">
-                        <div class="wallet-name">Coinbase Wallet</div>
-                    </div>
-                </div>
-
-                <!-- Phantom (Solana) -->
-				<div class="wallet-option available" onclick="connectSolanaPhantom()">
-				    <span class="wallet-icon-wrap">
-                    <!-- 你自己的官方 SVG/PNG -->
                         <img src="svg/phantom.svg" alt="Phantom">
                     </span>
-				  <div class="wallet-info">
-				    <div class="wallet-name">Phantom (Solana)</div>
-				  </div>
-				</div>
+                    <div class="wallet-info">
+                        <div class="wallet-name">Phantom (Solana Devnet)</div>
+                        <div class="wallet-desc">Pay and check in with USDC on Solana Devnet</div>
+                    </div>
+                </div>
 
                 <div class="wallet-footer">
                     By Intelligence Cubed
@@ -1880,7 +1779,7 @@
             
             <div class="wallet-modal-header">
                 <h2 class="wallet-modal-title">✅ Check-In on Chain</h2>
-                <p class="wallet-modal-subtitle">Complete your daily on-chain check-in to earn I3 credits</p>
+                <p class="wallet-modal-subtitle">Complete your daily on-chain check-in to earn USDC credits</p>
             </div>
 
             <div id="userStatusSection" style="margin: 20px 0; padding: 16px; background: #f0fdf4; border-radius: 12px;">
@@ -1901,16 +1800,14 @@
             </div>
 
             <div style="margin: 20px 0;">
-                <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">Select Network</label>
-                <select id="chainSelector" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;">
-                    <option value="BSC">BNB Smart Chain (BSC)</option>
-                    <option value="OPBNB">opBNB Mainnet</option>
-                    <option value="SOLANA">Solana Devnet</option>
+                <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">Network</label>
+                <select id="chainSelector" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;" disabled>
+                    <option value="SOLANA">Solana (Devnet)</option>
                 </select>
             </div>
 
             <div style="margin: 20px 0; padding: 12px; background: #fef3c7; border-radius: 8px; border: 1px solid #fcd34d;">
-                <p style="font-size: 13px; color: #92400e; margin: 0;">⛽ Gas fee: ~$0.03</p>
+                <p style="font-size: 13px; color: #92400e; margin: 0;">⛽ Gas fee: ≈0.00025 USDC per call</p>
             </div>
 
             <button id="executeCheckInBtn" onclick="executeOnChainCheckIn()" 

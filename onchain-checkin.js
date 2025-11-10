@@ -170,7 +170,7 @@ async function loadUserCheckInStatus() {
 
     const addr = window.walletManager.walletAddress;
     const sel = document.getElementById('chainSelector');
-    const selectedChain = sel ? sel.value : 'BSC';
+    const selectedChain = sel ? sel.value : 'SOLANA';
     const config = window.getContractConfig?.(selectedChain);
     if (!config) {
       console.error('No EVM config for chain:', selectedChain);
@@ -287,7 +287,7 @@ async function executeOnChainCheckIn() {
     }
 
     const sel = document.getElementById('chainSelector');
-    const selectedChain = sel ? sel.value : 'BSC';
+    const selectedChain = sel ? sel.value : 'SOLANA';
     const config = window.getContractConfig?.(selectedChain);
     const abi    = getEvmAbi(config);
     const rpc    = config?.rpcUrl;

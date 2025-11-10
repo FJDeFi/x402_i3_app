@@ -11,6 +11,11 @@ let isConnecting = false;
 let connectionStart = null;
 let temporaryLine = null;
 
+const NODE_WIDTH = 320;
+const NODE_HEIGHT = 200;
+const WORKSPACE_PADDING = 400;
+let sidebarModelsBase = [];
+
 // Selection variables
 let isSelecting = false;
 let selectionStart = { x: 0, y: 0 };
@@ -44,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Failed to load selected workflow:', e);
     }
     
+    updateWorkspaceSize();
     console.log('Canvas工作流初始化完成');
 });
 
@@ -73,6 +79,7 @@ function restoreWorkflow() {
                     }
                 });
                 
+                updateWorkspaceSize();
                 // 延迟恢复连接，确保节点已创建
                 setTimeout(() => {
                     if (workflowData.connections && workflowData.connections.length > 0) {
@@ -86,6 +93,7 @@ function restoreWorkflow() {
                             }
                         });
                     }
+                    updateWorkspaceSize();
                 }, 200);
             }
         } catch (e) {
@@ -138,6 +146,7 @@ function createNodeElement(nodeData) {
     setupConnectionPoints(nodeElement, nodeData);
     
     document.getElementById('workflowNodes').appendChild(nodeElement);
+    updateWorkspaceSize();
 }
 
 // 新增函数：恢复保存的工作流
@@ -240,6 +249,7 @@ function restoreWorkflowFromData(workflowData) {
             nodeIdCounter = nodeNumber;
         }
     });
+    updateWorkspaceSize();
     
     // 恢复连接
     if (workflowData.connections) {
@@ -253,6 +263,7 @@ function restoreWorkflowFromData(workflowData) {
                     connectionIdCounter = connectionNumber;
                 }
             });
+            updateWorkspaceSize();
         }, 100);
     }
     
@@ -584,49 +595,78 @@ function deleteSelectedElements() {
 function loadModels() {
     const modelsList = document.getElementById('modelsList');
     const modelsCount = document.getElementById('modelsCount');
-    
-    // Load user's assets from localStorage
-    let userModels = [];
+    if (!modelsList || !modelsCount) {
+        return;
+    }
+
+    const modelMap = new Map();
+
+    function addModel(modelName, source = {}) {
+        if (!modelName || modelMap.has(modelName)) return;
+        const modelData = getModelData(modelName);
+        if (!modelData && !source.category) {
+            return;
+        }
+        modelMap.set(modelName, {
+            modelName,
+            type: source.type || 'TOKEN',
+            category: source.category || (modelData ? modelData.category : 'AI Research'),
+            quantity: Number(source.quantity || source.tokens || 2) || 2,
+            purpose: source.purpose || (modelData ? modelData.purpose : ''),
+            useCase: source.useCase || (modelData ? modelData.useCase : ''),
+            tags: source.tags || `${modelData?.purpose || ''} ${modelData?.useCase || ''}`
+        });
+    }
+
     try {
         const myAssets = JSON.parse(localStorage.getItem('myAssets')) || { tokens: [], shares: [] };
-        
-        // Get models that user owns
         myAssets.tokens.forEach(token => {
             if (token.quantity > 0) {
-                const modelData = getModelData(token.modelName);
-                if (modelData) {
-                    userModels.push({
-                        modelName: token.modelName,
-                        type: 'token',
-                        category: modelData.category,
-                        quantity: token.quantity,
-                        tokenPrice: modelData.tokenPrice,
-                        sharePrice: modelData.sharePrice,
-                        rating: modelData.rating,
-                        purpose: modelData.purpose,
-                        useCase: modelData.useCase
-                    });
-                }
+                addModel(token.modelName, {
+                    quantity: token.quantity,
+                    category: token.category,
+                    type: 'TOKEN'
+                });
             }
         });
     } catch (error) {
         console.error('Error loading user models:', error);
     }
-    
-    // If no models owned, show some sample models
-    if (userModels.length === 0) {
-        userModels = [];
+
+    try {
+        const selectedWorkflowRaw = localStorage.getItem('selectedWorkflow') || localStorage.getItem('canvasWorkflow');
+        if (selectedWorkflowRaw) {
+            const selectedWorkflow = JSON.parse(selectedWorkflowRaw);
+            (selectedWorkflow?.models || []).forEach(model => {
+                addModel(model.name || model.modelName, {
+                    quantity: model.tokens || model.calls || model.quantity || 2,
+                    category: model.category,
+                    type: 'WORKFLOW'
+                });
+            });
+        }
+    } catch (error) {
+        console.warn('Unable to merge selected workflow models:', error);
     }
-    
-    modelsList.innerHTML = '';
-    
-    userModels.forEach(model => {
-        const modelElement = createModelElement(model);
-        modelsList.appendChild(modelElement);
-    });
-    
-    modelsCount.textContent = `${userModels.length} models`;
-    console.log(`✅ Loaded ${userModels.length} models`);
+
+    if (modelMap.size === 0 && typeof MODEL_DATA === 'object') {
+        Object.entries(MODEL_DATA)
+            .slice(0, 250)
+            .forEach(([modelName, data]) => {
+                addModel(modelName, {
+                    quantity: 2,
+                    category: data.category,
+                    purpose: data.purpose,
+                    useCase: data.useCase,
+                    tags: `${data.category} ${data.industry}`,
+                    type: 'TOKEN'
+                });
+            });
+    }
+
+    sidebarModelsBase = Array.from(modelMap.values());
+    renderSidebarModels(sidebarModelsBase);
+    console.log(`✅ Loaded ${sidebarModelsBase.length} models into sidebar`);
 }
 
 // Create model element
@@ -635,10 +675,14 @@ function createModelElement(model) {
     modelElement.className = 'model-item';
     modelElement.draggable = true;
     
+    const quantity = Number(model.quantity) || 2;
     modelElement.dataset.modelName = model.modelName;
-    modelElement.dataset.modelType = model.type;
-    modelElement.dataset.category = model.category;
-    modelElement.dataset.quantity = model.quantity;
+    modelElement.dataset.modelType = model.type || 'TOKEN';
+    modelElement.dataset.category = model.category || 'AI Research';
+    modelElement.dataset.quantity = quantity;
+    if (model.tags) {
+        modelElement.dataset.tags = model.tags;
+    }
     
     const displayName = model.modelName.length > 25 ? 
         model.modelName.substring(0, 25) + '...' : model.modelName;
@@ -648,14 +692,14 @@ function createModelElement(model) {
             <div class="model-name" title="${model.modelName}">${displayName}</div>
             <div class="model-type">${model.type}</div>
             </div>
-            <div class="model-category">${model.category}</div>
+            <div class="model-category">${model.category || ''}</div>
         <div class="model-tokens">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="3"/>
                     <path d="M12 1v6m0 6v6"/>
                 <path d="m21 12-6-3-6 3-6-3"/>
                 </svg>
-            ${model.quantity}K tokens
+            ${quantity}K tokens
         </div>
     `;
     
@@ -663,6 +707,38 @@ function createModelElement(model) {
     modelElement.addEventListener('dragend', handleDragEnd);
     
     return modelElement;
+}
+
+function renderSidebarModels(models, { filteredTerm = '' } = {}) {
+    const modelsList = document.getElementById('modelsList');
+    const modelsCount = document.getElementById('modelsCount');
+    if (!modelsList || !modelsCount) {
+        return;
+    }
+
+    modelsList.innerHTML = '';
+
+    if (!models.length) {
+        const empty = document.createElement('div');
+        empty.className = 'models-empty-state';
+        empty.textContent = filteredTerm
+            ? `No models found for "${filteredTerm}".`
+            : 'No models available yet.';
+        modelsList.appendChild(empty);
+    } else {
+        models.forEach(model => {
+            const modelElement = createModelElement(model);
+            modelsList.appendChild(modelElement);
+        });
+    }
+
+    const total = sidebarModelsBase.length || models.length;
+    modelsCount.dataset.total = total;
+    if (filteredTerm && filteredTerm.trim().length) {
+        modelsCount.textContent = `${models.length} / ${total} models`;
+    } else {
+        modelsCount.textContent = `${total} models`;
+    }
 }
 
 // Setup drag and drop
@@ -752,13 +828,14 @@ function hideDropZone() {
 // Create workflow node
 function createWorkflowNode(model, x, y) {
     const nodeId = `node-${++nodeIdCounter}`;
+    const quantity = Math.max(Number(model.quantity) || 1, 1);
     
     const nodeData = {
         id: nodeId,
         modelName: model.name,
         modelType: model.type,
         category: model.category,
-        quantity: model.quantity,
+        quantity,
         x: x,
         y: y
     };
@@ -777,6 +854,23 @@ function createWorkflowNode(model, x, y) {
     nodeElement.innerHTML = `
         <div class="node-header">
             <div class="node-title" title="${model.name}">${displayName}</div>
+            <div class="node-actions">
+                <button type="button" class="node-control node-config" title="Configure">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                </button>
+                <button type="button" class="node-control node-delete" title="Remove">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                </button>
+            </div>
         </div>
         <div class="node-category">${model.category}</div>
         <div class="node-tokens">
@@ -785,7 +879,7 @@ function createWorkflowNode(model, x, y) {
                 <path d="M12 1v6m0 6v6"/>
                 <path d="m21 12-6-3-6 3-6-3"/>
             </svg>
-            ${model.quantity}K tokens
+            ${quantity}K tokens
         </div>
     `;
     
@@ -808,10 +902,27 @@ function createWorkflowNode(model, x, y) {
     setupNodeDragging(nodeElement, nodeData);
     setupConnectionPoints(nodeElement, nodeData);
     
+    const configBtn = nodeElement.querySelector('.node-config');
+    if (configBtn) {
+        configBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            configureNode(nodeId);
+        });
+    }
+    
+    const deleteBtn = nodeElement.querySelector('.node-delete');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            deleteNode(nodeId);
+        });
+    }
+    
     const workflowNodesContainer = document.getElementById('workflowNodes');
     workflowNodesContainer.appendChild(nodeElement);
     
     console.log('✅ Created workflow node:', nodeData);
+    updateWorkspaceSize();
 }
 
 
@@ -1101,6 +1212,33 @@ function updateAllConnections() {
     });
 }
 
+function updateWorkspaceSize() {
+    const workspace = document.getElementById('canvasWorkspace');
+    const nodesContainer = document.getElementById('workflowNodes');
+    const connectionsSvg = document.getElementById('connectionsSvg');
+    if (!workspace || !nodesContainer || !connectionsSvg) {
+        return;
+    }
+
+    let maxX = 0;
+    let maxY = 0;
+    workflowNodes.forEach(node => {
+        maxX = Math.max(maxX, (Number(node.x) || 0) + NODE_WIDTH);
+        maxY = Math.max(maxY, (Number(node.y) || 0) + NODE_HEIGHT);
+    });
+
+    const desiredWidth = Math.max(workspace.clientWidth, maxX + WORKSPACE_PADDING);
+    const desiredHeight = Math.max(workspace.clientHeight, maxY + WORKSPACE_PADDING);
+
+    nodesContainer.style.width = `${desiredWidth}px`;
+    nodesContainer.style.height = `${desiredHeight}px`;
+
+    connectionsSvg.setAttribute('width', desiredWidth);
+    connectionsSvg.setAttribute('height', desiredHeight);
+    connectionsSvg.style.width = `${desiredWidth}px`;
+    connectionsSvg.style.height = `${desiredHeight}px`;
+}
+
 // Update all node priorities based on position
 function updateAllPriorities() {
     // This function can be used to update execution order based on node positions
@@ -1141,6 +1279,7 @@ function setupNodeDragging(nodeElement, nodeData) {
         nodeElement.style.left = `${nodeData.x}px`;
         nodeElement.style.top = `${nodeData.y}px`;
         
+        updateWorkspaceSize();
         // Update connections when node moves
         updateAllConnections();
         
@@ -1154,6 +1293,7 @@ function setupNodeDragging(nodeElement, nodeData) {
         
         document.removeEventListener('mousemove', handleNodeDrag);
         document.removeEventListener('mouseup', handleNodeDragEnd);
+        updateWorkspaceSize();
     }
 }
 
@@ -1164,15 +1304,60 @@ function toggleSidebar() {
 }
 
 function filterModels() {
-    const searchTerm = document.getElementById('modelSearch').value.toLowerCase();
-    const modelItems = document.querySelectorAll('.model-item');
-    
-    modelItems.forEach(item => {
-        const modelName = item.dataset.modelName.toLowerCase();
-        const category = item.dataset.category.toLowerCase();
-        const visible = modelName.includes(searchTerm) || category.includes(searchTerm);
-        item.style.display = visible ? 'block' : 'none';
+    const searchInput = document.getElementById('modelSearch');
+    const searchTerm = (searchInput ? searchInput.value : '').trim().toLowerCase();
+
+    if (!searchTerm) {
+        renderSidebarModels(sidebarModelsBase);
+        return;
+    }
+
+    const primaryMatches = sidebarModelsBase.filter(model => {
+        const bucket = [
+            model.modelName,
+            model.category,
+            model.type,
+            model.purpose,
+            model.useCase,
+            model.tags
+        ].join(' ').toLowerCase();
+        return bucket.includes(searchTerm);
     });
+
+    if (primaryMatches.length) {
+        renderSidebarModels(primaryMatches, { filteredTerm: searchTerm });
+        return;
+    }
+
+    // Fallback: search the full model catalog
+    if (typeof MODEL_DATA === 'object' && MODEL_DATA) {
+        const fallbackMatches = [];
+        Object.entries(MODEL_DATA).some(([name, data]) => {
+            const bucket = [
+                name,
+                data?.category,
+                data?.industry,
+                data?.purpose,
+                data?.useCase
+            ].join(' ').toLowerCase();
+            if (bucket.includes(searchTerm)) {
+                fallbackMatches.push({
+                    modelName: name,
+                    type: 'TOKEN',
+                    category: data?.category || 'AI Research',
+                    quantity: 2,
+                    purpose: data?.purpose || '',
+                    useCase: data?.useCase || '',
+                    tags: `${data?.category || ''} ${data?.industry || ''}`
+                });
+            }
+            return fallbackMatches.length >= 40;
+        });
+        renderSidebarModels(fallbackMatches, { filteredTerm: searchTerm });
+        return;
+    }
+
+    renderSidebarModels([], { filteredTerm: searchTerm });
 }
 
 function clearCanvas() {
@@ -1203,6 +1388,7 @@ function clearCanvas() {
         localStorage.removeItem('currentWorkflow');
         
         console.log('🧹 Canvas cleared');
+        updateWorkspaceSize();
     }
 }
 
@@ -1293,19 +1479,37 @@ function configureNode(nodeId) {
 }
 
 function deleteNode(nodeId) {
-    if (confirm('Delete this node?')) {
-        const nodeIndex = workflowNodes.findIndex(n => n.id === nodeId);
-        if (nodeIndex !== -1) {
-            workflowNodes.splice(nodeIndex, 1);
-        }
-        
-        const nodeElement = document.getElementById(nodeId);
-        if (nodeElement) {
-            nodeElement.remove();
-        }
-        
-        console.log('🗑️ Node deleted:', nodeId);
+    if (!nodeId) return;
+    if (!confirm('Delete this node?')) {
+        return;
     }
+
+    const nodeIndex = workflowNodes.findIndex(n => n.id === nodeId);
+    if (nodeIndex !== -1) {
+        workflowNodes.splice(nodeIndex, 1);
+    }
+
+    const nodeElement = document.getElementById(nodeId);
+    if (nodeElement) {
+        nodeElement.remove();
+    }
+
+    selectedNodes.delete(nodeId);
+
+    const removedConnections = connections.filter(conn => conn.from.nodeId === nodeId || conn.to.nodeId === nodeId);
+    if (removedConnections.length) {
+        removedConnections.forEach(conn => {
+            const line = document.getElementById(conn.id);
+            if (line) line.remove();
+        });
+    }
+    connections = connections.filter(conn => conn.from.nodeId !== nodeId && conn.to.nodeId !== nodeId);
+
+    clearSelection();
+    updateAllConnections();
+    updateWorkspaceSize();
+
+    console.log('🗑️ Node deleted:', nodeId);
 }
 
 // Modal functions
@@ -1399,11 +1603,12 @@ function saveAndRunWorkflow() {
     localStorage.setItem('myWorkflows', JSON.stringify(myWorkflows));
     
     hideSaveRunModal();
-    alert(`工作流 "${workflowName}" 保存成功！正在跳转到聊天页面...`);
     
-    setTimeout(() => {
-        window.location.href = 'index.html';
-    }, 1000);
+    executeCanvasWorkflow({
+        workflowId: completeWorkflowData.id,
+        workflowName,
+        workflowDescription
+    });
 }
 
 // Load workflow to canvas
@@ -1433,14 +1638,27 @@ function loadWorkflowToCanvas(workflow) {
         // Find the model in our model data
         const modelData = findModelByName(model.name);
         if (modelData) {
-            createWorkflowNode(modelData, xOffset, 200);
+            const quantity = Math.max(
+                Number(model.tokens || model.calls || model.quantity || modelData.quantity || 1) || 1,
+                1
+            );
+            createWorkflowNode(
+                {
+                    ...modelData,
+                    quantity
+                },
+                xOffset,
+                200
+            );
             xOffset += 350; // Space between nodes
         }
     });
     
+    updateWorkspaceSize();
     // Connect nodes sequentially
     setTimeout(() => {
         connectWorkflowNodes();
+        updateWorkspaceSize();
     }, 500);
     
     // Show Run button and hide Save and Run button
@@ -1516,116 +1734,223 @@ function connectWorkflowNodes() {
     }
 }
 
-// Run selected workflow
-function runSelectedWorkflow() {
-    const currentWorkflow = localStorage.getItem('currentWorkflow');
-    if (!currentWorkflow) {
-        alert('⚠️ No workflow selected to run.');
+function computeExecutionPlan() {
+    if (!workflowNodes.length) {
+        return {
+            orderedNodes: [],
+            sequenceNames: [],
+            edges: []
+        };
+    }
+
+    const nodes = workflowNodes.map(node => ({
+        ...node,
+        x: Number(node.x) || 0
+    }));
+    const nodesById = new Map(nodes.map(n => [n.id, n]));
+    const validIds = new Set(nodes.map(n => n.id));
+
+    const edges = connections
+        .filter(conn => validIds.has(conn.from.nodeId) && validIds.has(conn.to.nodeId) && conn.from.nodeId !== conn.to.nodeId)
+        .map(conn => ({ from: conn.from.nodeId, to: conn.to.nodeId }));
+
+    const inDegree = new Map();
+    nodes.forEach(n => inDegree.set(n.id, 0));
+    edges.forEach(edge => inDegree.set(edge.to, (inDegree.get(edge.to) || 0) + 1));
+
+    const adjacency = new Map();
+    nodes.forEach(n => adjacency.set(n.id, []));
+    edges.forEach(edge => {
+        adjacency.get(edge.from).push(edge.to);
+    });
+
+    const compareNodes = (a, b) => {
+        if (a.x !== b.x) return a.x - b.x;
+        return a.modelName.localeCompare(b.modelName);
+    };
+    const compareIds = (aId, bId) => {
+        const a = nodesById.get(aId);
+        const b = nodesById.get(bId);
+        if (!a || !b) return 0;
+        return compareNodes(a, b);
+    };
+
+    const ready = [];
+    inDegree.forEach((deg, id) => {
+        if (deg === 0) {
+            ready.push(id);
+        }
+    });
+    ready.sort(compareIds);
+
+    const orderedIds = [];
+    let processed = 0;
+
+    while (ready.length) {
+        const id = ready.shift();
+        orderedIds.push(id);
+        processed += 1;
+        const neighbors = adjacency.get(id) || [];
+        neighbors.forEach(nextId => {
+            inDegree.set(nextId, (inDegree.get(nextId) || 0) - 1);
+            if (inDegree.get(nextId) === 0) {
+                ready.push(nextId);
+                ready.sort(compareIds);
+            }
+        });
+    }
+
+    let finalIds = orderedIds;
+    if (processed !== nodes.length) {
+        console.warn('⚠️ Cycle detected; falling back to left→right order.');
+        finalIds = [...nodes].sort(compareNodes).map(n => n.id);
+    }
+
+    const orderedNodes = finalIds.map(id => nodesById.get(id)).filter(Boolean);
+    const sequenceNames = orderedNodes.map(node => node.modelName);
+
+    return {
+        orderedNodes,
+        sequenceNames,
+        edges
+    };
+}
+
+function executeCanvasWorkflow({ workflowId, workflowName, workflowDescription } = {}) {
+    const plan = computeExecutionPlan();
+    if (!plan.orderedNodes.length) {
+        alert('⚠️ 请先在Canvas上添加至少一个模型。');
         return;
     }
-    
-    // Build exportable graph and a single sequential topological order (no parallel)
-    function exportWorkflowGraphAndSequence() {
-        // Enrich nodes with model description from model-data.js
-        const nodes = workflowNodes.map(n => {
-            const md = (typeof getModelData === 'function') ? getModelData(n.modelName) : null;
-            return {
-                id: n.id,
-                name: n.modelName,
-                category: n.category,
-                purpose: md && md.purpose ? md.purpose : '',
-                useCase: md && md.useCase ? md.useCase : '',
-                industry: md && md.industry ? md.industry : ''
-            };
-        });
-        const nodeIds = new Set(nodes.map(n => n.id));
-        const posX = new Map(workflowNodes.map(n => [n.id, n.x || 0]));
-        
-        // Directed edges
-        const edges = connections
-            .filter(c => nodeIds.has(c.from.nodeId) && nodeIds.has(c.to.nodeId) && c.from.nodeId !== c.to.nodeId)
-            .map(c => ({ from: c.from.nodeId, to: c.to.nodeId }));
-        
-        // Kahn's algorithm → single sequence with tie-breakers
-        const inDeg = new Map();
-        nodes.forEach(n => inDeg.set(n.id, 0));
-        edges.forEach(e => inDeg.set(e.to, (inDeg.get(e.to) || 0) + 1));
-        
-        const adj = new Map();
-        nodes.forEach(n => adj.set(n.id, []));
-        edges.forEach(e => adj.get(e.from).push(e.to));
-        
-        const byId = new Map(nodes.map(n => [n.id, n]));
-        const ready = [];
-        inDeg.forEach((deg, id) => { if (deg === 0) ready.push(id); });
-        ready.sort((a, b) => (posX.get(a) - posX.get(b)) || (byId.get(a).name.localeCompare(byId.get(b).name)));
-        
-        const seq = [];
-        let processed = 0;
-        while (ready.length) {
-            const u = ready.shift();
-            seq.push(u);
-            processed++;
-            for (const v of adj.get(u)) {
-                inDeg.set(v, inDeg.get(v) - 1);
-                if (inDeg.get(v) === 0) {
-                    ready.push(v);
-                    ready.sort((a, b) => (posX.get(a) - posX.get(b)) || (byId.get(a).name.localeCompare(byId.get(b).name)));
-                }
-            }
-        }
-        
-        if (processed !== nodes.length) {
-            console.warn('⚠️ Cycle detected; falling back to left→right order.');
-            const byX = [...workflowNodes].sort((a,b) => a.x - b.x).map(n => n.id);
-            return {
-                nodes,
-                edges,
-                sequenceByIds: byX,
-                sequenceByNames: byX.map(id => nodes.find(n => n.id === id) && nodes.find(n => n.id === id).name).filter(Boolean)
-            };
-        }
-        
-        const sequenceByNames = seq.map(id => byId.get(id) && byId.get(id).name).filter(Boolean);
-        return { nodes, edges, sequenceByIds: seq, sequenceByNames };
-    }
-    
+
+    const workflowNameSafe = workflowName || 'Canvas Workflow';
+    const workflowIdSafe = workflowId || `canvas-${Date.now()}`;
+    const descriptionSafe = workflowDescription || '';
+    const runId = `run-${Date.now()}`;
+    let existingWorkflowMeta = {};
     try {
-        const wf = JSON.parse(currentWorkflow);
-        const runId = Date.now().toString();
-        const { nodes, edges, sequenceByNames } = exportWorkflowGraphAndSequence();
-        const experts = nodes.map(n => n.name);
-        const expertDetails = nodes.map(n => ({
-            name: n.name,
-            purpose: n.purpose,
-            useCase: n.useCase,
-            category: n.category,
-            industry: n.industry
-        }));
-        
-        wf.status = 'running';
-        wf.runId = runId;
-        wf.experts = experts;
-        wf.expertDetails = expertDetails;
-        wf.graph = { nodes, edges };
-        wf.sequence = sequenceByNames;
-        
-        localStorage.setItem('currentWorkflow', JSON.stringify(wf));
-        
-        // Clear any forced model when starting workflow from Canvas
-        localStorage.removeItem('forcedModel');
-        console.log('🧹 Cleared forcedModel when starting workflow from Canvas');
-        
-        alert(`🚀 Starting workflow: ${wf.name}\n\nOrder: ${sequenceByNames.join(' → ')}`);
-        
-        setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 1000);
-        
-    } catch (e) {
-        console.error('Error running workflow:', e);
-        alert('❌ Error running workflow');
+        existingWorkflowMeta = JSON.parse(localStorage.getItem('currentWorkflow') || '{}') || {};
+    } catch (_) {
+        existingWorkflowMeta = {};
     }
+
+    const enrichedNodes = plan.orderedNodes.map(node => {
+        const md = (typeof getModelData === 'function') ? getModelData(node.modelName) : null;
+        return {
+            id: node.id,
+            name: node.modelName,
+            category: node.category,
+            quantity: Math.max(Number(node.quantity) || 1, 1),
+            x: Number(node.x) || 0,
+            y: Number(node.y) || 0,
+            purpose: md?.purpose || '',
+            useCase: md?.useCase || '',
+            industry: md?.industry || ''
+        };
+    });
+
+    const expertDetails = enrichedNodes.map(n => ({
+        name: n.name,
+        purpose: n.purpose,
+        useCase: n.useCase,
+        category: n.category,
+        industry: n.industry
+    }));
+
+    const workflowRecord = {
+        id: workflowIdSafe,
+        name: workflowNameSafe,
+        description: descriptionSafe,
+        status: 'running',
+        runId,
+        startedAt: new Date().toISOString(),
+        sequence: plan.sequenceNames,
+        experts: plan.sequenceNames.slice(),
+        expertDetails,
+        graph: {
+            nodes: enrichedNodes.map(n => ({
+                id: n.id,
+                name: n.name,
+                category: n.category,
+                x: n.x,
+                y: n.y
+            })),
+            edges: plan.edges.map(edge => ({
+                from: edge.from,
+                to: edge.to
+            }))
+        },
+        nodes: enrichedNodes,
+        prepaid: !!existingWorkflowMeta.prepaid,
+        prepaidAt: existingWorkflowMeta.prepaidAt || null,
+        prepaidAmountUsdc: existingWorkflowMeta.prepaidAmountUsdc || null,
+        prepaidModels: existingWorkflowMeta.prepaidModels || null,
+        lastPaymentTx: existingWorkflowMeta.lastPaymentTx || null,
+        lastPaymentExplorer: existingWorkflowMeta.lastPaymentExplorer || null,
+        lastPaymentAt: existingWorkflowMeta.lastPaymentAt || null,
+        lastPaymentMemo: existingWorkflowMeta.lastPaymentMemo || null
+    };
+
+    localStorage.removeItem('forcedModel');
+    localStorage.setItem('currentWorkflow', JSON.stringify(workflowRecord));
+
+    try {
+        const snapshot = collectWorkflowData();
+        if (snapshot) {
+            localStorage.setItem('canvasWorkflow', JSON.stringify({
+                ...snapshot,
+                id: workflowIdSafe,
+                name: workflowNameSafe,
+                description: descriptionSafe,
+                lastRunAt: workflowRecord.startedAt,
+                prepaid: workflowRecord.prepaid,
+                prepaidAt: workflowRecord.prepaidAt,
+                prepaidAmountUsdc: workflowRecord.prepaidAmountUsdc,
+                prepaidModels: workflowRecord.prepaidModels,
+                lastPaymentTx: workflowRecord.lastPaymentTx,
+                lastPaymentExplorer: workflowRecord.lastPaymentExplorer,
+                lastPaymentAt: workflowRecord.lastPaymentAt,
+                lastPaymentMemo: workflowRecord.lastPaymentMemo
+            }));
+        }
+    } catch (err) {
+        console.warn('Failed to persist canvas workflow snapshot:', err);
+    }
+
+    try { localStorage.setItem('autoRouter', 'off'); } catch (_) {}
+
+    alert(`🚀 工作流 "${workflowNameSafe}" 已准备好，正在跳转到聊天界面执行。`);
+    setTimeout(() => {
+        window.location.href = 'index.html';
+    }, 300);
+}
+
+// Run selected workflow
+function runSelectedWorkflow() {
+    if (!workflowNodes.length) {
+        alert('⚠️ 请先在Canvas上加载一个工作流。');
+        return;
+    }
+
+    let storedWorkflow = {};
+    const storedRaw = localStorage.getItem('currentWorkflow');
+    if (storedRaw) {
+        try {
+            storedWorkflow = JSON.parse(storedRaw) || {};
+        } catch (e) {
+            console.error('Failed to parse currentWorkflow from localStorage:', e);
+        }
+    }
+
+    const workflowId = storedWorkflow.id || `canvas-${Date.now()}`;
+    const workflowName = storedWorkflow.name || 'Canvas Workflow';
+    const workflowDescription = storedWorkflow.description || '';
+
+    executeCanvasWorkflow({
+        workflowId,
+        workflowName,
+        workflowDescription
+    });
 }
 
 // 收集当前canvas上的workflow数据

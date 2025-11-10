@@ -4,46 +4,24 @@
 /**
  * 显示钱包选择模态框 - 新增功能
  */
+function forceWalletModalVisible() {
+  const modal = document.getElementById('walletModal');
+  if (!modal) {
+    console.error('Wallet modal not found in DOM');
+    return;
+  }
+  modal.style.transform = 'none';
+  modal.style.transition = 'none';
+  modal.style.display = 'flex';
+  modal.classList.add('show');
+}
+
+window.forceWalletModalVisible = forceWalletModalVisible;
+
 function showWalletSelectionModal() {
   const modal = document.getElementById('walletModal');
   if (modal) {
-    // 确保重置所有样式
-    modal.style.transform = 'none';
-    modal.style.transition = 'none';
-    modal.style.display = 'flex';
-   
-    modal.classList.add('show');
-
-    // === Filter wallet options by selected network ===
-    try {
-      const preferred = getPreferredNetwork?.();
-      const isEvm = preferred?.kind === 'evm';
-
-      // 你的按钮是 class="wallet-option"，onclick 分别是 connectMetaMaskWallet / connectWalletConnect / connectCoinbaseWallet / connectSolanaPhantom
-      const items = modal.querySelectorAll('.wallet-option');
-
-      items.forEach(el => {
-        const onClick = (el.getAttribute('onclick') || '').toLowerCase();
-        const isEvmWallet = /connectmetamaskwallet|connectwalletconnect|connectcoinbasewallet/.test(onClick);
-        const isSolWallet = /connectsolanaphantom/.test(onClick);
-
-        if ((isEvm && isEvmWallet) || (!isEvm && isSolWallet)) {
-          el.style.display = 'flex';        // 保持原有布局
-          el.classList.remove('disabled');
-          el.style.pointerEvents = 'auto';
-          el.style.opacity = '1';
-        } else {
-          el.style.display = 'none';        // 隐藏不匹配的钱包
-          // 如果你想“置灰”而不是隐藏，可以用下面三行替代:
-          // el.classList.add('disabled');
-          // el.style.pointerEvents = 'none';
-          // el.style.opacity = '0.5';
-        }
-      });
-    } catch (e) {
-      console.warn('filterWalletOptions failed:', e);
-    }
-
+    forceWalletModalVisible();
   } else {
     console.error('Wallet modal not found in DOM');
   }
@@ -62,6 +40,17 @@ function closeWalletModal() {
         modal.style.transform = 'none';
         modal.style.transition = 'none';
     }
+}
+
+function notifyUnsupportedWallet(name) {
+  const message = `${name} is not available. Please connect with Phantom (Solana Devnet).`;
+  if (typeof showNotification === 'function') {
+    showNotification(message, 'error');
+  } else if (typeof alert === 'function') {
+    alert(message);
+  } else {
+    console.warn(message);
+  }
 }
 
 // === 工具函数 ===
@@ -301,7 +290,8 @@ async function connectSolanaPhantom() {
     showNotification('Phantom (Solana) connected!', 'success');
   } catch (e) {
     console.error('Phantom connection error:', e);
-    showNotification(e?.message || 'Failed to connect Phantom', 'error');
+    const msg = e?.message || 'Failed to connect Phantom';
+    showNotification(msg, 'error');
   }
 }
 
@@ -412,7 +402,7 @@ async function executeLocalCheckin() {
             }
 
             // 执行本地签到
-            const result = window.walletManager.dailyCheckin();
+            const result = await window.walletManager.dailyCheckin();
             if (!result || !result.success) {
                 showNotification(result?.error || 'Check-in failed', 'error');
                 return;
@@ -434,7 +424,7 @@ async function executeLocalCheckin() {
             showNotification(`Check-in successful! +${result.reward} I3 tokens`, 'success');
         } else {
             // Firebase 不可用时的降级处理
-            const result = window.walletManager.dailyCheckin();
+            const result = await window.walletManager.dailyCheckin();
             if (result && result.success) {
                 showNotification(`Check-in successful! +${result.reward} I3 tokens`, 'success');
             } else {
@@ -869,9 +859,9 @@ window.showNotification = showNotification;
 window.initializeWalletUI = initializeWalletUI;
 window.showWalletSelectionModal = showWalletSelectionModal;
 window.closeWalletModal = closeWalletModal;
-window.connectMetaMaskWallet = connectMetaMaskWallet;
-window.connectCoinbaseWallet = connectCoinbaseWallet; 
-window.connectWalletConnect = connectWalletConnect;
+window.connectMetaMaskWallet = () => notifyUnsupportedWallet('MetaMask');
+window.connectCoinbaseWallet = () => notifyUnsupportedWallet('Coinbase Wallet');
+window.connectWalletConnect = () => notifyUnsupportedWallet('WalletConnect');
 window.connectSolanaPhantom = connectSolanaPhantom;
 
 
@@ -950,13 +940,16 @@ function renderNetworkBadge(info) {
   }
 
   badge.style.cursor = 'pointer';
-
-  // 点击徽章时打开网络选择器
-  badge.onclick = () => {
-    try {
-      openNetworkPickerModal();
-    } catch (e) {
-      console.error(e);
+  badge.title = 'Connect Phantom (Solana Devnet)';
+  badge.onclick = (event) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    if (typeof window.showWalletSelectionModal === 'function') {
+      window.showWalletSelectionModal(event);
+    } else {
+      forceWalletModalVisible();
     }
   };
 }
@@ -991,151 +984,20 @@ async function enforcePreferredEvmChain(provider) {
 }
 
 function openNetworkPickerModal() {
-  // 如果已存在，做成 toggle
-  const exists = document.getElementById('networkModal');
-  if (exists) {
-    exists.classList.toggle('show');
-    return;
+  const msg = 'Network selection is fixed to Solana (Devnet).';
+  if (typeof showNotification === 'function') {
+    showNotification(msg, 'error');
+  } else if (typeof alert === 'function') {
+    alert(msg);
+  } else {
+    console.log(msg);
   }
-
-  // 关闭时移除节点
-  function close() {
-    const m = document.getElementById('networkModal');
-    if (!m) return;
-    m.classList.remove('show');
-    setTimeout(() => { try { m.remove(); } catch {} }, 250);
-  }
-
-  // 1) 遮罩
-  const modal = document.createElement('div');
-  modal.id = 'networkModal';
-  modal.className = 'network-modal'; // 独立类名，避免和钱包模态冲突
-  modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
-
-  // 2) 面板
-  const panel = document.createElement('div');
-  panel.className = 'network-modal-content';
-  panel.setAttribute('role', 'dialog');
-  panel.setAttribute('aria-modal', 'true');
-
-  // 3) 头部
-  const header = document.createElement('div');
-  header.className = 'network-modal-header';
-  header.innerHTML = `
-    <div class="network-modal-title">Select a Network</div>
-    <button class="network-close-btn" aria-label="Close">✕</button>
-  `;
-  header.querySelector('.network-close-btn').onclick = () => close();
-
-  // 4) 列表
-  const list = document.createElement('div');
-  list.style.display = 'flex';
-  list.style.flexDirection = 'column';
-  list.style.gap = '12px';
-
-  const order = ['bnb','opbnb','ethereum','base','arbitrum','zksync','polygon-zkevm','optimism','solana'];
-
-  // ✅ 和 Login 保持一致的结构：wallet-option + wallet-icon-wrap + wallet-info/wallet-name
-const makeRow = (net) => {
-  const row = document.createElement('div');
-  row.className = 'wallet-option available';
-
-  // ✅ 检查是否支持签到
-  const supportsCheckIn = (net.key === 'bnb' || net.key === 'opbnb' || net.key === 'solana');
-  
-  row.innerHTML = `
-    <span class="wallet-icon-wrap">
-      <img src="${net.icon}" alt="${net.name}">
-    </span>
-    <div class="wallet-info">
-      <div class="wallet-name">
-        ${net.name}
-        ${supportsCheckIn ? '<span style="margin-left: 6px; font-size: 11px; background: #10b981; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 600;">✓ Recommended</span>' : ''}
-      </div>
-    </div>
-  `;
-
-  // ✅ 改为异步：点选后立即切链（若已连接）
-  row.onclick = async () => {
-    try {
-      // 1) 先写入首选网络 & 立刻刷新左上角徽章
-      setPreferredNetwork(net.key);
-      renderNetworkBadge({ name: net.name, icon: net.icon });
-
-      // 2) 如果当前已连接：EVM 直接切链；Solana 给提示
-      const isConnected = !!(window.walletManager?.isConnected);
-      if (isConnected) {
-        if (net.kind === 'evm') {
-          const provider =
-            window.walletManager?.getMetaMaskProvider?.() ||
-            window.walletManager?.ethereum ||
-            window.ethereum;
-
-          if (provider?.request) {
-            // 复用你已有的切链助手：内部会判断当前链 & 处理 4902 add+switch
-            await enforcePreferredEvmChain(provider);
-          } else {
-            throw new Error('No EVM provider available');
-          }
-        } else if (net.kind === 'solana') {
-          // 目前已连的是 EVM 钱包时，提示使用 Solana 钱包
-          window.showNotification?.(
-            'Please connect with a Solana wallet (e.g., Phantom) to use Solana.',
-            'info'
-          );
-        }
-      }
-    } catch (e) {
-      console.error('[NetworkPicker] switch failed:', e);
-      window.showNotification?.(e?.message || 'Failed to switch network', 'error');
-    } finally {
-      // 不论成功/失败都关闭弹窗
-      close();
-    }
-  };
-
-  return row;
-};
-
-  order.forEach(k => { const n = I3_NETWORKS[k]; if (n) list.appendChild(makeRow(n)); });
-
-  // 5) 页脚
-  const footer = document.createElement('div');
-  footer.className = 'network-modal-footer';
-  footer.innerHTML = `
-  <div style="margin-bottom: 12px; padding: 10px; background: #fef3c7; border-radius: 8px; border: 1px solid #fcd34d;">
-    <p style="font-size: 13px; color: #92400e; margin: 0; text-align: center;">
-      ℹ️ Daily check-in is currently only supported on <strong>BNB Chain</strong>,<strong>opBNB</strong> and <strong>Solana Devnet</strong>. Other chains are coming soon!
-    </p>
-  </div>
-  <div style="text-align: center; color: #6b7280; font-size: 13px;">
-    By Intelligence Cubed
-  </div>
-  `;
-
-  // 6) 组装
-  panel.appendChild(header);
-  panel.appendChild(list);
-  panel.appendChild(footer);
-  modal.appendChild(panel);
-  document.body.appendChild(modal);
-
-  // 展示
-  requestAnimationFrame(() => modal.classList.add('show'));
 }
 
 
 // ===== Preferred Network (pre-connect) =====
 const I3_NETWORKS = {
-  ethereum: { kind:'evm', key:'ethereum', name:'Ethereum', icon:'svg/chains/ethereum.svg', chainId:'0x1' },
-  bnb:      { kind:'evm', key:'bnb',      name:'BNB Chain', icon:'svg/chains/bnb.svg',      chainId:'0x38' },
-  base:     { kind:'evm', key:'base',     name:'Base',      icon:'svg/chains/base.svg',     chainId:'0x2105' },
-  arbitrum: { kind:'evm', key:'arbitrum', name:'Arbitrum One', icon:'svg/chains/arbitrum.svg', chainId:'0xa4b1' },
-  zksync:   { kind:'evm', key:'zksync',   name:'ZKsync Era',   icon:'svg/chains/zksync.svg',   chainId:'0x144' },
-  'polygon-zkevm': { kind:'evm', key:'polygon-zkevm', name:'Polygon zkEVM', icon:'svg/chains/polygon-zkevm.svg', chainId:'0x44d' },
-  optimism: { kind:'evm', key:'optimism', name:'Optimism', icon:'svg/chains/optimism.svg', chainId:'0xa' },
-  opbnb: { kind:'evm', key:'opbnb', name:'opBNB', icon:'svg/chains/opbnb.svg', chainId:'0xcc' },
-  solana:   { kind:'solana', key:'solana', name:'Solana (Devnet)', icon:'svg/chains/solana.svg', network:'devnet' },
+  solana: { kind: 'solana', key: 'solana', name: 'Solana (Devnet)', icon: 'svg/chains/solana.svg', network: 'devnet' }
 };
 
 function getPreferredNetwork() {
@@ -1144,11 +1006,11 @@ function getPreferredNetwork() {
     const data = raw ? JSON.parse(raw) : null;
     if (data && I3_NETWORKS[data.key]) return I3_NETWORKS[data.key];
   } catch {}
-  return I3_NETWORKS.bnb; // 默认 BNB
+  return I3_NETWORKS.solana;
 }
 
 function setPreferredNetwork(key) {
-  const n = I3_NETWORKS[key] || I3_NETWORKS.ethereum;
+  const n = I3_NETWORKS[key] || I3_NETWORKS.solana;
   localStorage.setItem('i3_preferred_network', JSON.stringify({ key: n.key }));
   // 刷新徽章
   renderNetworkBadge({ name: n.name, icon: n.icon });
@@ -1158,9 +1020,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const n = getPreferredNetwork();
   // 未连接也显示徽章
   renderNetworkBadge({ name: n.name, icon: n.icon });
-  // 点击徽章 -> 打开网络选择面板
-  const badge = document.getElementById('networkBadge');
-  if (badge) badge.addEventListener('click', openNetworkPickerModal);
 });
 
 // ===== 链上签到 Modal 控制函数 =====
@@ -1235,7 +1094,7 @@ function closeOnChainCheckInModal() {
 
 async function executeOnChainCheckIn() {
     const chainSelector = document.getElementById('chainSelector');
-    const selectedChain = chainSelector ? chainSelector.value : 'BSC';
+    const selectedChain = chainSelector ? chainSelector.value : 'SOLANA';
     const loadingDiv = document.getElementById('checkInLoading');
     const btn = document.getElementById('executeCheckInBtn');
     

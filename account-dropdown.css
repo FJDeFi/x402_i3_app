@@ -64,21 +64,24 @@
 
 /* Account button styling */
 .account-btn {
-  background: linear-gradient(135deg,#8b5cf6,#7c3aed);
-  color:#fff;
-  border:0;
-  border-radius:12px;
-  padding:12px 24px;
-  font-weight:600;
-  font-size:15px;
-  cursor:pointer;
-  transition:all .25s ease;
-  box-shadow:0 4px 12px rgba(139,92,246,.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #8b7cf6, #7c3aed);
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .2s ease;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, .2);
 }
 .account-btn:hover {
-  background: linear-gradient(135deg,#7c3aed,#6d28d9);
-  transform: translateY(-1px) scale(1.02);
-  box-shadow:0 6px 16px rgba(124,58,237,.30);
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, .25);
 }
 
 /* ==================== Social Tasks Styles ==================== */

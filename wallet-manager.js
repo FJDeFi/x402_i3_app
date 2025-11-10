@@ -74,7 +74,7 @@ class WalletManager {
 						url: 'https://intelligencecubed.netlify.app',
 						iconUrl: [
     						'https://intelligencecubed.netlify.app/png/i3-token-logo.png', // ← PNG 放第一个
-    						'https://intelligencecubed.netlify.app/svg/i3-token-logo.svg'      // ← 可保留 SVG 作备选
+    						'https://intelligencecubed.netlify.app/svg/i3-token-logo.svg'  // ← 可保留 SVG 作备选
   						]
 					},
 					useDeeplink: true,
@@ -147,7 +147,10 @@ class WalletManager {
 	      throw new Error(`Unsupported Solana wallet: ${kind}`);
 	    }
 	    // ① 检测 Phantom 是否存在
-	    const provider = window.solana;
+	    const provider =
+	      (window.solana && window.solana.isPhantom && window.solana) ||
+	      (window.phantom && window.phantom.solana && window.phantom.solana.isPhantom && window.phantom.solana) ||
+	      null;
 	    if (!provider || !provider.isPhantom) {
 	      // 更友好的提示 + 合理跳转
 	      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -219,9 +222,18 @@ class WalletManager {
 		renderNetworkBadge(mapChainIdToDisplay(null, 'solana-phantom', 'devnet'));
 	    try { window.onWalletConnected?.(this.walletAddress, 'solana', 'devnet'); } catch {}
 	    return { success: true, address: this.walletAddress, credits: this.credits };
-	  } catch (error) {
-	    console.error('Solana connect error:', error);
-	    return { success: false, error: error.message || String(error) };
+  } catch (error) {
+    console.error('Solana connect error:', error);
+    const rawMessage = error?.message || String(error);
+    let friendlyMessage = rawMessage;
+    if (/Phantom not installed/i.test(rawMessage)) {
+      friendlyMessage = 'Phantom not detected. Please install or enable the Phantom extension and try again.';
+    } else if (/Unexpected error/i.test(rawMessage)) {
+      friendlyMessage = 'Phantom reported an unexpected error. Please make sure the Phantom extension is installed, unlocked, and switched to Solana Devnet, then try connecting again.';
+    } else if (/Failed to initialize Solana connection/i.test(rawMessage)) {
+      friendlyMessage = 'Unable to reach Solana Devnet RPC. Please check your network connection and retry.';
+    }
+    return { success: false, error: friendlyMessage };
 	  } finally {
 	    this.isConnecting = false;
 	  }
@@ -725,7 +737,7 @@ disconnectWallet() {
 	}
 
 	// Daily check-in with 24h gating support via local last_checkin_at
-	dailyCheckin(options = {}) {
+	async dailyCheckin(options = {}) {
 		const skipLocalGate = !!options.skipLocalGate;
 		if (!this.isConnected) {
 			return { success: false, error: 'Please connect your wallet first' };
@@ -750,7 +762,23 @@ disconnectWallet() {
 			}
 		}
 
-		const DAILY_REWARD = 30;
+		const reward = (window.APP_CONFIG?.pricing?.dailyCheckInRewardUsdc) || (window.PricingUtils?.constants?.dailyCheckInRewardUsdc) || 0.01;
+		const DAILY_REWARD = Number(reward);
+
+		let claimResult = null;
+		try {
+			if (window.MCPClient && typeof window.MCPClient.claimCheckin === 'function') {
+				const response = await window.MCPClient.claimCheckin({ wallet_address: this.walletAddress });
+				if (response.status !== 'ok') {
+					return { success: false, error: response.error?.message || 'Check-in failed via MCP.' };
+				}
+				claimResult = response.result;
+			}
+		} catch (err) {
+			console.warn('[dailyCheckin] MCP claim failed:', err);
+			return { success: false, error: err?.message || 'Check-in failed via MCP.' };
+		}
+
 		this.credits += DAILY_REWARD;
 		this.totalEarned = (this.totalEarned || 0) + DAILY_REWARD;
 
@@ -788,17 +816,19 @@ disconnectWallet() {
 			detail: {
 				reward: DAILY_REWARD,
 				newBalance: this.credits,
-				totalCheckins: totalCheckins
+				totalCheckins: totalCheckins,
+				mcp: claimResult
 			}
 		}));
 
-		console.log(`Daily checkin successful! Earned ${DAILY_REWARD} I3 tokens.`);
+		console.log(`Daily checkin successful! Earned ${DAILY_REWARD} USDC.`, claimResult);
 
 		return {
 			success: true,
 			reward: DAILY_REWARD,
 			newBalance: this.credits,
-			totalCheckins: totalCheckins
+			totalCheckins: totalCheckins,
+			mcp: claimResult
 		};
 	}
 

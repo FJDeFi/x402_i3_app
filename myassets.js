@@ -66,17 +66,20 @@ function calculatePoolOwnership(modelName, sharesOwned) {
 function calculateTokenStats() {
     const myAssets = getMyAssets();
     let totalTokensK = 0;
-    let totalI3Spent = 0;
+    let totalUsdcSpent = 0;
     
     myAssets.tokens.forEach(token => {
         totalTokensK += token.quantity;
         const modelData = getModelData(token.modelName);
         if (modelData) {
-            totalI3Spent += modelData.tokenPrice * token.quantity;
+            const pricing = (window.PricingUtils && typeof window.PricingUtils.normalizeModelPricing === 'function')
+                ? window.PricingUtils.normalizeModelPricing(modelData)
+                : { pricePerCallUsdc: modelData?.tokenPrice || 0 };
+            totalUsdcSpent += Number(pricing.pricePerCallUsdc || modelData?.tokenPrice || 0) * token.quantity;
         }
     });
     
-    return { totalTokensK, totalI3Spent };
+    return { totalTokensK, totalUsdcSpent };
 }
 
 // Calculate total shares and profit/loss
@@ -105,7 +108,7 @@ function calculateShareStats() {
 
 // ========== UPDATE DISPLAY FUNCTIONS ==========
 
-// 更新 I3 Token 余额显示
+// 更新 USDC 余额显示
 function updateI3TokenBalance() {
     const i3BalanceElement = document.getElementById('i3TokenBalance');
     
@@ -128,7 +131,7 @@ function updateOverview() {
     const shareStats = calculateShareStats();
     
     // Update Total Token Value card with detailed info
-    const totalTokenValueK = tokenStats.totalI3Spent.toFixed(2); // Keep original value, just add K suffix
+    const totalTokenValueK = tokenStats.totalUsdcSpent.toFixed(6);
     document.getElementById('totalTokenValue').innerHTML = `
         ${tokenStats.totalTokensK}K tokens
         <small>Value: ${totalTokenValueK}K <img src="svg/i3-token-logo.svg" class="token-logo" alt="i3"></small>
@@ -149,7 +152,7 @@ function updateOverview() {
     // Remove token change display (tokens don't fluctuate like shares)
     document.getElementById('totalTokenChange').style.display = 'none';
     
-    // Update I3 Token balance
+    // Update USDC balance
     updateI3TokenBalance();
 }
 

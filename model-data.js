@@ -3666,6 +3666,37 @@ const MODEL_DATA = {
         }
     };
     
+    const PRICE_MIN_USDC = 0.00001;
+    const PRICE_MAX_USDC = 0.0001;
+    const SHARE_MIN_USDC = 1;
+    const SHARE_MAX_USDC = 20;
+    const GAS_DEFAULT_USDC = 0.00025;
+    
+    function hashToUnitInterval(input) {
+        let hash = 0;
+        for (let i = 0; i < input.length; i++) {
+            hash = (hash * 1664525 + input.charCodeAt(i) + 1013904223) >>> 0;
+        }
+        return hash / 0xffffffff;
+    }
+    
+    Object.entries(MODEL_DATA).forEach(([modelName, modelData], index) => {
+        const priceSeed = hashToUnitInterval(modelName || String(index));
+        const shareSeed = hashToUnitInterval(`${modelName || index}-share`);
+    
+        const priceValue = PRICE_MIN_USDC + priceSeed * (PRICE_MAX_USDC - PRICE_MIN_USDC);
+        const shareValue = SHARE_MIN_USDC + shareSeed * (SHARE_MAX_USDC - SHARE_MIN_USDC);
+    
+        modelData.pricePerApiCallUsdc = Number(priceValue.toFixed(5));
+        modelData.gasEstimatePerCallUsdc = Number.isFinite(modelData.gasEstimatePerCallUsdc)
+            ? modelData.gasEstimatePerCallUsdc
+            : GAS_DEFAULT_USDC;
+        modelData.sharePriceUsdc = Number(shareValue.toFixed(2));
+        modelData.sharePrice = modelData.sharePriceUsdc;
+        modelData.pricingCurrency = 'USDC';
+        modelData.tokenPrice = modelData.pricePerApiCallUsdc;
+    });
+    
     // 🔧 辅助函数
     function getModelData(modelName) {
         return MODEL_DATA[modelName] || null;
@@ -3739,4 +3770,3 @@ const MODEL_DATA = {
         window.getTopModelsByScore = getTopModelsByScore;
         window.searchModels = searchModels;
     }
-

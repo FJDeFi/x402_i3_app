@@ -117,6 +117,323 @@ body:has(.modelverse-content.full-width) .main-layout,
     font-weight: 500;
 }
 
+/* Modal overlay for model details */
+.mvpro-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(4px);
+    z-index: 10000;
+}
+
+.mvpro-overlay.active {
+    display: flex;
+}
+
+.mvpro-card {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+    max-width: 920px;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: mvpro-pop-in 0.25s ease;
+}
+
+@keyframes mvpro-pop-in {
+    from {
+        transform: translateY(12px) scale(0.98);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.mvpro-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 28px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 45%, #0ea5e9 100%);
+    color: #ffffff;
+}
+
+.mvpro-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.mvpro-close {
+    border: none;
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mvpro-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.mvpro-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(260px, 1fr);
+    gap: 32px;
+    padding: 28px;
+    background: #f8fafc;
+}
+
+.mvpro-info {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.mvpro-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mvpro-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.mvpro-text {
+    margin: 0;
+    font-size: 14px;
+    color: #1e293b;
+    line-height: 1.6;
+}
+
+.mvpro-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.mvpro-pill {
+    background: #eef2ff;
+    color: #4338ca;
+    border-radius: 999px;
+    padding: 8px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.mvpro-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.mvpro-kpi {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.mvpro-kpi .lbl {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.mvpro-kpi .val {
+    font-size: 16px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.mvpro-kpi .val.positive {
+    color: #059669;
+}
+
+.mvpro-kpi .val.negative {
+    color: #dc2626;
+}
+
+.mvpro-chart {
+    background: #ffffff;
+    border-radius: 18px;
+    border: 1px solid #e2e8f0;
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.mvpro-chart-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.mvpro-chart-percentage {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2563eb;
+}
+
+.mvpro-legend {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+    color: #475569;
+}
+
+.mvpro-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.mvpro-dot.p {
+    background: #6366f1;
+}
+
+.mvpro-dot.r {
+    background: #e2e8f0;
+}
+
+.mvpro-actions {
+    display: flex;
+    gap: 12px;
+    padding: 20px 28px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    justify-content: flex-end;
+}
+
+.mvpro-btn {
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mvpro-btn.primary {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: #ffffff;
+    border-color: #6255f3;
+}
+
+.mvpro-btn.success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    border-color: #0f9a6b;
+}
+
+.mvpro-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.18);
+}
+
+.mvpro-btn:not(.primary):not(.success) {
+    background: #ffffff;
+    color: #475569;
+    border-color: #cbd5e1;
+}
+
+.mvpro-btn:not(.primary):not(.success):hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+.mvpro-btn:active {
+    transform: translateY(0);
+}
+
+.mvpro-body .mvpro-info a {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.mvpro-body .mvpro-info a:hover {
+    text-decoration: underline;
+}
+
+.mvpro-body .mvpro-info strong {
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.mvpro-body .mvpro-info span + strong {
+    margin-left: 4px;
+}
+
+.mvpro-body .mvpro-info .mvpro-row strong {
+    font-weight: 600;
+}
+
+.mvpro-body .mvpro-info .mvpro-row span + strong {
+    display: block;
+}
+
+@media (max-width: 900px) {
+    .mvpro-body {
+        grid-template-columns: 1fr;
+    }
+    .mvpro-chart {
+        width: 100%;
+    }
+    .mvpro-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+
 .search-results-info.highlight {
     color: #8b7cf6;
     font-weight: 600;

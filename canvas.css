@@ -120,6 +120,16 @@
     gap: 12px;
 }
 
+.models-empty-state {
+    padding: 16px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    text-align: center;
+    color: #64748b;
+    font-size: 13px;
+    background: #f8fafc;
+}
+
 .model-item {
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border: 1px solid #e2e8f0;
@@ -314,7 +324,7 @@
 .canvas-workspace {
     flex: 1;
     position: relative;
-    overflow: hidden;
+    overflow: auto;
     background: 
         radial-gradient(circle at 1px 1px, #cbd5e1 1px, transparent 1px);
     background-size: 20px 20px;
@@ -412,9 +422,10 @@
 /* Workflow Nodes */
 .workflow-nodes {
     position: relative;
-    width: 100%;
-    height: 100%;
+    min-width: 100%;
+    min-height: 100%;
     z-index: 10;
+    will-change: width, height;
 }
 
 .workflow-node {
@@ -443,7 +454,8 @@
 
 .node-header {
     display: flex;
-    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
     gap: 12px;
     margin-bottom: 16px;
 }
@@ -516,31 +528,37 @@
     opacity: 0.8;
 }
 
-.node-controls {
+.node-actions {
     display: flex;
-    gap: 4px;
+    align-items: center;
+    gap: 6px;
 }
 
 .node-control {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    color: #64748b;
-    border-radius: 4px;
-    padding: 4px;
+    width: 26px;
+    height: 26px;
+    border: none;
+    background: rgba(241, 245, 249, 0.9);
+    color: #475569;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.18s ease;
+}
+
+.node-control svg {
+    pointer-events: none;
 }
 
 .node-control:hover {
     background: #e2e8f0;
-    border-color: #cbd5e1;
-    color: #475569;
+    color: #0f172a;
 }
 
-.node-control.delete:hover {
-    background: #fef2f2;
-    border-color: #fecaca;
-    color: #dc2626;
+.node-control:active {
+    transform: scale(0.96);
 }
 
 .node-category {

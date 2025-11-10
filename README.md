@@ -88,7 +88,7 @@ yarn format
 intelligence-cubed-homepage/
 ├── public/
 │   ├── index.html                    # Main HTML file
-│   └── svg/I3 logo.svg              # Logo file
+│   └── svg/I3 logo.svg            # Logo file
 ├── src/
 │   ├── styles.css                    # CSS styling
 │   └── script.js                     # JavaScript functionality

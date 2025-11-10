@@ -1263,11 +1263,17 @@ function connectMetaMaskWallet() {
     if (typeof closeWalletModal === 'function') {
         closeWalletModal();
     }
-    bscGuide.connectWalletWithGuide();
+    const msg = 'MetaMask is no longer supported. Please connect with Phantom (Solana Devnet).';
+    if (typeof showNotification === 'function') {
+        showNotification(msg, 'error');
+    } else if (typeof alert === 'function') {
+        alert(msg);
+    } else {
+        console.warn(msg);
+    }
 }
 
 // Export for use in other scripts
 if (typeof window !== 'undefined') {
     window.bscGuide = bscGuide;
     window.connectMetaMaskWallet = connectMetaMaskWallet;
-}

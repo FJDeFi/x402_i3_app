@@ -7,6 +7,58 @@
 //    robust button rebinding so every row opens its own card.
 // ================================
 
+const MODELVERSE_PRICING = (window.PricingUtils && window.PricingUtils.constants) || {
+  pricePerApiCallUsdc: 0.0008,
+  gasEstimatePerCallUsdc: 0.00025,
+  sharePurchaseMinUsdc: 1,
+  sharePurchaseMaxUsdc: 20
+};
+
+const USDC_ICON_PATH = 'svg/usdc.svg';
+
+function formatNumeric(value, decimals) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return '—';
+  return num.toLocaleString(undefined, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
+}
+
+function renderUsdcBadge(value, decimals = 5) {
+  if (!Number.isFinite(Number(value))) {
+    return '<span class="usdc-amount">—</span>';
+  }
+  const formatted = formatNumeric(value, decimals);
+  return `<span class="usdc-amount">${formatted}</span><img src="${USDC_ICON_PATH}" alt="USDC" class="usdc-icon" loading="lazy">`;
+}
+
+function formatUsdc(value, options = {}) {
+  if (window.PricingUtils && typeof window.PricingUtils.formatUsdcAmount === 'function') {
+    return window.PricingUtils.formatUsdcAmount(value, options);
+  }
+  const num = Number(value || 0);
+  const min = options.minimumFractionDigits ?? 4;
+  const max = options.maximumFractionDigits ?? 6;
+  return `${num.toFixed(Math.min(Math.max(min, 0), max))} USDC`;
+}
+
+function getModelCallPricing(modelData) {
+  if (window.PricingUtils && typeof window.PricingUtils.normalizeModelPricing === 'function') {
+    const normalized = window.PricingUtils.normalizeModelPricing(modelData);
+    return {
+      pricePerCall: normalized.pricePerCallUsdc,
+      gas: normalized.gasPerCallUsdc,
+      share: normalized.sharePriceUsdc
+    };
+  }
+  return {
+    pricePerCall: MODELVERSE_PRICING.pricePerApiCallUsdc,
+    gas: MODELVERSE_PRICING.gasEstimatePerCallUsdc,
+    share: MODELVERSE_PRICING.sharePurchaseMinUsdc
+  };
+}
+
 // ---------- Search ----------
 function performSearch() {
   const input = document.getElementById('searchInput');
@@ -47,6 +99,7 @@ function performSearch() {
   });
 
   updateSearchResultCount(visibleCount);
+  bindModelTableInteractions();
 }
 
 function clearSearch() {
@@ -58,8 +111,10 @@ function clearSearch() {
     const nameCell = row.querySelector('.model-name');
     if (!nameCell) return;
     nameCell.innerHTML = nameCell.textContent;
+    delete nameCell.dataset.bound;
   });
   updateSearchResultCount(rows.length);
+  bindModelTableInteractions();
 }
 
 function highlightSearchTerms(cellEl, term) {
@@ -229,7 +284,10 @@ function showModelCard(modelName, signOverride) {
   if (categoryEl) categoryEl.textContent = data.category || '—';
   if (industryEl) industryEl.textContent = data.industry || '—';
   if (priceEl) {
-    priceEl.innerHTML = `${data.tokenPrice} <img src="svg/i3-token-logo.svg" alt="I³" style="width: 16px; height: 16px; vertical-align: middle; margin-left: 4px;">`;
+    const pricing = getModelCallPricing(data);
+    const perCall = formatUsdc(pricing.pricePerCall, { minimumFractionDigits: 4, maximumFractionDigits: 6 });
+    const gas = formatUsdc(pricing.gas, { minimumFractionDigits: 5, maximumFractionDigits: 6 });
+    priceEl.innerHTML = `${perCall} per call<br><span class="gas-hint">Estimated gas ≈ ${gas}</span>`;
   }
 
   // fix market change sign
@@ -238,7 +296,10 @@ function showModelCard(modelName, signOverride) {
     changeVal = Math.abs(changeVal) * (signOverride > 0 ? 1 : -1);
   }
   if (changeEl) {
+    changeEl.classList.remove('positive', 'negative');
     const sign = changeVal > 0 ? '+' : (changeVal < 0 ? '−' : '');
+    if (changeVal > 0) changeEl.classList.add('positive');
+    if (changeVal < 0) changeEl.classList.add('negative');
     changeEl.textContent = `${sign}${Math.abs(changeVal).toFixed(2)}%`;
   }
 
@@ -322,36 +383,9 @@ window.showModelCardForRow = showModelCardForRow;
 
 // ---------- Page init ----------
 document.addEventListener('DOMContentLoaded', function() {
-  // Rebind Model Card buttons to use the row's model name
-  document.querySelectorAll('.model-card-btn').forEach(btn => {
-    try { btn.removeAttribute('onclick'); } catch (e) {}
-    btn.addEventListener('click', function(ev) {
-      ev.preventDefault();
-      const row = this.closest('tr');
-      if (row) {
-        showModelCardForRow(row); // 优先使用行级显示（获取符号信息）
-      } else {
-        const modelName = this.textContent.trim();
-        if (modelName) showModelCard(modelName); // 备用：直接显示
-      }
-    });
-  });
+  renderModelTable();
+  bindModelTableInteractions();
 
-  // Allow clicking model name to open card
-  document.querySelectorAll('.model-name').forEach(cell => {
-    cell.style.cursor = 'pointer';
-    cell.style.color = '#3b82f6';
-    cell.addEventListener('click', function() {
-      const row = this.closest('tr');
-      if (row) {
-        showModelCardForRow(row); // 优先使用行级显示（获取符号信息）
-      } else {
-        showModelCard(this.textContent.trim()); // 备用：直接显示
-      }
-    });
-  });
-
-  // Search input UX
   const searchInput = document.getElementById('searchInput');
   if (searchInput) {
     searchInput.addEventListener('keypress', function(e) {
@@ -539,6 +573,131 @@ function getModelData(name) {
     }
   };
 })();
+
+function getAllModelEntries(limit = 300) {
+  if (typeof getTopModelsByScore === 'function') {
+    return getTopModelsByScore(limit);
+  }
+  if (typeof MODEL_DATA === 'object' && MODEL_DATA) {
+    return Object.entries(MODEL_DATA)
+      .map(([name, data]) => ({ name, ...data }))
+      .sort((a, b) => (Number(b.totalScore) || 0) - (Number(a.totalScore) || 0))
+      .slice(0, limit);
+  }
+  return [];
+}
+
+function renderModelTable() {
+  const tbody = document.getElementById('modelsTableBody');
+  if (!tbody) return;
+
+  const models = getAllModelEntries(400);
+  const fragment = document.createDocumentFragment();
+
+  models.forEach(model => {
+    const pricing = getModelCallPricing(model);
+    const perCallBadge = renderUsdcBadge(pricing.pricePerCall, 5);
+    const shareBadge = renderUsdcBadge(pricing.share, 2);
+    const gasEstimate = formatUsdc(pricing.gas, { minimumFractionDigits: 5, maximumFractionDigits: 6 });
+    const changeValue = Number(model.change) || 0;
+    const changeClass = changeValue >= 0 ? 'positive' : 'negative';
+    const changeText = `${changeValue >= 0 ? '+' : ''}${changeValue.toFixed(2)}%`;
+    const usageText = Number.isFinite(Number(model.usage)) ? Number(model.usage).toLocaleString() : '—';
+    const compatibilityText = Number.isFinite(Number(model.compatibility)) ? Number(model.compatibility).toFixed(1) : '—';
+    const totalScoreText = Number.isFinite(Number(model.totalScore)) ? `${Number(model.totalScore).toFixed(0)}%` : '—';
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td class="model-name">${model.name}</td>
+      <td class="category">${model.category || '—'}</td>
+      <td class="industry">${model.industry || '—'}</td>
+      <td class="api-price"><div class="price-badge">${perCallBadge}</div></td>
+      <td class="api-price"><div class="price-badge">${shareBadge}</div></td>
+      <td class="daily-delta ${changeClass}">${changeText}</td>
+      <td class="usage-score">${usageText}</td>
+      <td class="compatibility-score">${compatibilityText}</td>
+      <td class="total-score">${totalScoreText}</td>
+      <td class="action-cell">
+        <div class="invest">
+          <button class="model-card-btn">Details</button>
+          <button class="try-btn">Try</button>
+          <button class="add-cart-btn">Add to Cart</button>
+        </div>
+      </td>
+    `;
+    fragment.appendChild(row);
+  });
+
+  tbody.innerHTML = '';
+  tbody.appendChild(fragment);
+  updateSearchResultCount(models.length);
+}
+
+function bindModelTableInteractions() {
+  document.querySelectorAll('.model-card-btn').forEach(btn => {
+    if (btn.dataset.bound === '1') return;
+    btn.dataset.bound = '1';
+    try { btn.removeAttribute('onclick'); } catch (e) {}
+    btn.addEventListener('click', function(ev) {
+      ev.preventDefault();
+      const row = this.closest('tr');
+      if (row) {
+        showModelCardForRow(row);
+      } else {
+        const modelName = this.textContent.trim();
+        if (modelName) showModelCard(modelName);
+      }
+    });
+  });
+
+  document.querySelectorAll('.model-name').forEach(cell => {
+    if (cell.dataset.bound === '1') return;
+    cell.dataset.bound = '1';
+    cell.style.cursor = 'pointer';
+    cell.style.color = '#3b82f6';
+    cell.addEventListener('click', function() {
+      const row = this.closest('tr');
+      if (row) {
+        showModelCardForRow(row);
+      } else {
+        showModelCard(this.textContent.trim());
+      }
+    });
+  });
+
+  document.querySelectorAll('.try-btn').forEach(btn => {
+    if (btn.dataset.bound === '1') return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', function(ev) {
+      ev.preventDefault();
+      const row = this.closest('tr');
+      const modelName = row?.querySelector('.model-name')?.textContent?.trim();
+      if (modelName) {
+        if (typeof window.tryModel === 'function') {
+          window.tryModel(modelName);
+        } else {
+          tryModelFromModelverse(this);
+        }
+      }
+    });
+  });
+
+  document.querySelectorAll('.add-cart-btn').forEach(btn => {
+    if (btn.dataset.bound === '1') return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', function(ev) {
+      ev.preventDefault();
+      const row = this.closest('tr');
+      const modelName = row?.querySelector('.model-name')?.textContent?.trim();
+      if (!modelName) return;
+      if (typeof window.addToCart === 'function') {
+        window.addToCart(modelName);
+      } else {
+        addToCartFromModelverse(this);
+      }
+    });
+  });
+}
 
 // 创建全屏滚动弹窗
 function showFullContentModal(content, title = 'Content') {

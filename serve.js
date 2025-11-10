@@ -5,19 +5,28 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fetch = require('node-fetch');
+const mcpRouter = require('./server/mcp/router');
 
 console.log('✅ Dependencies loaded successfully');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '127.0.0.1';
 
-console.log(`🔧 Server configuration: PORT=${PORT}, NODE_ENV=${process.env.NODE_ENV || 'development'}`);
+console.log(`🔧 Server configuration: HOST=${HOST}, PORT=${PORT}, NODE_ENV=${process.env.NODE_ENV || 'development'}`);
 
 // Enable CORS
-app.use(cors());
+app.use(
+  cors({
+    exposedHeaders: ['X-Workflow-Session', 'X-Request-Id']
+  })
+);
 
 // Parse JSON request bodies
 app.use(express.json());
+
+// MCP / x402 routes
+app.use('/mcp', mcpRouter);
 
 // Serve static files
 app.use(express.static(__dirname));
@@ -196,13 +205,13 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, HOST, () => {
   console.log(`🚀 Intelligence Cubed Homepage Server is running on port ${PORT}`);
-  console.log(`📱 Local: http://localhost:${PORT}`);
-  console.log(`📊 API: http://localhost:${PORT}/api/models`);
+  console.log(`📱 Local: http://${HOST}:${PORT}`);
+  console.log(`📊 API: http://${HOST}:${PORT}/api/models`);
   console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔧 Node version: ${process.version}`);
 }).on('error', (err) => {
   console.error('❌ Server failed to start:', err);
   process.exit(1);
-}); 
+});

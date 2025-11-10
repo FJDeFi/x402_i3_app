@@ -2,6 +2,64 @@
 
 console.log('🚀 加载 Benchmark 页面...');
 
+const BENCHMARK_PRICING = (window.PricingUtils && window.PricingUtils.constants) || {
+    currency: 'USDC',
+    pricePerApiCallUsdc: 0.0008,
+    gasEstimatePerCallUsdc: 0.00025,
+    sharePurchaseMinUsdc: 1,
+    sharePurchaseMaxUsdc: 20
+};
+
+const USDC_ICON_PATH = 'svg/usdc.svg';
+
+function formatNumeric(value, decimals) {
+    const num = Number(value);
+    if (!Number.isFinite(num)) return '—';
+    return num.toLocaleString(undefined, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+    });
+}
+
+function renderUsdcBadge(value, decimals = 5) {
+    if (!Number.isFinite(Number(value))) {
+        return '<span class="usdc-amount">—</span>';
+    }
+    const formatted = formatNumeric(value, decimals);
+    return `<span class="usdc-amount">${formatted}</span><img src="${USDC_ICON_PATH}" alt="USDC" class="usdc-icon" loading="lazy">`;
+}
+
+function formatUsdc(value, options = {}) {
+    if (window.PricingUtils && typeof window.PricingUtils.formatUsdcAmount === 'function') {
+        return window.PricingUtils.formatUsdcAmount(value, options);
+    }
+    const num = Number(value || 0);
+    const min = options.minimumFractionDigits ?? 4;
+    const max = options.maximumFractionDigits ?? 6;
+    return `${num.toFixed(Math.min(Math.max(min, 0), max))} ${BENCHMARK_PRICING.currency}`;
+}
+
+function getModelPricing(modelData) {
+    if (window.PricingUtils && typeof window.PricingUtils.normalizeModelPricing === 'function') {
+        const normalized = window.PricingUtils.normalizeModelPricing(modelData);
+        return {
+            pricePerCall: normalized.pricePerCallUsdc,
+            gas: normalized.gasPerCallUsdc,
+            share: normalized.sharePriceUsdc
+        };
+    }
+    const pricePerCall = typeof modelData?.pricePerApiCallUsdc === 'number'
+        ? modelData.pricePerApiCallUsdc
+        : BENCHMARK_PRICING.pricePerApiCallUsdc;
+    const gas = typeof modelData?.gasEstimatePerCallUsdc === 'number'
+        ? modelData.gasEstimatePerCallUsdc
+        : BENCHMARK_PRICING.gasEstimatePerCallUsdc;
+    const share = typeof modelData?.sharePriceUsdc === 'number'
+        ? modelData.sharePriceUsdc
+        : (typeof modelData?.sharePrice === 'number' ? modelData.sharePrice : BENCHMARK_PRICING.sharePurchaseMinUsdc);
+    return { pricePerCall, gas, share };
+}
+
 // 当前激活的标签页
 let currentTab = 'model';
 
@@ -505,7 +563,10 @@ function showModelCard(modelName, signOverride) {
     if (categoryEl) categoryEl.textContent = data.category || '—';
     if (industryEl) industryEl.textContent = data.industry || '—';
     if (priceEl) {
-        priceEl.innerHTML = `${data.tokenPrice} <img src="svg/i3-token-logo.svg" alt="I³" style="width: 16px; height: 16px; vertical-align: middle; margin-left: 4px;">`;
+        const pricing = getModelPricing(data);
+        const perCall = formatUsdc(pricing.pricePerCall, { minimumFractionDigits: 4, maximumFractionDigits: 6 });
+        const gasHint = formatUsdc(pricing.gas, { minimumFractionDigits: 5, maximumFractionDigits: 6 });
+        priceEl.innerHTML = `${perCall} per call<br><span class="gas-hint">Estimated gas ≈ ${gasHint}</span>`;
     }
 
     // fix market change sign
@@ -571,7 +632,7 @@ function populateBenchmarkTable(models) {
     }
     
     console.log('✅ 找到表格tbody，开始填充数据...');
-    console.log('📊 HTML表头列数: 10列 (MODEL, CATEGORY, INDUSTRY, PRICE PER 1K TOKENS, PRICE PER SHARE, MARKET CHANGE, USAGE, COMPATIBILITY, TOTAL SCORE, ACTION)');
+    console.log('📊 HTML表头列数: 10列 (MODEL, CATEGORY, INDUSTRY, PRICE / API CALL (USDC), SHARE PRICE (USDC), MARKET CHANGE, USAGE, COMPATIBILITY, TOTAL SCORE, ACTION)');
     
     // 清空现有内容
     tableBody.innerHTML = '';
@@ -597,15 +658,20 @@ function populateBenchmarkTable(models) {
                 });
             }
             
+            const pricing = getModelPricing(model);
+            const perCallBadge = renderUsdcBadge(pricing.pricePerCall, 5);
+            const shareBadge = renderUsdcBadge(pricing.share, 2);
+            const gasDisplay = formatUsdc(pricing.gas, { minimumFractionDigits: 5, maximumFractionDigits: 6 });
+
             const row = document.createElement('tr');
             
-            // MODEL, CATEGORY, INDUSTRY, PRICE PER 1K TOKENS, PRICE PER SHARE, MARKET CHANGE, USAGE, COMPATIBILITY, TOTAL SCORE, ACTION十列
+            // MODEL, CATEGORY, INDUSTRY, PRICE PER API CALL, SHARE PRICE, MARKET CHANGE, USAGE, COMPATIBILITY, TOTAL SCORE, ACTION
             const cells = [
-                `<td class="model-name model-name-clickable" onclick="showModelCard('${model.name}')" style="cursor: pointer; color: #8b5cf6;">${model.name}</td>`,        // 1. MODEL// 1. MODEL
+                `<td class="model-name model-name-clickable" onclick="showModelCard('${model.name}')" style="cursor: pointer; color: #8b5cf6;">${model.name}</td>`,        // 1. MODEL
                 `<td class="category">${model.category}</td>`,      // 2. CATEGORY
                 `<td class="industry">${model.industry}</td>`,      // 3. INDUSTRY
-                `<td class="api-price">${model.tokenPrice}<img src="svg/i3-token-logo.svg" class="token-icon" alt="i3"></td>`,   // 4. PRICE PER 1K TOKENS
-                `<td class="api-price">${model.sharePrice}K<img src="svg/i3-token-logo.svg" class="token-icon" alt="i3"></td>`,  // 5. PRICE PER SHARE
+          `<td class="api-price"><div class="price-badge">${perCallBadge}</div></td>`,   // 4. PRICE PER API CALL
+                `<td class="api-price"><div class="price-badge">${shareBadge}</div></td>`,  // 5. PRICE PER SHARE
                 `<td class="daily-delta ${model.change >= 0 ? 'positive' : 'negative'}">${model.change >= 0 ? '+' : ''}${model.change.toFixed(2)}%</td>`, // 6. MARKET CHANGE
                 `<td class="usage-score">${model.usage.toLocaleString()}</td>`,  // 7. USAGE
                 `<td class="compatibility-score">${model.compatibility}</td>`,   // 8. COMPATIBILITY
@@ -982,4 +1048,3 @@ window.filterBenchmarkTable = filterBenchmarkTable;
 window.filterByScore = filterByScore;
 window.filterByUsage = filterByUsage;
 window.sortBenchmarkTable = sortBenchmarkTable;
-window.clearAllFilters = clearAllFilters;

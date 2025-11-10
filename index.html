@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intelligence Cubed - AI Terminal</title>
-    <link rel="icon" type="image/svg+xml" href="/svg/i3-token-logo.svg">
+    <link rel="icon" type="image/svg+xml" href="/svg/I3 logo.svg">
     <link rel="icon" type="image/png" sizes="192x192" href="/png/i3-token-logo.png">  <!-- 可选: 准备一张 192x192 PNG -->
     <link rel="apple-touch-icon" sizes="192x192" href="/png/i3-token-logo.png"> 
     <link rel="preload" as="image" href="/svg/chains/ethereum.svg">
@@ -19,8 +19,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <script src="https://c0f4f41c-2f55-4863-921b-sdk-docs.github.io/cdn/metamask-sdk.js"></script>
-    <!-- Safe polyfills for Solana web3.js (module-friendly, no globals pollution) -->
+<!-- Safe polyfills for Solana web3.js (module-friendly, no globals pollution) -->
     <script type="module">
     // 只有缺失时才注入，避免覆盖浏览器原生实现
     if (!('Buffer' in globalThis)) {
@@ -70,80 +69,11 @@
     <!-- 仅在旧浏览器需要；现代浏览器也可以保留，不会有副作用 -->
     <script async src="https://ga.jspm.io/npm:es-module-shims@1.10.0/dist/es-module-shims.js"></script>
 
-    <script type="module-shim">
-	  // ========= AppKit loader with CDN fallback (fixed 1.8.4) =========
-	  const PROJECT_ID = '87a5da024dea0385e2d43dcad60b4935';
-	  async function load(kind) {
-	    if (kind === 'unpkg') {
-	      const { createAppKit } = await import('https://unpkg.com/@reown/appkit@1.8.4/dist/index.js?module');
-	      const nets = await import('https://unpkg.com/@reown/appkit@1.8.4/networks/index.js?module');
-	      return { createAppKit, nets };
-	    }
-	    if (kind === 'jsdelivr') {
-	      const { createAppKit } = await import('https://cdn.jsdelivr.net/npm/@reown/appkit@1.8.4/+esm');
-	      const nets = await import('https://cdn.jsdelivr.net/npm/@reown/appkit@1.8.4/networks/+esm');
-	      return { createAppKit, nets };
-	    }
-	    // esm.sh 作为第三备选
-	    const { createAppKit } = await import('https://esm.sh/@reown/appkit@1.8.4?bundle');
-	    const nets = await import('https://esm.sh/@reown/appkit@1.8.4/networks?bundle');
-	    return { createAppKit, nets };
-	  }
-	  let mod;
-	  try { mod = await load('jsdelivr'); }
-	  catch { try { mod = await load('esmsh'); } catch { mod = await load('unpkg'); } }
-	  const { createAppKit, nets } = mod;
-	  // ① 读取"首选网络"（你模块里 setPreferredNetwork 写入的）
-	  const pref = (window.getPreferredNetwork && window.getPreferredNetwork()) || { key: 'ethereum', kind: 'evm' };
-	  // ② I3 → AppKit 网络映射（按你当前 1.8.4 可用的 nets 字段来对齐）
-	  const map = {
-	    ethereum:  nets.mainnet,
-	    sepolia:   nets.sepolia,     // 测试链可选
-	    polygon:   nets.polygon,
-	    bnb:       nets.bsc,
-	    arbitrum:  nets.arbitrum,
-	    optimism:  nets.optimism,
-	    avalanche: nets.avalanche,
-	    fantom:    nets.fantom,
-	    gnosis:    nets.gnosis,
-	    linea:     nets.linea,
-	    scroll:    nets.scroll,
-	    zksync:    nets.zksync
-	    // 如需 base / polygonZkEvm，请确认 1.8.4 是否暴露相应键后再补：
-	    // base: nets.base,
-	    // 'polygon-zkevm': nets.polygonZkEvm,
-	  };
-	  // ③ 允许在 AppKit 弹窗里展示的链（你现在 index 原本列的我都保留了）
-	  const allowKeys = [
-	    'ethereum','sepolia','polygon','bnb','arbitrum','optimism',
-	    'avalanche','fantom','gnosis','linea','scroll','zksync'
-	  ];
-	  // 如果用户在模块里选了 Solana（kind === 'solana'），AppKit 依然只管 EVM，
-	  // 这里就把默认链回退到 ethereum，避免无效首选
-	  const effectivePrefKey = (pref.kind === 'evm' && map[pref.key]) ? pref.key : 'ethereum';
-	  // ④ 计算默认链 & 列表（把默认链置顶，其他按 allowKeys 顺序去重追加）
-	  const defaultNet = map[effectivePrefKey] || nets.mainnet;
-	  const allowedList = allowKeys.map(k => map[k]).filter(Boolean);
-	  const networks = [defaultNet, ...allowedList.filter(n => n !== defaultNet)];
-	  // ⑤ 创建 AppKit —— 1.8.4 有的版本支持 defaultNetwork，没有也不报错
-	  const modal = createAppKit({
-	    projectId: PROJECT_ID,
-	    networks,
-	    // 某些版本支持；若控制台提示不识别可以忽略这行
-	    defaultNetwork: defaultNet,
-	    metadata: {
-	      name: 'Intelligence Cubed',
-	      description: 'AI Terminal for Web3',
-	      url: 'https://i3-testnet.web.app',
-	      icons: ['https://i3-testnet.web.app/png/i3-token-logo.png']
-	    }
-	  });
-	  // 暴露给业务代码
-	  window.appkit = modal;
-	  // 兼容你现有 initializeWalletConnect 的等待逻辑
-	  window.dispatchEvent(new Event('reownAppKitLoaded'));
-	  console.log('[OK] AppKit loaded', { defaultNet, networks, modal });
-	</script>
+    <script>
+      window.appkit = null;
+      window.dispatchEvent(new Event('reownAppKitLoaded'));
+      console.log('[AppKit] disabled: Phantom-only mode');
+    </script>
 
     <script type="module-shim">
 	  import {
@@ -492,7 +422,6 @@
             justify-content: center;
             flex-wrap: wrap;
         }
-
         .action-btn {
             display: flex;
             align-items: center;
@@ -641,7 +570,6 @@
                 margin-top: 60px;
             }
         }
-
         /* Subtle animations */
         @keyframes fadeInUp {
             from {
@@ -795,7 +723,6 @@
 		  flex-direction: column; 
 		  gap: 12px;                   /* 原 16px -> 12px */
 		}
-
 		/* 钱包文字信息 */
 		/* 标题文字：沉稳、左对齐，不漂浮 */
 		.wallet-name {
@@ -870,7 +797,6 @@
                 font-size: 1rem;
             }
         }
-
 /* Network modal (独立于 wallet modal) */
 		.network-modal {
 		  position: fixed;
@@ -1480,7 +1406,7 @@
                 </select>
                 <button id="attachBtn" title="Attach file" onclick="triggerChatFileInput()" style="padding:8px 10px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; color:#374151; font-size:14px; cursor:pointer;">📎</button>
                 <input id="chatFileInput" type="file" accept="image/*" style="display:none;" />
-                <div id="chatAttachmentPreview" style="display:none; align-items:center; gap:8px;"></div>
+                <div id="chatAttachmentPreview" style="display:none; align-items:center; gap:8px; flex-wrap:wrap;"></div>
                 <input id="chatInput" class="chat-input" placeholder="Ask anything.." />
                 <button class="send-btn-dark" onclick="handleChatSend()">></button>
             </div>
@@ -1711,7 +1637,6 @@
                 });
             } catch (_) { return null; }
         }
-
         // ===== Lightweight PDF/Text extraction (hidden for model input) =====
         function loadScript(src) {
             return new Promise((resolve, reject) => {
@@ -1833,7 +1758,6 @@
                 try { console.log('[WF][cache last] saved', { count: cached.length, from: (src === atts ? 'chatAttachments' : 'mainAttachments') }); } catch (_) {}
             } catch (_) {}
         }
-
         // ===== Workflow attachment caching (for pipeline start) =====
         async function cacheWorkflowInputAttachments(runId) {
             try {
@@ -1884,7 +1808,6 @@
             // 跳转到 canvas 页面
             window.location.href = 'canvas.html';
         }
-
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             // 读取已保存的开关状态(防止刷新后状态丢失)
@@ -2202,7 +2125,6 @@
             // Show composer again when workflow stops
             setComposerVisible(true);
         }
-
         function toggleAutoRouter() {
             const forcedModel = localStorage.getItem('forcedModel');
             
@@ -2484,7 +2406,6 @@
                 }
             }
         }
-
         function getCurrentWorkflow() {
             try {
                 return JSON.parse(localStorage.getItem("currentWorkflow") || 'null');
@@ -2493,7 +2414,7 @@
             }
         }
 
-        // ===== Usage accounting & I3 deduction helpers =====
+        // ===== Usage accounting & USDC deduction helpers =====
         function estimateTokenCount(text) {
             try {
                 const t = (text || '').toString();
@@ -2503,13 +2424,22 @@
         }
 
         function getModelTokenPrice(modelName) {
+            const pricing = getModelPricing(modelName);
+            return Number(pricing.pricePerCallUsdc || (window.APP_CONFIG?.pricing?.pricePerApiCallUsdc) || 0.0008);
+        }
+
+        function getModelPricing(modelName) {
             try {
-                if (typeof MODEL_DATA !== 'undefined' && MODEL_DATA[modelName] && typeof MODEL_DATA[modelName].tokenPrice === 'number') {
-                    return Number(MODEL_DATA[modelName].tokenPrice);
+                const data = (typeof MODEL_DATA !== 'undefined' && MODEL_DATA[modelName]) ? MODEL_DATA[modelName] : {};
+                if (window.PricingUtils && typeof window.PricingUtils.normalizeModelPricing === 'function') {
+                    return window.PricingUtils.normalizeModelPricing(data);
                 }
             } catch (_) {}
-            // Fallback default price per 1K tokens in i3
-            return 1.0;
+            const fallback = (window.APP_CONFIG && window.APP_CONFIG.pricing) || {};
+            return {
+                pricePerCallUsdc: fallback.pricePerApiCallUsdc || 0.0008,
+                gasPerCallUsdc: fallback.gasEstimatePerCallUsdc || 0.00025
+            };
         }
 
         function recordUsageLog(entry) {
@@ -2540,20 +2470,16 @@
 
         function chargeModelUsage(modelName, systemPrompt, userText, assistantText, runMeta = {}) {
             try {
-                const inTokens = estimateTokenCount((systemPrompt || '')) + estimateTokenCount((userText || ''));
-                const outTokens = estimateTokenCount((assistantText || ''));
-                const totalTokens = inTokens + outTokens;
-                const pricePerK = getModelTokenPrice(modelName);
-                const cost = (pricePerK * (totalTokens / 1000));
-                const amount = Number(cost.toFixed(3)); // 3-decimal precision
+                const pricing = getModelPricing(modelName);
+                const perCall = Number(pricing.pricePerCallUsdc || 0);
+                const gas = Number(pricing.gasPerCallUsdc || 0);
+                const amount = Number((perCall + gas).toFixed(6));
 
                 let spend = { success: false, error: 'walletManager not available' };
-                console.log('[I3 Charge] Preparing to charge model usage', {
+                console.log('[USDC Charge] Preparing to charge model usage', {
                     model: modelName,
-                    inTokens,
-                    outTokens,
-                    totalTokens,
-                    pricePerK,
+                    perCall,
+                    gas,
                     amount,
                     reason: runMeta.reason || 'chat',
                     step: runMeta.step || null,
@@ -2561,53 +2487,48 @@
                     walletConnected: !!(window.walletManager && window.walletManager.isConnected),
                     currentCredits: window.walletManager && typeof window.walletManager.getUserInfo === 'function' ? window.walletManager.getUserInfo().credits : 'unknown'
                 });
+
                 if (window.walletManager && typeof window.walletManager.spendCredits === 'function') {
                     spend = window.walletManager.spendCredits(amount, `model_usage:${modelName}`);
                 }
 
                 recordUsageLog({
                     model: modelName,
-                    inTokens,
-                    outTokens,
-                    totalTokens,
-                    pricePerK,
                     amount,
+                    perCall,
+                    gas,
                     spendSuccess: !!(spend && spend.success),
                     reason: runMeta.reason || 'chat',
                     step: runMeta.step || null,
                     runId: runMeta.runId || null
                 });
 
-                // Always log result; if balance now <= 0, show top-up modal
                 if (spend && spend.success === false && spend.error) {
-                    console.warn('I3 deduction failed:', spend.error);
+                    console.warn('USDC deduction failed:', spend.error);
                 } else {
-                    console.log('[I3 Charge] Spend result:', spend);
+                    console.log('[USDC Charge] Spend result:', spend);
                     try {
                         const cur = getAvailableCredits();
-                        // Immediately sync new balance to Firestore
                         try { firebasePersistCredits(cur); } catch (_) {}
-                        if (cur <= 0) {
-                            showInsufficientCreditsModal(Math.max(0.001, amount), cur);
+                        if (cur <= amount) {
+                            showInsufficientCreditsModal(Math.max(0.0001, amount), cur);
                         }
                     } catch (_) {}
                 }
-                return { inTokens, outTokens, totalTokens, pricePerK, amount, spend };
+                return { amount, perCall, gas, spend };
             } catch (e) {
                 console.warn('chargeModelUsage error:', e);
-                return { inTokens: 0, outTokens: 0, totalTokens: 0, pricePerK: 0, amount: 0, spend: { success: false, error: e.message } };
+                return { amount: 0, perCall: 0, gas: 0, spend: { success: false, error: e.message } };
             }
         }
 
         // ===== Preflight credit gating =====
-        function estimateCostI3(modelName, systemPrompt, userText, expectedOutTokens) {
-            try {
-                const inT = estimateTokenCount(systemPrompt || '') + estimateTokenCount(userText || '');
-                const outT = Math.max(0, Number(expectedOutTokens || 0));
-                const total = inT + outT;
-                const pricePerK = getModelTokenPrice(modelName);
-                return Number(((pricePerK * total) / 1000).toFixed(3));
-            } catch (_) { return 0; }
+        function estimateInvocationCost(modelName) {
+            const pricing = getModelPricing(modelName);
+            const perCall = Number(pricing.pricePerCallUsdc || (window.APP_CONFIG?.pricing?.pricePerApiCallUsdc) || 0.0008);
+            const gas = Number(pricing.gasPerCallUsdc || (window.APP_CONFIG?.pricing?.gasEstimatePerCallUsdc) || 0.00025);
+            const total = Number((perCall + gas).toFixed(6));
+            return { total, perCall, gas };
         }
 
         function getAvailableCredits() {
@@ -2620,49 +2541,63 @@
         }
 
         function showInsufficientCreditsModal(required, available) {
-            try { const old = document.getElementById('insufficientCreditsModal'); if (old) old.remove(); } catch (_) {}
-            const modal = document.createElement('div');
-            modal.id = 'insufficientCreditsModal';
-            modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:9999;';
-            modal.innerHTML = `
-                <div style="background:#fff;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,0.2);max-width:460px;width:92%;padding:20px;border:1px solid #e5e7eb;">
-                    <h3 style="margin:0 0 8px 0;font-size:18px;">Insufficient I3 tokens</h3>
-                    <p style="margin:0 0 4px 0;color:#374151;">Needed now: <strong>${required.toFixed(3)} I3</strong></p>
-                    <p style="margin:0 0 16px 0;color:#374151;">Current balance: <strong>${available.toFixed(3)} I3</strong></p>
-                    <div style="display:flex;gap:8px;justify-content:flex-end;">
-                        <button id="icm-cancel" style="padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;background:#fff;cursor:pointer;">Cancel</button>
-                        <button id="icm-checkin" style="padding:8px 12px;border:1px solid #10b981;border-radius:8px;background:#34d399;color:#fff;cursor:pointer;">Daily Check-in (+30)</button>
-                        <button id="icm-buy" style="padding:8px 12px;border:1px solid #2563eb;border-radius:8px;background:#3b82f6;color:#fff;cursor:pointer;">Go to Workflows</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            modal.querySelector('#icm-cancel').onclick = () => modal.remove();
-            modal.querySelector('#icm-buy').onclick = () => { modal.remove(); try { window.location.href = 'workflow.html'; } catch (_) {} };
-            modal.querySelector('#icm-checkin').onclick = () => {
-                try {
-                    if (window.walletManager && typeof window.walletManager.dailyCheckin === 'function') {
-                        const r = window.walletManager.dailyCheckin();
-                        if (r && r.success) {
-                            alert(`✅ Check-in success! +${r.reward} I3 tokens. New balance: ${r.newBalance} I3`);
-                            modal.remove();
-                        } else {
-                            alert(r && r.error ? r.error : 'Check-in unavailable.');
-                        }
-                    } else {
-                        alert('Wallet not connected. Please connect your wallet first.');
-                    }
-                } catch (e) { alert('Check-in error: ' + e.message); }
-            };
-        }
+             try { const old = document.getElementById('insufficientCreditsModal'); if (old) old.remove(); } catch (_) {}
+             const modal = document.createElement('div');
+             modal.id = 'insufficientCreditsModal';
+             modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:9999;';
+             modal.innerHTML = `
+                 <div style="background:#fff;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,0.2);max-width:460px;width:92%;padding:20px;border:1px solid #e5e7eb;">
+                     <h3 style="margin:0 0 8px 0;font-size:18px;">Insufficient USDC balance</h3>
+                     <p style="margin:0 0 4px 0;color:#374151;">Needed now: <strong>${required.toFixed(6)} USDC</strong></p>
+                     <p style="margin:0 0 16px 0;color:#374151;">Current balance: <strong>${available.toFixed(6)} USDC</strong></p>
+                     <div style="display:flex;gap:8px;justify-content:flex-end;">
+                         <button id="icm-cancel" style="padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;background:#fff;cursor:pointer;">Cancel</button>
+                         <button id="icm-checkin" style="padding:8px 12px;border:1px solid #10b981;border-radius:8px;background:#34d399;color:#fff;cursor:pointer;">Daily Check-in (+0.01)</button>
+                         <button id="icm-buy" style="padding:8px 12px;border:1px solid #2563eb;border-radius:8px;background:#3b82f6;color:#fff;cursor:pointer;">Explore Workflows</button>
+                     </div>
+                 </div>
+             `;
+             document.body.appendChild(modal);
+             modal.querySelector('#icm-cancel').onclick = () => modal.remove();
+             modal.querySelector('#icm-buy').onclick = () => { modal.remove(); try { window.location.href = 'workflow.html'; } catch (_) {} };
+             modal.querySelector('#icm-checkin').onclick = async () => {
+                 try {
+                     if (window.walletManager && typeof window.walletManager.dailyCheckin === 'function') {
+                         const result = window.walletManager.dailyCheckin();
+                         Promise.resolve(result).then(r => {
+                             if (!r || !r.success) {
+                                 alert(r?.error || 'Check-in unavailable right now.');
+                             } else {
+                                 alert(`✅ Check-in success! +${r.reward} USDC. New balance: ${r.newBalance} USDC`);
+                                 modal.remove();
+                             }
+                         });
+                     } else {
+                         alert('Wallet not connected. Please connect your wallet first.');
+                     }
+                 } catch (e) { alert('Check-in error: ' + e.message); }
+             };
+         }
 
         function ensureCreditsOrBlock(modelName, systemPrompt, userText, expectedOutTokens) {
-            // Estimate conservative output tokens: mirror user tokens x1.5 with floor 300
-            const outGuess = expectedOutTokens != null ? expectedOutTokens : Math.max(300, Math.floor(estimateTokenCount(userText || '') * 1.5));
-            const need = estimateCostI3(modelName, systemPrompt, userText, outGuess);
+            try {
+                const wf = getCurrentWorkflow();
+                if (wf && wf.status === 'running') {
+                    if (wf.prepaid === true) {
+                        return true;
+                    }
+                    if (Array.isArray(wf.prepaidModels) && wf.prepaidModels.length) {
+                        const normalized = (modelName || '').trim().toLowerCase();
+                        if (wf.prepaidModels.some(name => (name || '').toLowerCase() === normalized)) {
+                            return true;
+                        }
+                    }
+                }
+            } catch (_) {}
+            const { total: need } = estimateInvocationCost(modelName);
             const have = getAvailableCredits();
             if (have < need) {
-                console.warn('I3 preflight gating: insufficient credits', { modelName, need, have, outGuess });
+                console.warn('USDC preflight gating: insufficient credits', { modelName, need, have });
                 showInsufficientCreditsModal(need, have);
                 return false;
             }
@@ -2685,7 +2620,6 @@
             const wf = getCurrentWorkflow();
             return !!(wf && wf.status === 'running' && Array.isArray(wf.sequence) && wf.sequence.length > 0);
         }
-
         function updateComposerVisibilityForWorkflow() {
             // Only apply special composer-hiding rules for group workflows
             if (!isGroupWorkflowRunning()) { setComposerVisible(true); return; }
@@ -2704,7 +2638,6 @@
             const hasAssistantDom = !!(box && box.querySelector('.message.assistant'));
             setComposerVisible(!hasAssistantDom);
         }
-
         // Build conversation context from chat history for API calls
         function buildConversationContext() {
             try {
@@ -2987,6 +2920,25 @@
             appendMessageDark('system', summary);
             localStorage.setItem(key, '1');
             updateChatHeader();
+            scheduleWorkflowRun(wf);
+        }
+
+        function scheduleWorkflowRun(wf) {
+            try {
+                if (!wf || !Array.isArray(wf.sequence) || !wf.sequence.length) return;
+                const runKey = wf.runId ? `wfRun:${wf.runId}` : `wfRun:${wf.name}`;
+                if (localStorage.getItem(runKey)) return;
+                localStorage.setItem(runKey, new Date().toISOString());
+                setTimeout(() => {
+                    try {
+                        runWorkflowRemaining(wf.runId || 'default', 1, '');
+                    } catch (err) {
+                        console.error('[workflow] auto-run failed', err);
+                    }
+                }, 200);
+            } catch (err) {
+                console.error('[workflow] schedule run error', err);
+            }
         }
 
         function addToChatHistory(topic) {
@@ -3119,7 +3071,6 @@
             
             console.log('🗑️ Chat history cleared');
         }
-
         // Markdown rendering (safe subset)
         function escapeHtml(str) {
             return String(str).replace(/[&<>"']/g, function(ch) {
@@ -3133,7 +3084,6 @@
                 }
             });
         }
-
         function renderMarkdownSafe(text) {
             let s = escapeHtml(text || '');
             // Links: [text](https://...)
@@ -3178,7 +3128,6 @@
             if (nearBottom) box.scrollTop = box.scrollHeight;
             return div;
         }
-
         // Editable input card for workflow steps (one fixed card per step)
         function appendInputCard(modelName, runId, stepIndex, initialText) {
             const box = document.getElementById('chatMessages');
@@ -3299,6 +3248,14 @@
                         if (!isNaN(s) && s >= startStepIndex) localStorage.removeItem(k);
                     }
                 });
+            } catch (_) {}
+        }
+
+        function resetWorkflowDom(runId) {
+            try {
+                document.querySelectorAll(`[id^="flow-card-${runId}-"]`).forEach(el => el.remove());
+                document.querySelectorAll(`[id^="flow-header-${runId}-"]`).forEach(el => el.remove());
+                document.querySelectorAll(`[id^="flow-output-${runId}-"]`).forEach(el => el.remove());
             } catch (_) {}
         }
 
@@ -3426,7 +3383,6 @@
             scored.sort((a, b) => b.score - a.score);
             return scored.slice(0, topK).map(({ name, score }) => ({ name, score, ...MODEL_DATA[name] }));
         }
-
         // 智能模型选择功能（向量优先，失败时回退到关键词打分）
         async function selectBestModel(userInput) {
             console.log('🤖 Auto Router: Selecting best model for:', userInput);
@@ -3523,7 +3479,6 @@
             }
             return bestModel;
         }
-
         // 供右下角按钮与 Enter 调用 (For calling by bottom-right button and Enter)
         let isChatSending = false; // Guard against multiple simultaneous calls
         async function handleChatSend() {
@@ -3585,6 +3540,18 @@
             input.value = '';
             // (do not clear attachment yet; needed for image base64 flow)
 
+            const currentWf = getCurrentWorkflow();
+            if (isGroupWorkflowRunning() && currentWf) {
+                const runId = currentWf.runId || 'default';
+                try { clearFlowCachesFromStep(runId, 1); } catch (_) {}
+                resetWorkflowDom(runId);
+                try { localStorage.setItem(`flow:editedInput:${runId}:1`, q); } catch (_) {}
+                const runKey = currentWf.runId ? `wfRun:${currentWf.runId}` : `wfRun:${currentWf.name}`;
+                try { localStorage.setItem(runKey, new Date().toISOString()); } catch (_) {}
+                await runWorkflowRemaining(runId, 1, q);
+                return;
+            }
+
             try {
                 let selectedModel;
                 let systemPrompt = "Answer as the selected model would.";
@@ -3601,7 +3568,7 @@
                         selectedModel = { name: forced || 'Custom-Model' };
                     }
                 } else if (autoRouterOn) {
-                
+
                     // Auto Router 模式：智能选择模型（异步向量检索）
                     selectedModel = await selectBestModel(q);
                     console.log('🤖 Auto Router: selectedModel result:', selectedModel);
@@ -3609,40 +3576,45 @@
                         // 更新聊天标题显示选中的模型
                         const header = document.getElementById('chatHeader');
                         if (header) {
-                            header.textContent = selectedModel.name;
+                            header.setAttribute('data-model', selectedModel.name || 'Auto-Router');
                         }
-                        
-                        // 显示正在使用的模型信息
-                        const message = `🤖 Auto Router selected: **${selectedModel.name}**\n\n**Purpose:** ${selectedModel.purpose}\n**Category:** ${selectedModel.category}\n**Industry:** ${selectedModel.industry}`;
-                        console.log('🤖 Auto Router: Displaying message:', message);
-                        appendMessageDark("system", message);
-                        
-                        systemPrompt = `You are ${selectedModel.name}. ${selectedModel.purpose}\n\nUse Case: ${selectedModel.useCase}\n\nAnswer the user's question as this specialized model would.`;
-                    } else {
-                        console.log('🤖 Auto Router: selectedModel is null/undefined');
                     }
-                } else {
-                    // 手动模式：检查是否有运行中的工作流
-                    let wf = getCurrentWorkflow();
-                    // console.log('[handleChatSend wf]', { wf });
-                    if (!wf || wf.status !== "running") {
-                        appendMessageDark('assistant', "Please click 'Try' on a model in Benchmark first, or enable Auto Router for automatic model selection.");
-                        return;
+                } else if (typeof MODEL_DATA !== 'undefined') {
+                    // If auto router off, fallback to default selection from dropdown (if any)
+                    const dropdown = document.getElementById('modelSelector');
+                    if (dropdown && dropdown.value && MODEL_DATA[dropdown.value]) {
+                        selectedModel = { name: dropdown.value, ...MODEL_DATA[dropdown.value] };
                     }
-                    // console.log('[handleChatSend wf.sequence]', { wf.sequence });
-                    // 如果有顺序信息，则作为群聊串行执行（除非强制单模型聊天）
-                    if (!window.forceSingleModelChat && wf.sequence && wf.sequence.length) {
-                        // Ensure attachments are cached for the workflow run so step 1 can consume them
-                        try {
-                            if (Array.isArray(chatAttachments) && chatAttachments.length) {
-                                await cacheAttachmentsForNextWorkflowFromChat(chatAttachments);
+                }
+
+                const walletAddress = (window.walletManager && window.walletManager.walletAddress) ? window.walletManager.walletAddress : undefined;
+                if (window.MCPClient && typeof window.MCPClient.invokeModel === 'function') {
+                    try {
+                        const invocation = await window.MCPClient.invokeModel({
+                            prompt: q,
+                            modelName: selectedModel?.name,
+                            metadata: {
+                                source: 'chat',
+                                user_wallet: walletAddress || null
                             }
-                        } catch (_) {}
-                        await runWorkflowGroupChat(q);
-                        return; // 已处理
+                        });
+                        if (invocation && invocation.status === 'ok') {
+                            const payload = invocation.result || {};
+                            const assistantText = (payload.result && payload.result.output) || payload.output || '[No output]';
+                            appendMessageDark('assistant', assistantText);
+                            addMessageToCurrentChat('assistant', assistantText);
+                            isChatSending = false;
+                            return;
+                        }
+                        if (invocation && invocation.status === 'cancelled') {
+                            appendMessageDark('assistant', '⚠️ Payment incomplete. Invocation cancelled.');
+                            addMessageToCurrentChat('assistant', '⚠️ Payment incomplete. Invocation cancelled.');
+                            isChatSending = false;
+                            return;
+                        }
+                    } catch (mcpError) {
+                        console.warn('[MCP invokeModel] fallback to legacy pipeline:', mcpError);
                     }
-                    // 否则退回到单模型名称
-                    selectedModel = { name: wf.name };
                 }
 
                 // 普通聊天模式：更具互动性
@@ -4003,8 +3975,7 @@
                 console.error('rerunWorkflowStep error:', e);
             }
         }
-
-        // 串行执行工作流为“群聊”：按顺序调用每位专家模型，并把专家描述放入 system prompt
+        // 串行执行工作流为"群聊"：按顺序调用每位专家模型，并把专家描述放入 system prompt
         async function runWorkflowGroupChat(userPrompt) {
             console.log("[runWorkflowGroupChat]", { userPrompt });
             const wf = getCurrentWorkflow();
@@ -4050,7 +4021,7 @@
                 return { name, purpose: '', useCase: '', category: '', industry: '' };
             }
 
-            // 仅使用“直接父节点”的输出作为每个步骤的输入（无父节点则使用用户原始输入）
+            // 仅使用"直接父节点"的输出作为每个步骤的输入（无父节点则使用用户原始输入）
             const idToName = new Map(((wf.graph && wf.graph.nodes) || []).map(n => [n.id, n.name]));
             const parentsOf = Object.create(null);
             ((wf.graph && wf.graph.edges) || []).forEach(e => {
@@ -4350,7 +4321,6 @@
                 currentInput = full; // 兼容旧变量，不再作为主要数据源
             }
         }
-
         // Rerun only a specific workflow step (1-based index), do not auto-advance
         async function runWorkflowFromStep(runId, startStepIndex, seedInput) {
             const wf = getCurrentWorkflow();
@@ -4597,7 +4567,6 @@
             // Propagate to children textareas but do not mark downstream dirty automatically
             propagateParentOutputToChildren(modelName, full);
         }
-
         // Continue the workflow from a given step (1-based), appending results
         async function runWorkflowRemaining(runId, startStepIndex, seedInput) {
             const wf = getCurrentWorkflow();
@@ -4719,7 +4688,7 @@
         }
 
         //首次:切换到暗色 Chat UI
-        async function handleSearch() {
+        window.handleSearch = async function handleSearch() {
             console.log('🔍 handleSearch called');
             ensureChatUI();
             // 把终端输入框内容转移到 Chat 输入框并发送
@@ -4727,7 +4696,7 @@
             const dst = document.getElementById('chatInput');
             const txt = (src?.value || '').trim();
             console.log('📝 Text to transfer:', txt);
-            // If there are main attachments, mirror them to chat attachments before sending
+            // If there are main attachments, mirror them to chatAttachments before sending
             if (Array.isArray(mainAttachments) && mainAttachments.length) {
                 // Move (copy object refs) to chatAttachments for unified handling in handleChatSend
                 try { chatAttachments = (mainAttachments || []).slice(); } catch (_) {}
@@ -4747,8 +4716,8 @@
                 dst?.focus();
             }
         }
+        console.log('[init] handleSearch assigned', typeof window.handleSearch);
     </script>
-
     <script>
         // Lightweight modal to host interactive.html inside an iframe
         (function(){
@@ -4892,7 +4861,20 @@
     </script>
 
     <script src="contract-config.js"></script>
+    <script src="pricing.js"></script>
+    <script src="mcp-client.js"></script>
     <script src="model-data.js"></script>
+    <script>
+        window.handleSearch = window.handleSearch || function handleSearchPlaceholder() {
+            console.warn('[placeholder] handleSearch called before init');
+        };
+        window.toggleAutoRouter = window.toggleAutoRouter || function toggleAutoRouterPlaceholder() {
+            console.warn('[placeholder] toggleAutoRouter called before init');
+        };
+        window.triggerMainFileInput = window.triggerMainFileInput || function triggerMainFileInputPlaceholder() {
+            console.warn('[placeholder] triggerMainFileInput called before init');
+        };
+    </script>
     <script src="config.js"></script>
     <script src="api-manager.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
@@ -4949,7 +4931,6 @@
         try { injectAccountDropdown('#accountDropdownMount'); } catch (e) { console.warn('injectAccountDropdown failed:', e); }
       });
     </script>
-
     <!-- Google 认证功能 - 直接内联实现 -->
     <script>
         // Firebase 配置 - 请替换为您的实际配置
@@ -5243,7 +5224,6 @@
             
             console.log('❌ 用户已退出，钱包功能保持可见，logout 按钮已隐藏');
         }
-
         // 加载用户数据
         async function loadUserData(uid) {
             try {
@@ -5527,7 +5507,6 @@
             }
             showWalletSelectionModal(event);
         };
-
         // 测试函数 - 手动切换显示状态
         window.testUI = function() {
             const googleSignInBtn = document.getElementById('googleSignInBtn');
@@ -5547,7 +5526,6 @@
                 }
             }
         };
-
         // 显示登录提示弹窗
         function showLoginPromptModal() {
             const modal = document.getElementById('loginPromptModal');
@@ -5583,7 +5561,6 @@
             closeLoginPromptModal();
             showWalletSelectionModal();
         }
-
         // 初始化 Firebase 和 UI - 修复版本
         function initializeFirebaseAndUI() {
             // Guard to avoid double init
@@ -5640,7 +5617,6 @@
         // Expose initialization functions globally for console/manual triggers
         window.initializeFirebase = initializeFirebase;
         window.initializeFirebaseAndUI = initializeFirebaseAndUI;
-
         // 将钱包连接信息写入 Firestore（无需强制 Google 登录）
         // 说明：
         // - 若 currentUser 存在，则写入 users/<uid> 与其子集合 wallets/<address>
@@ -5871,54 +5847,19 @@
             
             <div class="wallet-modal-header">
                 <h2 class="wallet-modal-title">Log in or sign up</h2>
-                <p class="wallet-modal-subtitle">Log in and connect wallet to earn I3 tokens</p>
+                <p class="wallet-modal-subtitle">Log in and connect wallet to earn USDC credits</p>
             </div>
 
             <div class="wallet-options">
-                <!-- MetaMask 选项 -->
-                <div class="wallet-option available" onclick="connectMetaMaskWallet()">
+                <div class="wallet-option available" onclick="connectSolanaPhantom()">
                     <span class="wallet-icon-wrap">
-                    <!-- 你自己的官方 SVG/PNG -->
-                        <img src="svg/metamask.svg" alt="MetaMask">
-                    </span>
-                    <div class="wallet-info">
-                        <div class="wallet-name">MetaMask</div>
-                    </div>
-                </div>
-
-                <!-- Update the WalletConnect option in your wallet modal -->
-                <div class="wallet-option available" onclick="connectWalletConnect()">
-                    <span class="wallet-icon-wrap">
-                    <!-- 你自己的官方 SVG/PNG -->
-                        <img src="svg/walletconnect.svg" alt="WalletConnect">
-                    </span>
-                    <div class="wallet-info">
-                        <div class="wallet-name">WalletConnect</div>
-                    </div>
-                </div>
-
-
-                <!-- Coinbase Wallet 选项  -->
-                <div class="wallet-option available" onclick="connectCoinbaseWallet()">
-                    <span class="wallet-icon-wrap">
-                    <!-- 你自己的官方 SVG/PNG -->
-                        <img src="svg/coinbase.svg" alt="Coinbase">
-                    </span>
-                    <div class="wallet-info">
-                        <div class="wallet-name">Coinbase Wallet</div>
-                    </div>
-                </div>
-
-                <!-- Phantom (Solana) -->
-				<div class="wallet-option available" onclick="connectSolanaPhantom()">
-				    <span class="wallet-icon-wrap">
-                    <!-- 你自己的官方 SVG/PNG -->
                         <img src="svg/phantom.svg" alt="Phantom">
                     </span>
-				  <div class="wallet-info">
-				    <div class="wallet-name">Phantom (Solana)</div>
-				  </div>
-				</div>
+                    <div class="wallet-info">
+                        <div class="wallet-name">Phantom (Solana Devnet)</div>
+                        <div class="wallet-desc">Pay and check in with USDC on Solana Devnet</div>
+                    </div>
+                </div>
 
                 <div class="wallet-footer">
                     By Intelligence Cubed
@@ -5936,7 +5877,7 @@
             
             <div class="wallet-modal-header">
                 <h2 class="wallet-modal-title">✅ Check-In on Chain</h2>
-                <p class="wallet-modal-subtitle">Complete your daily on-chain check-in to earn I3 credits</p>
+                <p class="wallet-modal-subtitle">Complete your daily on-chain check-in to earn USDC credits</p>
             </div>
 
             <div id="userStatusSection" style="margin: 20px 0; padding: 16px; background: #f0fdf4; border-radius: 12px;">
@@ -5957,16 +5898,14 @@
             </div>
 
             <div style="margin: 20px 0;">
-                <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">Select Network</label>
-                <select id="chainSelector" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;">
-                    <option value="BSC">BNB Smart Chain (BSC)</option>
-                    <option value="OPBNB">opBNB Mainnet</option>
-                    <option value="SOLANA">Solana Devnet</option>
+                <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">Network</label>
+                <select id="chainSelector" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;" disabled>
+                    <option value="SOLANA">Solana (Devnet)</option>
                 </select>
             </div>
 
             <div style="margin: 20px 0; padding: 12px; background: #fef3c7; border-radius: 8px; border: 1px solid #fcd34d;">
-                <p style="font-size: 13px; color: #92400e; margin: 0;">⛽ Gas fee: ~$0.03</p>
+                <p style="font-size: 13px; color: #92400e; margin: 0;">⛽ Gas fee: ≈0.00025 USDC per call</p>
             </div>
 
             <button id="executeCheckInBtn" onclick="executeOnChainCheckIn()" 

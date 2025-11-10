@@ -1,5 +1,36 @@
 // Workflow Page JavaScript
 
+const WORKFLOW_PRICING_DEFAULTS = (window.PricingUtils && window.PricingUtils.constants) || {
+    currency: 'USDC',
+    pricePerApiCallUsdc: 0.0008,
+    gasEstimatePerCallUsdc: 0.00025,
+    sharePurchaseMinUsdc: 1,
+    sharePurchaseMaxUsdc: 20,
+    dailyCheckInRewardUsdc: 0.01
+};
+
+function workflowFormatUsdc(value, options = {}) {
+    if (window.PricingUtils && typeof window.PricingUtils.formatUsdcAmount === 'function') {
+        return window.PricingUtils.formatUsdcAmount(value, options);
+    }
+    const num = Number(value || 0);
+    const min = options.minimumFractionDigits ?? 4;
+    const max = options.maximumFractionDigits ?? 6;
+    return `${num.toFixed(Math.min(Math.max(min, 0), max))} USDC`;
+}
+
+function getWorkflowModelPricing(modelName) {
+    const model = (typeof window.getModelData === 'function') ? window.getModelData(modelName) : null;
+    if (window.PricingUtils && typeof window.PricingUtils.normalizeModelPricing === 'function') {
+        return window.PricingUtils.normalizeModelPricing(model || {});
+    }
+    return {
+        currency: WORKFLOW_PRICING_DEFAULTS.currency,
+        pricePerCallUsdc: WORKFLOW_PRICING_DEFAULTS.pricePerApiCallUsdc,
+        gasPerCallUsdc: WORKFLOW_PRICING_DEFAULTS.gasEstimatePerCallUsdc
+    };
+}
+
 // Sample workflow data using real models from model-data.js
 const workflows = [
     {
@@ -164,10 +195,44 @@ const workflows = [
     }
 ];
 
+enrichWorkflowPricing(workflows);
+
+function enrichWorkflowPricing(workflowList) {
+    workflowList.forEach(workflow => {
+        let computeCost = 0;
+        let gasCost = 0;
+        workflow.models = (workflow.models || []).map(node => {
+            const calls = Math.max(Number(node.tokens || node.calls || 1), 1);
+            const pricing = getWorkflowModelPricing(node.name);
+            const pricePerCall = Number(pricing.pricePerCallUsdc || WORKFLOW_PRICING_DEFAULTS.pricePerApiCallUsdc);
+            const gasPerCall = Number(pricing.gasPerCallUsdc || WORKFLOW_PRICING_DEFAULTS.gasEstimatePerCallUsdc);
+            const nodeComputeCost = calls * pricePerCall;
+            const nodeGasCost = calls * gasPerCall;
+            computeCost += nodeComputeCost;
+            gasCost += nodeGasCost;
+            return {
+                ...node,
+                calls,
+                tokens: calls,
+                price: Number(pricePerCall.toFixed(6)),
+                pricePerCallUsdc: pricePerCall,
+                gasPerCallUsdc: gasPerCall,
+                computeCostUsdc: Number(nodeComputeCost.toFixed(6)),
+                gasCostUsdc: Number(nodeGasCost.toFixed(6)),
+                totalCostUsdc: Number((nodeComputeCost + nodeGasCost).toFixed(6))
+            };
+        });
+        workflow.totalComputeCostUsdc = Number(computeCost.toFixed(6));
+        workflow.totalGasCostUsdc = Number(gasCost.toFixed(6));
+        workflow.totalPriceUsdc = Number((computeCost + gasCost).toFixed(6));
+        workflow.totalPrice = workflow.totalPriceUsdc; // legacy compatibility
+    });
+}
+
 // Current user's assets (from myAssets localStorage)
 let userAssets = {};
 
-// Helper: get current wallet credits (I3 balance)
+// Helper: get current wallet credits (USDC balance)
 function getWalletCredits() {
     try {
         if (window.walletManager && typeof window.walletManager.getUserInfo === 'function') {
@@ -213,12 +278,12 @@ function checkWalletConnection() {
     return {
         connected: userInfo.isConnected,
         address: userInfo.address,
-        tokens: userInfo.credits, // 这里是I3 tokens余额
+        tokens: userInfo.credits, // 统一使用 USDC 余额
         error: userInfo.isConnected ? null : 'Please connect your wallet first'
     };
 }
 
-// 验证用户是否有足够的I3 tokens - 复制自mycart.js
+// 验证用户是否有足够的 USDC 余额 - 复制自mycart.js
 function validatePayment(totalCost) {
     const walletStatus = checkWalletConnection();
     
@@ -234,7 +299,7 @@ function validatePayment(totalCost) {
     if (walletStatus.tokens < totalCost) {
         return {
             valid: false,
-            error: `Insufficient I3 tokens. You need ${totalCost} I3 tokens but only have ${walletStatus.tokens} I3 tokens.`,
+            error: `Insufficient USDC balance. You need ${totalCost} USDC but only have ${walletStatus.tokens} USDC.`,
             required: totalCost,
             available: walletStatus.tokens
         };
@@ -268,9 +333,6 @@ function createWorkflowCard(workflow) {
     const card = document.createElement('div');
     card.className = 'workflow-card';
     
-    // Readiness based on wallet credits vs total workflow price
-    const hasSufficientCredits = getWalletCredits() >= Number(workflow.totalPrice || 0);
-    
     card.innerHTML = `
         <div class="workflow-header-section">
             <div>
@@ -299,18 +361,16 @@ function createWorkflowCard(workflow) {
         
         <div class="workflow-metrics">
             <div class="metric-item">
-                <span class="metric-label">Price Per 1K Tokens (i3)</span>
-                <span class="metric-value price">${workflow.totalPrice.toFixed(3)}</span>
+                <span class="metric-label">Compute Cost</span>
+                <span class="metric-value price">${workflowFormatUsdc(workflow.totalComputeCostUsdc, { minimumFractionDigits: 4, maximumFractionDigits: 6 })}</span>
             </div>
             <div class="metric-item">
-                <span class="metric-label">Models</span>
-                <span class="metric-value models">${workflow.modelCount}</span>
+                <span class="metric-label">Estimated Gas</span>
+                <span class="metric-value price">${workflowFormatUsdc(workflow.totalGasCostUsdc, { minimumFractionDigits: 5, maximumFractionDigits: 6 })}</span>
             </div>
-            <div class="metric-item ${hasSufficientCredits ? 'status-ok' : 'status-warning'}">
-                <span class="metric-label">Token Status</span>
-                <span class="metric-value status">
-                    ${hasSufficientCredits ? '✅ Ready' : '⚠️ Need Tokens'}
-                </span>
+            <div class="metric-item">
+                <span class="metric-label">Total (x402)</span>
+                <span class="metric-value price">${workflowFormatUsdc(workflow.totalPriceUsdc, { minimumFractionDigits: 4, maximumFractionDigits: 6 })}</span>
             </div>
         </div>
         
@@ -322,11 +382,11 @@ function createWorkflowCard(workflow) {
                 </svg>
                 Details
             </button>
-            <button class="action-btn try-now ${hasSufficientCredits ? '' : 'disabled'}" onclick="tryWorkflow(${workflow.id})">
+            <button class="action-btn try-now" onclick="tryWorkflow(${workflow.id})">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="5,3 19,12 5,21"/>
                 </svg>
-                ${hasSufficientCredits ? 'Try Now' : 'Buy Tokens'}
+                Pay with x402
             </button>
         </div>
     `;
@@ -375,12 +435,12 @@ function showTokenPurchaseModal(workflow, missingTokens) {
                 <div class="token-name">${token.name}</div>
                 <div class="token-details">${token.required}K tokens needed (you have ${token.current}K)</div>
             </div>
-            <div class="token-price">${token.cost.toFixed(3)} i3</div>
+            <div class="token-price">${workflowFormatUsdc(token.cost, { minimumFractionDigits: 4, maximumFractionDigits: 6 })}</div>
         `;
         tokenList.appendChild(tokenItem);
     });
     
-    totalCostElement.textContent = `${totalCost.toFixed(3)} i3`;
+    totalCostElement.textContent = workflowFormatUsdc(totalCost, { minimumFractionDigits: 4, maximumFractionDigits: 6 });
     
     // Store workflow data for later use
     modal.dataset.workflowId = workflow.id;
@@ -396,7 +456,7 @@ function hideTokenPurchaseModal() {
 }
 
 // 修复后的placeOrder函数 - 在这里进行所有验证
-function placeOrder() {
+async function placeOrder() {
     const modal = document.getElementById('tokenPurchaseModal');
     const workflowId = parseInt(modal.dataset.workflowId);
     const workflow = workflows.find(w => w.id === workflowId);
@@ -413,40 +473,72 @@ function placeOrder() {
     // 2. 计算缺失tokens的总成本
     const missingTokens = checkMissingTokens(workflow);
     const totalCost = missingTokens.reduce((sum, token) => sum + token.cost, 0);
+    const requestId = generateWorkflowPaymentRequestId();
     
     // 3. 验证支付能力
     const paymentValidation = validatePayment(totalCost);
     if (!paymentValidation.valid) {
-        alert(`❌ Payment Failed!\n\n${paymentValidation.error}\n\n💡 Tip: Get more I3 tokens by doing daily check-ins (+30 I3 tokens per day)!\n\nTransaction cancelled.`);
+        alert(`❌ Payment Failed!\n\n${paymentValidation.error}\n\n💡 Tip: Daily check-in grants +0.01 USDC.\n\nTransaction cancelled.`);
         return;
     }
     
-    // 4. 扣除I3 tokens
+    // 4. 402 付款流程（Phantom）
+    let paymentResult;
+    try {
+        paymentResult = await settleWorkflowInvoice(totalCost, workflow, requestId);
+    } catch (error) {
+        alert(`❌ Payment Processing Failed!\n\n${error?.message || error}\n\nTransaction cancelled.`);
+        return;
+    }
+    if (!paymentResult || !paymentResult.success) {
+        // 用户取消或失败已在 settleWorkflowInvoice 中记录
+        return;
+    }
+    
+    // 5. 扣减本地账户余额
     const spendResult = window.walletManager.spendCredits(totalCost, 'workflow_tokens_purchase');
     if (!spendResult.success) {
-        alert(`❌ Payment Processing Failed!\n\n${spendResult.error}\n\nTransaction cancelled.`);
-        return;
+        alert(`⚠️ Payment settled on-chain, but failed to update local credits: ${spendResult.error}`);
     }
     
-    // 5. 更新用户资产 (添加购买的tokens)
+    // 6. 更新用户资产 (添加购买的tokens)
     missingTokens.forEach(token => {
         userAssets[token.name] = (userAssets[token.name] || 0) + token.required;
     });
     
-    // 6. 保存到localStorage
+    // 7. 保存到localStorage
     updateUserAssetsInStorage();
     
-    // 7. 显示成功消息
-    alert(`🎉 Tokens Purchase Successful!\n\n💳 Payment: ${totalCost.toFixed(3)} I3 tokens\n📊 Workflow: ${workflow.name}\n🎯 Models: ${workflow.modelCount}\n\n💰 Remaining Balance: ${spendResult.newBalance} I3 tokens\n\n✅ Tokens have been added to your account.\nThank you for your purchase!`);
+    // 8. 显示成功消息
+    alert(`🎉 Purchase Successful!\n\n💳 Payment: ${totalCost.toFixed(6)} USDC\n📊 Workflow: ${workflow.name}\n🎯 Models: ${workflow.modelCount}`);
     
-    // 8. Hide modal
+    // 9. Hide modal
     hideTokenPurchaseModal();
     
-    // 9. Refresh workflow display
+    // 10. Refresh workflow display
     displayWorkflows(workflows);
     
-    // 10. Load workflow to canvas
-    loadWorkflowToCanvas(workflow);
+    // 11. 标记该工作流已预付费
+    workflow.prepaid = true;
+    workflow.prepaidAt = new Date().toISOString();
+    workflow.prepaidAmountUsdc = Number(totalCost.toFixed(6));
+    workflow.prepaidModels = (workflow.models || []).map(m => m.name);
+    workflow.lastPaymentTx = paymentResult.signature || null;
+    workflow.lastPaymentExplorer = paymentResult.explorer || null;
+    workflow.lastPaymentAt = workflow.prepaidAt;
+    workflow.lastPaymentMemo = requestId;
+    
+    if (window.MCPClient && typeof window.MCPClient.logStatus === 'function') {
+        window.MCPClient.logStatus('payment', 'Workflow payment settled', {
+            amount: totalCost.toFixed(6),
+            memo: requestId,
+            tx: workflow.lastPaymentTx,
+            explorer: paymentResult.explorer
+        });
+    }
+    showWorkflowExplorerToast(workflow.lastPaymentTx, totalCost, paymentResult.explorer);
+    
+    offerCanvasNavigation(workflow);
 }
 
 // Update user assets in localStorage
@@ -567,7 +659,7 @@ function showWorkflowDetails(workflowId) {
                 <div class="model-details">
                     <div class="model-detail-item">
                         <div class="model-detail-label">Price</div>
-                        <div class="model-detail-value">${model.price} i3/1K tokens</div>
+                        <div class="model-detail-value">${workflowFormatUsdc(model.price, { minimumFractionDigits: 4, maximumFractionDigits: 6 })} / call</div>
                     </div>
                     <div class="model-detail-item">
                         <div class="model-detail-label">Required Tokens</div>
@@ -622,7 +714,7 @@ function showWorkflowDetails(workflowId) {
             <div class="summary-stats">
                 <div class="summary-stat">
                     <div class="summary-stat-label">Total Price</div>
-                    <div class="summary-stat-value price">${workflow.totalPrice.toFixed(3)} i3</div>
+                    <div class="summary-stat-value price">${workflowFormatUsdc(workflow.totalPriceUsdc, { minimumFractionDigits: 4, maximumFractionDigits: 6 })}</div>
                 </div>
                 <div class="summary-stat">
                     <div class="summary-stat-label">Status</div>
@@ -650,17 +742,10 @@ function hideWorkflowDetailsModal() {
 function tryWorkflow(workflowId) {
     const workflow = workflows.find(w => w.id === workflowId);
     if (!workflow) return;
-    
-    // New rule: allow run if credits >= total price
-    const walletStatus = checkWalletConnection();
-    if (!walletStatus.connected) {
-        alert('⚠️ Please connect your MetaMask wallet first to run workflows.\n\nClick "Login" → "Connect Wallet"');
-        return;
-    }
 
-    const credits = getWalletCredits();
-    if (credits < Number(workflow.totalPrice || 0)) {
-        alert(`⚠️ Need Tokens\n\nRequired: ${Number(workflow.totalPrice || 0).toFixed(3)} I3\nAvailable: ${credits.toFixed(3)} I3\n\nTip: Do daily check-ins (+30 I3) or add funds.`);
+    const missingTokens = checkMissingTokens(workflow);
+    if (missingTokens.length) {
+        showTokenPurchaseModal(workflow, missingTokens);
         return;
     }
 
@@ -677,6 +762,14 @@ function loadWorkflowToCanvas(workflow) {
         models: workflow.models,
         totalPrice: workflow.totalPrice,
         modelCount: workflow.modelCount,
+        prepaid: !!workflow.prepaid,
+        prepaidAt: workflow.prepaidAt || null,
+        prepaidAmountUsdc: workflow.prepaidAmountUsdc || null,
+        prepaidModels: workflow.prepaidModels || null,
+        lastPaymentTx: workflow.lastPaymentTx || null,
+        lastPaymentExplorer: workflow.lastPaymentExplorer || null,
+        lastPaymentAt: workflow.lastPaymentAt || null,
+        lastPaymentMemo: workflow.lastPaymentMemo || null,
         status: 'ready',
         createdAt: new Date().toISOString()
     };
@@ -688,7 +781,15 @@ function loadWorkflowToCanvas(workflow) {
         name: workflow.name,
         description: workflow.description,
         status: 'running',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        prepaid: !!workflow.prepaid,
+        prepaidAt: workflow.prepaidAt || null,
+        prepaidAmountUsdc: workflow.prepaidAmountUsdc || null,
+        prepaidModels: workflow.prepaidModels || null,
+        lastPaymentTx: workflow.lastPaymentTx || null,
+        lastPaymentExplorer: workflow.lastPaymentExplorer || null,
+        lastPaymentAt: workflow.lastPaymentAt || null,
+        lastPaymentMemo: workflow.lastPaymentMemo || null
     };
     localStorage.setItem('currentWorkflow', JSON.stringify(currentWorkflow));
     
@@ -702,4 +803,159 @@ window.showWorkflowDetails = showWorkflowDetails;
 window.hideWorkflowDetailsModal = hideWorkflowDetailsModal;
 window.tryWorkflow = tryWorkflow;
 window.hideTokenPurchaseModal = hideTokenPurchaseModal;
-window.placeOrder = placeOrder;
+
+function generateWorkflowPaymentRequestId() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+    }
+    return 'wf-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+function generateWorkflowPaymentNonce() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+    }
+    return 'wf-nonce-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+async function settleWorkflowInvoice(totalCost, workflow, requestId) {
+    const client = window.MCPClient;
+    if (!client || typeof client.settleInvoice !== 'function') {
+        throw new Error('402 payment client unavailable. Please ensure MCP client is loaded.');
+    }
+
+    const normalizedAmount = Number(totalCost.toFixed(6));
+    const appConfig = window.APP_CONFIG || {};
+    const sol = appConfig.solana || {};
+    if (!sol.merchantAddress || !sol.usdcMint || !sol.rpcEndpoint) {
+        throw new Error('Solana payment configuration is incomplete.');
+    }
+    const decimals = Number(sol.usdcDecimals || 6);
+    const explorerBase =
+        (appConfig.mcp && appConfig.mcp.receiptExplorerBaseUrl) ||
+        `https://explorer.solana.com/tx?cluster=${encodeURIComponent(sol.cluster || 'devnet')}`;
+
+    const invoice = {
+        status: 'payment_required',
+        request_id: requestId,
+        nonce: generateWorkflowPaymentNonce(),
+        amount_usdc: normalizedAmount,
+        currency: 'USDC',
+        recipient: sol.merchantAddress,
+        mint: sol.usdcMint,
+        decimals,
+        memo: requestId,
+        description: `Workflow token purchase: ${workflow.name}`,
+        rpc_endpoint: sol.rpcEndpoint,
+        explorer_base_url: explorerBase
+    };
+
+    const logStatus =
+        client && typeof client.logStatus === 'function'
+            ? client.logStatus.bind(client)
+            : null;
+
+    logStatus?.('invoice', `Workflow payment request: ${workflow.name}`, {
+        amount: normalizedAmount.toFixed(6),
+        memo: requestId,
+        description: 'Processing workflow checkout'
+    });
+
+    try {
+        const signature = await client.settleInvoice(invoice);
+        if (!signature) {
+            logStatus?.('cancel', 'Workflow payment cancelled by user', {
+                amount: normalizedAmount.toFixed(6),
+                memo: requestId
+            });
+            return { success: false, cancelled: true };
+        }
+
+        let explorerUrl = `https://explorer.solana.com/tx/${encodeURIComponent(
+            signature
+        )}?cluster=${encodeURIComponent(sol.cluster || 'devnet')}`;
+        if (invoice.explorer_base_url) {
+            if (invoice.explorer_base_url.includes('?')) {
+                const [prefix, query] = invoice.explorer_base_url.split('?');
+                explorerUrl = `${prefix.replace(/\/$/, '')}/${encodeURIComponent(
+                    signature
+                )}?${query}`;
+            } else {
+                explorerUrl = `${invoice.explorer_base_url.replace(/\/$/, '')}/${encodeURIComponent(
+                    signature
+                )}`;
+            }
+        }
+
+        return {
+            success: true,
+            signature,
+            explorer: explorerUrl
+        };
+    } catch (error) {
+        logStatus?.('cancel', `Workflow payment failed: ${error?.message || error}`, {
+            amount: normalizedAmount.toFixed(6),
+            memo: requestId
+        });
+        throw error;
+    }
+}
+
+function showWorkflowExplorerToast(signature, amount, explorerUrlOverride) {
+    try {
+        if (!signature) return;
+        const existing = document.getElementById('workflow-payment-toast');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.id = 'workflow-payment-toast';
+        toast.className = 'workflow-payment-toast';
+        const explorerUrl = explorerUrlOverride || `https://explorer.solana.com/tx/${encodeURIComponent(signature)}?cluster=devnet`;
+        toast.innerHTML = `
+            <button class="workflow-payment-toast__close" aria-label="Dismiss">×</button>
+            <h4>Workflow Payment Settled</h4>
+            <p>Amount: <strong>${Number(amount).toFixed(6)} USDC</strong></p>
+            <a href="${explorerUrl}" target="_blank" rel="noopener noreferrer">View on Solana Explorer →</a>
+        `;
+        const close = toast.querySelector('.workflow-payment-toast__close');
+        if (close) close.addEventListener('click', () => toast.remove());
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            try { toast.remove(); } catch (_) {}
+        }, 12000);
+    } catch (err) {
+        console.warn('Failed to show explorer toast', err);
+    }
+}
+
+function offerCanvasNavigation(workflow) {
+    try {
+        const existing = document.getElementById('workflow-run-modal');
+        if (existing) existing.remove();
+        const modal = document.createElement('div');
+        modal.id = 'workflow-run-modal';
+        modal.className = 'workflow-run-modal';
+        modal.innerHTML = `
+            <div class="workflow-run-modal__content">
+                <button class="workflow-run-modal__close" aria-label="Close">×</button>
+                <h3>Workflow Ready</h3>
+                <p>Your workflow <strong>${workflow.name}</strong> is paid and ready to execute.</p>
+                <p>Would you like to open it on the canvas to review or run the pipeline now?</p>
+                <div class="workflow-run-modal__actions">
+                    <button type="button" class="workflow-run-modal__later">Maybe Later</button>
+                    <button type="button" class="workflow-run-modal__open">Open Canvas</button>
+                </div>
+            </div>
+        `;
+        const close = () => modal.remove();
+        modal.querySelector('.workflow-run-modal__close').addEventListener('click', close);
+        modal.querySelector('.workflow-run-modal__later').addEventListener('click', close);
+        modal.querySelector('.workflow-run-modal__open').addEventListener('click', () => {
+            try { loadWorkflowToCanvas(workflow); }
+            finally { close(); }
+        });
+        document.body.appendChild(modal);
+    } catch (err) {
+        console.warn('Failed to show canvas navigation modal', err);
+        loadWorkflowToCanvas(workflow);
+    }
+}
