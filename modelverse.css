@@ -676,14 +676,14 @@ body:has(.modelverse-content.full-width) .main-layout,
     background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: white;
     border: none;
-    padding: 6px 12px;
+    padding: 8px 16px;
     border-radius: 6px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
-    min-width: 50px;
+    min-width: 90px;
     white-space: nowrap;
 }
 
@@ -701,17 +701,17 @@ body:has(.modelverse-content.full-width) .main-layout,
 
 /* Add to Cart Button */
 .add-cart-btn {
-    padding: 6px 12px;
+    padding: 8px 16px;
     background: linear-gradient(135deg, #10b981, #059669);
     color: white;
     border: none;
     border-radius: 6px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
-    min-width: 80px;
+    min-width: 90px;
     white-space: nowrap;
 }
 
@@ -1209,14 +1209,14 @@ body:has(.modelverse-content.full-width) .main-layout,
     background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: white;
     border: none;
-    padding: 6px 12px;
+    padding: 8px 16px;
     border-radius: 6px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
-    min-width: 50px;
+    min-width: 90px;
     white-space: nowrap;
 }
 
@@ -1234,17 +1234,17 @@ body:has(.modelverse-content.full-width) .main-layout,
 
 /* Update Add to Cart Button */
 .add-cart-btn {
-    padding: 6px 12px;
+    padding: 8px 16px;
     background: linear-gradient(135deg, #10b981, #059669) !important;
     color: white;
     border: none;
     border-radius: 6px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
-    min-width: 80px;
+    min-width: 90px;
     white-space: nowrap;
 }
 

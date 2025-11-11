@@ -11703,6 +11703,1345 @@
       "model_or_node": "AI-Text-Detector-Examiner",
       "tokens_or_calls": 1,
       "expires_at": "2025-11-11T13:07:16.515Z"
+    },
+    {
+      "id": "52db0d84-b54b-4e8d-9892-7baac4f748b4",
+      "status": "completed",
+      "created_at": "2025-11-11T16:47:06.808Z",
+      "updated_at": "2025-11-11T16:47:23.524Z",
+      "meta": {
+        "share_id": "AI-Text-Detector-Examiner_tokens",
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "is_token_purchase": true,
+        "description": "Purchase API calls for AI-Text-Detector-Examiner",
+        "verification": {
+          "ok": true,
+          "payer": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+          "amountRaw": "90",
+          "slot": 420870472,
+          "blockTime": 1762879642,
+          "explorerUrl": "https://explorer.solana.com/tx/2JUc6P3PKL1cz3VqEZTcxLPBJcRDCdvTN1JA7BreJiFgpzbejUof3yps2ijmW6Wqn8nYsUkd8FZ5YwaCndvAeiFe?cluster=devnet",
+          "memoMatched": false
+        }
+      },
+      "type": "token",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "4237d055-214d-4e85-a415-2d4cbb99cb84",
+      "nonce": "c4b6d2c9-221d-4b0a-a024-b9c02c1a0dbf",
+      "amount_usdc": 0.00009,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 2,
+      "expires_at": "2025-11-11T16:52:06.808Z",
+      "tx_signature": "2JUc6P3PKL1cz3VqEZTcxLPBJcRDCdvTN1JA7BreJiFgpzbejUof3yps2ijmW6Wqn8nYsUkd8FZ5YwaCndvAeiFe",
+      "paid_at": "2025-11-11T16:47:22.857Z",
+      "completed_at": "2025-11-11T16:47:22.857Z"
+    },
+    {
+      "id": "e62473e0-8e3b-4371-81ce-8e82216dbb99",
+      "status": "completed",
+      "created_at": "2025-11-11T16:54:30.907Z",
+      "updated_at": "2025-11-11T16:54:51.573Z",
+      "meta": {
+        "auto_router": {
+          "requestId": "181c84ef-dbf0-4f5b-a065-d5e8747f678d",
+          "model": {
+            "id": "AI-Text-Detector-Examiner",
+            "version": "latest",
+            "category": "Model Analysis",
+            "pricing": {
+              "currency": "USDC",
+              "pricePerCallUsdc": 0.00009,
+              "gasPerCallUsdc": 0.00025,
+              "sharePriceUsdc": 14.73
+            }
+          },
+          "reasoning": "Selected model \"AI-Text-Detector-Examiner\" with score 99. Prompt length 17 chars"
+        },
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "prompt": "what does this do",
+        "model_name": "AI-Text-Detector-Examiner",
+        "description": "Invoke AI-Text-Detector-Examiner",
+        "verification": {
+          "ok": true,
+          "payer": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+          "amountRaw": "340",
+          "slot": 420871623,
+          "blockTime": 1762880086,
+          "explorerUrl": "https://explorer.solana.com/tx/3Tr5D3E2pZZ2LPKdnR4frZyjbbJGxE5gXHGcsNMTzhj4FexHgXDZDzwccF6Ep7KDqdp81ipCizFrkmaYDF5NWGEY?cluster=devnet",
+          "memoMatched": false
+        },
+        "result": {
+          "output": "This platform analyzes and evaluates the performance of AI-generated text detectors, highlighting their limitations and potential shortcomings. It aims to provide insights into why these detectors often struggle, particularly in high-stakes contexts. The goal is to inform users—including educators and publishers—about the reliability of these tools and guide the development of better detection systems. Additionally, it seeks to caution against over-reliance on detector outputs as definitive evidence of AI usage.",
+          "usage": {
+            "prompt_tokens": 184,
+            "completion_tokens": 86,
+            "total_tokens": 270,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "audio_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "audio_tokens": 0,
+              "accepted_prediction_tokens": 0,
+              "rejected_prediction_tokens": 0
+            }
+          },
+          "model": "AI-Text-Detector-Examiner",
+          "raw": {
+            "success": true,
+            "data": {
+              "id": "chatcmpl-CalvlBn8fwRwVzWU6H5jp26JvBopQ",
+              "object": "chat.completion",
+              "created": 1762880089,
+              "model": "i3-model",
+              "choices": [
+                {
+                  "index": 0,
+                  "message": {
+                    "role": "assistant",
+                    "content": "This platform analyzes and evaluates the performance of AI-generated text detectors, highlighting their limitations and potential shortcomings. It aims to provide insights into why these detectors often struggle, particularly in high-stakes contexts. The goal is to inform users—including educators and publishers—about the reliability of these tools and guide the development of better detection systems. Additionally, it seeks to caution against over-reliance on detector outputs as definitive evidence of AI usage.",
+                    "refusal": null,
+                    "annotations": []
+                  },
+                  "logprobs": null,
+                  "finish_reason": "stop"
+                }
+              ],
+              "usage": {
+                "prompt_tokens": 184,
+                "completion_tokens": 86,
+                "total_tokens": 270,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0,
+                  "audio_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "reasoning_tokens": 0,
+                  "audio_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "system_fingerprint": "fp_560af6e559"
+            },
+            "error": null,
+            "status_code": 200,
+            "provider": "i3",
+            "request_id": "chatcmpl-CalvlBn8fwRwVzWU6H5jp26JvBopQ"
+          },
+          "error": null,
+          "warning": null
+        }
+      },
+      "type": "infer",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "ee5ad5cd-f112-4944-a30e-f3693e64bd3b",
+      "nonce": "72b234bd-ffe5-4386-b256-dc9f410b2574",
+      "amount_usdc": 0.00034,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T16:59:30.907Z",
+      "tx_signature": "3Tr5D3E2pZZ2LPKdnR4frZyjbbJGxE5gXHGcsNMTzhj4FexHgXDZDzwccF6Ep7KDqdp81ipCizFrkmaYDF5NWGEY",
+      "paid_at": "2025-11-11T16:54:47.716Z",
+      "completed_at": "2025-11-11T16:54:51.572Z"
+    },
+    {
+      "id": "d73e7a0a-a2e5-44f4-ae4b-94a63789ce09",
+      "status": "completed",
+      "created_at": "2025-11-11T17:09:27.779Z",
+      "updated_at": "2025-11-11T17:09:36.201Z",
+      "meta": {
+        "share_id": "PromptArmor-Defense_tokens",
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "is_token_purchase": true,
+        "description": "Purchase API calls for PromptArmor-Defense",
+        "verification": {
+          "ok": true,
+          "payer": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+          "amountRaw": "60",
+          "slot": 420873938,
+          "blockTime": 1762880975,
+          "explorerUrl": "https://explorer.solana.com/tx/5CTxkDVkeeLzyLXvFFSyFTxp6YYbsZL3H6hZNhKmnGDvXyKCiJzkyCP2fuce2CfiqVvaJFsFhKNVscXkV2sHB15A?cluster=devnet",
+          "memoMatched": false
+        }
+      },
+      "type": "token",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "ecadea55-3a21-47b8-8aee-f34f2dc7e53b",
+      "nonce": "22d6e457-3c43-42c7-9480-5eb595cac701",
+      "amount_usdc": 0.00006,
+      "model_or_node": "PromptArmor-Defense",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T17:14:27.778Z",
+      "tx_signature": "5CTxkDVkeeLzyLXvFFSyFTxp6YYbsZL3H6hZNhKmnGDvXyKCiJzkyCP2fuce2CfiqVvaJFsFhKNVscXkV2sHB15A",
+      "paid_at": "2025-11-11T17:09:35.920Z",
+      "completed_at": "2025-11-11T17:09:35.920Z"
+    },
+    {
+      "id": "5a47206a-526d-4093-a288-f41c4c52288c",
+      "status": "pending_payment",
+      "created_at": "2025-11-11T17:09:52.607Z",
+      "updated_at": "2025-11-11T17:09:52.607Z",
+      "meta": {
+        "auto_router": {
+          "requestId": "9864726f-c304-42d2-81d3-0997788f1101",
+          "model": {
+            "id": "AI-Text-Detector-Examiner",
+            "version": "latest",
+            "category": "Model Analysis",
+            "pricing": {
+              "currency": "USDC",
+              "pricePerCallUsdc": 0.00009,
+              "gasPerCallUsdc": 0.00025,
+              "sharePriceUsdc": 14.73
+            }
+          },
+          "reasoning": "Selected model \"AI-Text-Detector-Examiner\" with score 99. Prompt length 17 chars"
+        },
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "prompt": "what does this do",
+        "model_name": "AI-Text-Detector-Examiner",
+        "description": "Invoke AI-Text-Detector-Examiner"
+      },
+      "type": "infer",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "5953bd12-61e9-4839-a50c-867cc360bdd1",
+      "nonce": "6e497780-74f2-472d-bc88-278ab2189198",
+      "amount_usdc": 0.00034,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T17:14:52.607Z"
+    },
+    {
+      "id": "9913d07f-e41a-4dde-bec3-278a330e14bc",
+      "status": "pending_payment",
+      "created_at": "2025-11-11T17:23:42.228Z",
+      "updated_at": "2025-11-11T17:23:42.228Z",
+      "meta": {
+        "auto_router": {
+          "requestId": "5e721d16-2f40-4fd6-b3cf-80775111442e",
+          "model": {
+            "id": "AI-Text-Detector-Examiner",
+            "version": "latest",
+            "category": "Model Analysis",
+            "pricing": {
+              "currency": "USDC",
+              "pricePerCallUsdc": 0.00009,
+              "gasPerCallUsdc": 0.00025,
+              "sharePriceUsdc": 14.73
+            }
+          },
+          "reasoning": "Selected model \"AI-Text-Detector-Examiner\" with score 99. Prompt length 17 chars"
+        },
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "prompt": "what does this do",
+        "model_name": "AI-Text-Detector-Examiner",
+        "description": "Invoke AI-Text-Detector-Examiner"
+      },
+      "type": "infer",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "916644ee-f980-442a-8a6e-cb6c14676d55",
+      "nonce": "99a759ad-6395-49be-b2f7-2138e09bdd6b",
+      "amount_usdc": 0.00034,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T17:28:42.228Z"
+    },
+    {
+      "id": "c4ec1eb3-60af-414b-bfad-0037f9cf5028",
+      "status": "pending_payment",
+      "created_at": "2025-11-11T17:28:56.744Z",
+      "updated_at": "2025-11-11T17:28:56.744Z",
+      "meta": {
+        "auto_router": {
+          "requestId": "8d1eb6bb-0116-47b2-9ad6-49ce1631c455",
+          "model": {
+            "id": "AI-Text-Detector-Examiner",
+            "version": "latest",
+            "category": "Model Analysis",
+            "pricing": {
+              "currency": "USDC",
+              "pricePerCallUsdc": 0.00009,
+              "gasPerCallUsdc": 0.00025,
+              "sharePriceUsdc": 14.73
+            }
+          },
+          "reasoning": "Selected model \"AI-Text-Detector-Examiner\" with score 99. Prompt length 17 chars"
+        },
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "prompt": "what does this do",
+        "model_name": "AI-Text-Detector-Examiner",
+        "description": "Invoke AI-Text-Detector-Examiner"
+      },
+      "type": "infer",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "879e7fb5-18b9-47e8-a796-0945d5655d9d",
+      "nonce": "5effed82-e4a7-4cbf-a723-7cc9964d4859",
+      "amount_usdc": 0.00034,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T17:33:56.744Z"
+    },
+    {
+      "id": "595e560a-a64b-4427-b436-f0ae681c72c4",
+      "status": "pending_payment",
+      "created_at": "2025-11-11T17:29:42.242Z",
+      "updated_at": "2025-11-11T17:29:42.242Z",
+      "meta": {
+        "auto_router": {
+          "requestId": "a1383f45-0551-408f-b225-d8dea5217398",
+          "model": {
+            "id": "AI-Text-Detector-Examiner",
+            "version": "latest",
+            "category": "Model Analysis",
+            "pricing": {
+              "currency": "USDC",
+              "pricePerCallUsdc": 0.00009,
+              "gasPerCallUsdc": 0.00025,
+              "sharePriceUsdc": 14.73
+            }
+          },
+          "reasoning": "Selected model \"AI-Text-Detector-Examiner\" with score 99. Prompt length 17 chars"
+        },
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "prompt": "what does this do",
+        "model_name": "AI-Text-Detector-Examiner",
+        "description": "Invoke AI-Text-Detector-Examiner"
+      },
+      "type": "infer",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "5e044a2d-281c-4e8c-bb48-d0b0ce63e80a",
+      "nonce": "41b5d317-4668-4e87-8602-4221e5f66c9d",
+      "amount_usdc": 0.00034,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T17:34:42.242Z"
+    },
+    {
+      "id": "51210982-0692-46c5-b5cc-622b8501f35c",
+      "status": "completed",
+      "created_at": "2025-11-11T18:46:01.903Z",
+      "updated_at": "2025-11-11T18:46:28.295Z",
+      "meta": {
+        "auto_router": {
+          "requestId": "36194495-4dd6-4124-aff9-d44977e74119",
+          "model": {
+            "id": "AI-Text-Detector-Examiner",
+            "version": "latest",
+            "category": "Model Analysis",
+            "pricing": {
+              "currency": "USDC",
+              "pricePerCallUsdc": 0.00009,
+              "gasPerCallUsdc": 0.00025,
+              "sharePriceUsdc": 14.73
+            }
+          },
+          "reasoning": "Selected model \"AI-Text-Detector-Examiner\" with score 99. Prompt length 31 chars"
+        },
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "prompt": "tell me more about watermarking",
+        "model_name": "AI-Text-Detector-Examiner",
+        "description": "Invoke AI-Text-Detector-Examiner",
+        "verification": {
+          "ok": true,
+          "payer": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+          "amountRaw": "340",
+          "slot": 420889025,
+          "blockTime": 1762886780,
+          "explorerUrl": "https://explorer.solana.com/tx/5v2ZAHs8i6ZsRADGtq2UFXo49sQgUypJzTwQawtdVDk9tq914PvbBJ59BR82KMEPPSUi2mCLQbueD6PQVt736Awb?cluster=devnet",
+          "memoMatched": false
+        },
+        "result": {
+          "output": "Watermarking in the context of AI-generated text refers to techniques used to embed hidden signals or patterns within the text that can indicate its origin—specifically, whether it was generated by an AI model like GPT. This can help distinguish between human-written and AI-generated content, potentially enhancing transparency and accountability.\n\n### Key Aspects of Watermarking:\n\n1. **Types of Watermarks**:\n   - **Semantic Watermarks**: These alter the text's meaning in subtle ways while maintaining coherence, making it detectable through specific analyses.\n   - **Syntactic Watermarks**: Changes in sentence structure or grammar that can serve as markers for detection systems.\n\n2. **Detection Methods**: Tools designed to identify these watermarks can analyze the text for specific patterns or anomalies introduced during the watermarking process.\n\n3. **Benefits**:\n   - **Traceability**: Helps in identifying the source of the content, which can be crucial for academic integrity and misinformation mitigation.\n   - **User Awareness**: Educators and content creators can be informed if AI tools were used, fostering discussion around AI ethics.\n\n4. **Challenges**:\n   - **Evasion**: Skilled users may attempt to modify AI-generated text to remove watermarks, making detection difficult.\n   - **False Positives**: Watermarking systems may mistakenly flag human-written text as AI-generated, leading to reliability concerns.\n\n5. **Current Research**: Ongoing studies focus on developing robust watermarking techniques that are difficult to remove while maintaining the quality and coherence of the generated text.\n\n### Practical Applications:\n- **Education**: Institutions can use watermarking to uphold academic integrity by identifying AI-generated submissions.\n- **Content Creation**: Publishers may implement watermarking to help verify the authenticity of content.\n\nIn summary, while watermarking offers a promising avenue for distinguishing AI-generated text, its effectiveness and reliability remain subjects of active research and debate. As detection systems evolve, a careful balance between effective watermarking and the potential for misuse must be considered.",
+          "usage": {
+            "prompt_tokens": 188,
+            "completion_tokens": 405,
+            "total_tokens": 593,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "audio_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "audio_tokens": 0,
+              "accepted_prediction_tokens": 0,
+              "rejected_prediction_tokens": 0
+            }
+          },
+          "model": "AI-Text-Detector-Examiner",
+          "raw": {
+            "success": true,
+            "data": {
+              "id": "chatcmpl-Canfh4qmkFFFVqv9LStnPEGN888gp",
+              "object": "chat.completion",
+              "created": 1762886781,
+              "model": "i3-model",
+              "choices": [
+                {
+                  "index": 0,
+                  "message": {
+                    "role": "assistant",
+                    "content": "Watermarking in the context of AI-generated text refers to techniques used to embed hidden signals or patterns within the text that can indicate its origin—specifically, whether it was generated by an AI model like GPT. This can help distinguish between human-written and AI-generated content, potentially enhancing transparency and accountability.\n\n### Key Aspects of Watermarking:\n\n1. **Types of Watermarks**:\n   - **Semantic Watermarks**: These alter the text's meaning in subtle ways while maintaining coherence, making it detectable through specific analyses.\n   - **Syntactic Watermarks**: Changes in sentence structure or grammar that can serve as markers for detection systems.\n\n2. **Detection Methods**: Tools designed to identify these watermarks can analyze the text for specific patterns or anomalies introduced during the watermarking process.\n\n3. **Benefits**:\n   - **Traceability**: Helps in identifying the source of the content, which can be crucial for academic integrity and misinformation mitigation.\n   - **User Awareness**: Educators and content creators can be informed if AI tools were used, fostering discussion around AI ethics.\n\n4. **Challenges**:\n   - **Evasion**: Skilled users may attempt to modify AI-generated text to remove watermarks, making detection difficult.\n   - **False Positives**: Watermarking systems may mistakenly flag human-written text as AI-generated, leading to reliability concerns.\n\n5. **Current Research**: Ongoing studies focus on developing robust watermarking techniques that are difficult to remove while maintaining the quality and coherence of the generated text.\n\n### Practical Applications:\n- **Education**: Institutions can use watermarking to uphold academic integrity by identifying AI-generated submissions.\n- **Content Creation**: Publishers may implement watermarking to help verify the authenticity of content.\n\nIn summary, while watermarking offers a promising avenue for distinguishing AI-generated text, its effectiveness and reliability remain subjects of active research and debate. As detection systems evolve, a careful balance between effective watermarking and the potential for misuse must be considered.",
+                    "refusal": null,
+                    "annotations": []
+                  },
+                  "logprobs": null,
+                  "finish_reason": "stop"
+                }
+              ],
+              "usage": {
+                "prompt_tokens": 188,
+                "completion_tokens": 405,
+                "total_tokens": 593,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0,
+                  "audio_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "reasoning_tokens": 0,
+                  "audio_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "system_fingerprint": "fp_51db84afab"
+            },
+            "error": null,
+            "status_code": 200,
+            "provider": "i3",
+            "request_id": "chatcmpl-Canfh4qmkFFFVqv9LStnPEGN888gp"
+          },
+          "error": null,
+          "warning": null
+        }
+      },
+      "type": "infer",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "288f3a07-6622-4db7-8226-c5cba73fd94e",
+      "nonce": "363d459e-1567-41eb-815d-8a3378ba149d",
+      "amount_usdc": 0.00034,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T18:51:01.903Z",
+      "tx_signature": "5v2ZAHs8i6ZsRADGtq2UFXo49sQgUypJzTwQawtdVDk9tq914PvbBJ59BR82KMEPPSUi2mCLQbueD6PQVt736Awb",
+      "paid_at": "2025-11-11T18:46:20.674Z",
+      "completed_at": "2025-11-11T18:46:28.295Z"
+    },
+    {
+      "id": "3e8dce32-c8a2-4220-b80f-af1da6ec83aa",
+      "status": "completed",
+      "created_at": "2025-11-11T18:54:13.959Z",
+      "updated_at": "2025-11-11T18:54:58.274Z",
+      "meta": {
+        "auto_router": {
+          "requestId": "283f14e7-f809-4d79-ad8d-f8b11d4fe2f1",
+          "model": {
+            "id": "AI-Text-Detector-Examiner",
+            "version": "latest",
+            "category": "Model Analysis",
+            "pricing": {
+              "currency": "USDC",
+              "pricePerCallUsdc": 0.00009,
+              "gasPerCallUsdc": 0.00025,
+              "sharePriceUsdc": 14.73
+            }
+          },
+          "reasoning": "Selected model \"AI-Text-Detector-Examiner\" with score 99. Prompt length 31 chars"
+        },
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "prompt": "tell me more about watermarking",
+        "model_name": "AI-Text-Detector-Examiner",
+        "description": "Invoke AI-Text-Detector-Examiner",
+        "verification": {
+          "ok": true,
+          "payer": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+          "amountRaw": "340",
+          "slot": 420890343,
+          "blockTime": 1762887289,
+          "explorerUrl": "https://explorer.solana.com/tx/3AHETN4c5guT4HAnnWVnSxrRCNcm3dfvgtcGyypqnix8ht3CmUj7QJQuRXqQtPEREdAcGe6Um6ZLu3NwjLZVYa1E?cluster=devnet",
+          "memoMatched": false
+        },
+        "result": {
+          "output": "Watermarking in the context of AI-generated text refers to techniques used to embed information within the text that indicates it was produced by an AI model. This can serve as a form of identification, helping to distinguish between human-written and machine-generated content. Here are some key points about watermarking:\n\n1. **Purpose**: Watermarking aims to enhance traceability and accountability for AI outputs, helping educators, publishers, and other stakeholders identify potential misuse or unauthorized AI-generated content.\n\n2. **Methods**: Techniques for watermarking can include:\n   - **Linguistic watermarks**: Subtle alterations to writing style or structure that are statistically consistent with AI outputs.\n   - **Token-based watermarks**: Modifying specific words or phrases in a way that remains semantically coherent but marks the text as AI-generated.\n\n3. **Challenges**: \n   - **Robustness**: Watermarks must be resilient against text manipulations (e.g., paraphrasing or synonym replacement).\n   - **Detection**: There is a need for reliable methods to extract and recognize these watermarks without false positives or negatives.\n   - **Ethical concerns**: The implementation of watermarking raises questions about privacy and consent, especially if users are unaware that their content may be marked.\n\n4. **Limitations**: While watermarking can be a useful tool, it's not foolproof. Adversarial techniques may render watermarks ineffective, and reliance on them alone may not provide a comprehensive solution for identifying AI-generated text.\n\nIn summary, watermarking presents a promising avenue for improving the identification of AI-generated content, but it must be implemented thoughtfully, considering both technical and ethical implications.",
+          "usage": {
+            "prompt_tokens": 188,
+            "completion_tokens": 339,
+            "total_tokens": 527,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "audio_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "audio_tokens": 0,
+              "accepted_prediction_tokens": 0,
+              "rejected_prediction_tokens": 0
+            }
+          },
+          "model": "AI-Text-Detector-Examiner",
+          "raw": {
+            "success": true,
+            "data": {
+              "id": "chatcmpl-CannvvfZgcXOZlTCnsmwxgJIJpYwD",
+              "object": "chat.completion",
+              "created": 1762887291,
+              "model": "i3-model",
+              "choices": [
+                {
+                  "index": 0,
+                  "message": {
+                    "role": "assistant",
+                    "content": "Watermarking in the context of AI-generated text refers to techniques used to embed information within the text that indicates it was produced by an AI model. This can serve as a form of identification, helping to distinguish between human-written and machine-generated content. Here are some key points about watermarking:\n\n1. **Purpose**: Watermarking aims to enhance traceability and accountability for AI outputs, helping educators, publishers, and other stakeholders identify potential misuse or unauthorized AI-generated content.\n\n2. **Methods**: Techniques for watermarking can include:\n   - **Linguistic watermarks**: Subtle alterations to writing style or structure that are statistically consistent with AI outputs.\n   - **Token-based watermarks**: Modifying specific words or phrases in a way that remains semantically coherent but marks the text as AI-generated.\n\n3. **Challenges**: \n   - **Robustness**: Watermarks must be resilient against text manipulations (e.g., paraphrasing or synonym replacement).\n   - **Detection**: There is a need for reliable methods to extract and recognize these watermarks without false positives or negatives.\n   - **Ethical concerns**: The implementation of watermarking raises questions about privacy and consent, especially if users are unaware that their content may be marked.\n\n4. **Limitations**: While watermarking can be a useful tool, it's not foolproof. Adversarial techniques may render watermarks ineffective, and reliance on them alone may not provide a comprehensive solution for identifying AI-generated text.\n\nIn summary, watermarking presents a promising avenue for improving the identification of AI-generated content, but it must be implemented thoughtfully, considering both technical and ethical implications.",
+                    "refusal": null,
+                    "annotations": []
+                  },
+                  "logprobs": null,
+                  "finish_reason": "stop"
+                }
+              ],
+              "usage": {
+                "prompt_tokens": 188,
+                "completion_tokens": 339,
+                "total_tokens": 527,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0,
+                  "audio_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "reasoning_tokens": 0,
+                  "audio_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "system_fingerprint": "fp_51db84afab"
+            },
+            "error": null,
+            "status_code": 200,
+            "provider": "i3",
+            "request_id": "chatcmpl-CannvvfZgcXOZlTCnsmwxgJIJpYwD"
+          },
+          "error": null,
+          "warning": null
+        }
+      },
+      "type": "infer",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "29f4afd6-80f1-4946-a56d-7f0ede5da104",
+      "nonce": "7dbe44fd-1cbc-47a6-8e7f-8c9caca911e4",
+      "amount_usdc": 0.00034,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T18:59:13.959Z",
+      "tx_signature": "3AHETN4c5guT4HAnnWVnSxrRCNcm3dfvgtcGyypqnix8ht3CmUj7QJQuRXqQtPEREdAcGe6Um6ZLu3NwjLZVYa1E",
+      "paid_at": "2025-11-11T18:54:50.033Z",
+      "completed_at": "2025-11-11T18:54:58.274Z"
+    },
+    {
+      "id": "afee2391-e711-4956-824c-6272678d51d9",
+      "status": "completed",
+      "created_at": "2025-11-11T18:55:37.385Z",
+      "updated_at": "2025-11-11T18:55:50.092Z",
+      "meta": {
+        "auto_router": {
+          "requestId": "3f5fbf5f-0def-4f20-ad30-7406556a1d74",
+          "model": {
+            "id": "AI-Text-Detector-Examiner",
+            "version": "latest",
+            "category": "Model Analysis",
+            "pricing": {
+              "currency": "USDC",
+              "pricePerCallUsdc": 0.00009,
+              "gasPerCallUsdc": 0.00025,
+              "sharePriceUsdc": 14.73
+            }
+          },
+          "reasoning": "Selected model \"AI-Text-Detector-Examiner\" with score 99. Prompt length 30 chars"
+        },
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "prompt": "tell me more about its purpose",
+        "model_name": "AI-Text-Detector-Examiner",
+        "description": "Invoke AI-Text-Detector-Examiner",
+        "verification": {
+          "ok": true,
+          "payer": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+          "amountRaw": "340",
+          "slot": 420890481,
+          "blockTime": 1762887342,
+          "explorerUrl": "https://explorer.solana.com/tx/4iqjxjMdV9NoLbwP8SZHhCvrV8KrXALQU5SJpCAAcf9NvWrF1BT8Rvp5kbFsZ9dFbDHrCxFWkvzYpmKL9jPk7Wgy?cluster=devnet",
+          "memoMatched": false
+        },
+        "result": {
+          "output": "The purpose of evaluating GPT-generated text detectors is to empirically assess their effectiveness and reliability in identifying AI-generated content. This involves examining their performance in various scenarios, highlighting their limitations, and understanding the underlying mechanisms that contribute to their vulnerabilities, such as reliance on text perplexity.\n\nKey objectives include:\n\n1. **Identifying Weaknesses**: Analyzing how and why these detectors may fail, especially in high-stakes contexts like academic integrity or content authenticity.\n   \n2. **Informed Decision-Making**: Providing insights for educators, publishers, and organizations about the reliability of detection tools, guiding them in making informed decisions about their use.\n\n3. **Improving Detection Technologies**: Offering feedback on current methods to enhance the development of more robust detection systems that can better distinguish between human-written and machine-generated text.\n\n4. **Promoting Caution**: Encouraging stakeholders to critically evaluate detector outputs and avoid over-reliance on them as definitive evidence of AI usage.\n\nUltimately, this work aims to foster a better understanding of the challenges in AI detection and promote safer and more ethical use of AI technologies.",
+          "usage": {
+            "prompt_tokens": 188,
+            "completion_tokens": 224,
+            "total_tokens": 412,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "audio_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "audio_tokens": 0,
+              "accepted_prediction_tokens": 0,
+              "rejected_prediction_tokens": 0
+            }
+          },
+          "model": "AI-Text-Detector-Examiner",
+          "raw": {
+            "success": true,
+            "data": {
+              "id": "chatcmpl-CanomsUZDTl0J0FzxoOGOMSPmzTRV",
+              "object": "chat.completion",
+              "created": 1762887344,
+              "model": "i3-model",
+              "choices": [
+                {
+                  "index": 0,
+                  "message": {
+                    "role": "assistant",
+                    "content": "The purpose of evaluating GPT-generated text detectors is to empirically assess their effectiveness and reliability in identifying AI-generated content. This involves examining their performance in various scenarios, highlighting their limitations, and understanding the underlying mechanisms that contribute to their vulnerabilities, such as reliance on text perplexity.\n\nKey objectives include:\n\n1. **Identifying Weaknesses**: Analyzing how and why these detectors may fail, especially in high-stakes contexts like academic integrity or content authenticity.\n   \n2. **Informed Decision-Making**: Providing insights for educators, publishers, and organizations about the reliability of detection tools, guiding them in making informed decisions about their use.\n\n3. **Improving Detection Technologies**: Offering feedback on current methods to enhance the development of more robust detection systems that can better distinguish between human-written and machine-generated text.\n\n4. **Promoting Caution**: Encouraging stakeholders to critically evaluate detector outputs and avoid over-reliance on them as definitive evidence of AI usage.\n\nUltimately, this work aims to foster a better understanding of the challenges in AI detection and promote safer and more ethical use of AI technologies.",
+                    "refusal": null,
+                    "annotations": []
+                  },
+                  "logprobs": null,
+                  "finish_reason": "stop"
+                }
+              ],
+              "usage": {
+                "prompt_tokens": 188,
+                "completion_tokens": 224,
+                "total_tokens": 412,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0,
+                  "audio_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "reasoning_tokens": 0,
+                  "audio_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "system_fingerprint": "fp_51db84afab"
+            },
+            "error": null,
+            "status_code": 200,
+            "provider": "i3",
+            "request_id": "chatcmpl-CanomsUZDTl0J0FzxoOGOMSPmzTRV"
+          },
+          "error": null,
+          "warning": null
+        }
+      },
+      "type": "infer",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "ba20a3d6-6bda-4076-b7ae-eda5ebe0673b",
+      "nonce": "daf1872c-eb36-475b-b2c3-d7b99b4562cd",
+      "amount_usdc": 0.00034,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T19:00:37.385Z",
+      "tx_signature": "4iqjxjMdV9NoLbwP8SZHhCvrV8KrXALQU5SJpCAAcf9NvWrF1BT8Rvp5kbFsZ9dFbDHrCxFWkvzYpmKL9jPk7Wgy",
+      "paid_at": "2025-11-11T18:55:43.392Z",
+      "completed_at": "2025-11-11T18:55:50.092Z"
+    },
+    {
+      "id": "bfcd0a88-fb59-49e5-be3b-89ccbe7954c2",
+      "status": "completed",
+      "created_at": "2025-11-11T19:01:11.099Z",
+      "updated_at": "2025-11-11T19:01:26.177Z",
+      "meta": {
+        "auto_router": {
+          "requestId": "5a161f1e-ab2c-45ac-819c-b1d783e85927",
+          "model": {
+            "id": "AI-Text-Detector-Examiner",
+            "version": "latest",
+            "category": "Model Analysis",
+            "pricing": {
+              "currency": "USDC",
+              "pricePerCallUsdc": 0.00009,
+              "gasPerCallUsdc": 0.00025,
+              "sharePriceUsdc": 14.73
+            }
+          },
+          "reasoning": "Selected model \"AI-Text-Detector-Examiner\" with score 99. Prompt length 31 chars"
+        },
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "prompt": "tell me more about watermarking",
+        "model_name": "AI-Text-Detector-Examiner",
+        "description": "Invoke AI-Text-Detector-Examiner",
+        "verification": {
+          "ok": true,
+          "payer": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+          "amountRaw": "340",
+          "slot": 420891346,
+          "blockTime": 1762887675,
+          "explorerUrl": "https://explorer.solana.com/tx/Z7hiGaGS6ajnSKyek9HKYq94CU1gBEH4rWBgJdQk2peyHSg1weWCWAKD2pGBNMGvYwmbMNUuPU8pCtqAZFTUTht?cluster=devnet",
+          "memoMatched": false
+        },
+        "result": {
+          "output": "Watermarking in the context of AI-generated text refers to techniques used to embed identifiable information within the text produced by AI models. This can help distinguish between human-written and AI-generated content, potentially enhancing transparency and accountability in various applications. Here are some key points about watermarking:\n\n1. **Purpose**: Watermarking aims to indicate the origin of the text, enabling detection of AI-generated content. This can be particularly useful in academic integrity, content moderation, and copyright enforcement.\n\n2. **Types of Watermarking**:\n   - **Semantic Watermarking**: Involves subtly altering the meaning of sentences or using specific phrases that signal AI generation.\n   - **Statistical Watermarking**: Embeds patterns or distributions in the text that can be statistically analyzed to identify AI usage.\n\n3. **Challenges**:\n   - **Evasion**: Watermarks can be removed or altered by users intentionally trying to disguise AI-generated text.\n   - **Detection Reliability**: The effectiveness of watermarking can vary, and there may be false positives or negatives in identifying watermarked content.\n   - **Perceptibility**: The watermark must be inconspicuous enough not to disrupt the readability or quality of the text while still being detectable.\n\n4. **Applications**: Watermarking can be integrated into AI systems used for content creation, journalism, and educational tools, providing a layer of assurance regarding the content's authenticity.\n\n5. **Ethical Considerations**: There are discussions around privacy, consent, and the implications of watermarking in various contexts, especially concerning user rights and the potential for misuse.\n\nOverall, while watermarking offers a promising approach to identifying AI-generated text, its implementation must be carefully considered to address the inherent challenges and ethical implications.",
+          "usage": {
+            "prompt_tokens": 188,
+            "completion_tokens": 356,
+            "total_tokens": 544,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "audio_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "audio_tokens": 0,
+              "accepted_prediction_tokens": 0,
+              "rejected_prediction_tokens": 0
+            }
+          },
+          "model": "AI-Text-Detector-Examiner",
+          "raw": {
+            "success": true,
+            "data": {
+              "id": "chatcmpl-Canu9VF0N1nguVs084RJxYzDovaem",
+              "object": "chat.completion",
+              "created": 1762887677,
+              "model": "i3-model",
+              "choices": [
+                {
+                  "index": 0,
+                  "message": {
+                    "role": "assistant",
+                    "content": "Watermarking in the context of AI-generated text refers to techniques used to embed identifiable information within the text produced by AI models. This can help distinguish between human-written and AI-generated content, potentially enhancing transparency and accountability in various applications. Here are some key points about watermarking:\n\n1. **Purpose**: Watermarking aims to indicate the origin of the text, enabling detection of AI-generated content. This can be particularly useful in academic integrity, content moderation, and copyright enforcement.\n\n2. **Types of Watermarking**:\n   - **Semantic Watermarking**: Involves subtly altering the meaning of sentences or using specific phrases that signal AI generation.\n   - **Statistical Watermarking**: Embeds patterns or distributions in the text that can be statistically analyzed to identify AI usage.\n\n3. **Challenges**:\n   - **Evasion**: Watermarks can be removed or altered by users intentionally trying to disguise AI-generated text.\n   - **Detection Reliability**: The effectiveness of watermarking can vary, and there may be false positives or negatives in identifying watermarked content.\n   - **Perceptibility**: The watermark must be inconspicuous enough not to disrupt the readability or quality of the text while still being detectable.\n\n4. **Applications**: Watermarking can be integrated into AI systems used for content creation, journalism, and educational tools, providing a layer of assurance regarding the content's authenticity.\n\n5. **Ethical Considerations**: There are discussions around privacy, consent, and the implications of watermarking in various contexts, especially concerning user rights and the potential for misuse.\n\nOverall, while watermarking offers a promising approach to identifying AI-generated text, its implementation must be carefully considered to address the inherent challenges and ethical implications.",
+                    "refusal": null,
+                    "annotations": []
+                  },
+                  "logprobs": null,
+                  "finish_reason": "stop"
+                }
+              ],
+              "usage": {
+                "prompt_tokens": 188,
+                "completion_tokens": 356,
+                "total_tokens": 544,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0,
+                  "audio_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "reasoning_tokens": 0,
+                  "audio_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "system_fingerprint": "fp_560af6e559"
+            },
+            "error": null,
+            "status_code": 200,
+            "provider": "i3",
+            "request_id": "chatcmpl-Canu9VF0N1nguVs084RJxYzDovaem"
+          },
+          "error": null,
+          "warning": null
+        }
+      },
+      "type": "infer",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "96b9221a-db81-4f25-b455-1734ba775ffc",
+      "nonce": "ea207ef3-a06a-4156-8b97-f324843c9216",
+      "amount_usdc": 0.00034,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T19:06:11.099Z",
+      "tx_signature": "Z7hiGaGS6ajnSKyek9HKYq94CU1gBEH4rWBgJdQk2peyHSg1weWCWAKD2pGBNMGvYwmbMNUuPU8pCtqAZFTUTht",
+      "paid_at": "2025-11-11T19:01:16.302Z",
+      "completed_at": "2025-11-11T19:01:26.177Z"
+    },
+    {
+      "id": "8777a44f-c3c5-40c3-812b-d99ea12d77b6",
+      "status": "pending_payment",
+      "created_at": "2025-11-11T19:01:35.960Z",
+      "updated_at": "2025-11-11T19:01:35.960Z",
+      "meta": {
+        "auto_router": {
+          "requestId": "3928e5fd-e68b-4763-af72-f6d717c9383c",
+          "model": {
+            "id": "AI-Text-Detector-Examiner",
+            "version": "latest",
+            "category": "Model Analysis",
+            "pricing": {
+              "currency": "USDC",
+              "pricePerCallUsdc": 0.00009,
+              "gasPerCallUsdc": 0.00025,
+              "sharePriceUsdc": 14.73
+            }
+          },
+          "reasoning": "Selected model \"AI-Text-Detector-Examiner\" with score 99. Prompt length 19 chars"
+        },
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "prompt": "tell me the purpose",
+        "model_name": "AI-Text-Detector-Examiner",
+        "description": "Invoke AI-Text-Detector-Examiner"
+      },
+      "type": "infer",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "dbbd1c02-ffe3-4ca0-8506-c95a40a89b9c",
+      "nonce": "d5ea2d16-6aed-4402-b8d5-ca21154c07de",
+      "amount_usdc": 0.00034,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T19:06:35.960Z"
+    },
+    {
+      "id": "7f57a05c-1eee-4fd9-85b8-de05209cf6a8",
+      "status": "completed",
+      "created_at": "2025-11-11T19:08:11.305Z",
+      "updated_at": "2025-11-11T19:08:27.455Z",
+      "meta": {
+        "auto_router": {
+          "requestId": "f41b64f8-e8c6-4000-885e-ae5ba62168db",
+          "model": {
+            "id": "AI-Text-Detector-Examiner",
+            "version": "latest",
+            "category": "Model Analysis",
+            "pricing": {
+              "currency": "USDC",
+              "pricePerCallUsdc": 0.00009,
+              "gasPerCallUsdc": 0.00025,
+              "sharePriceUsdc": 14.73
+            }
+          },
+          "reasoning": "Selected model \"AI-Text-Detector-Examiner\" with score 99. Prompt length 31 chars"
+        },
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "prompt": "tell me more about watermarking",
+        "model_name": "AI-Text-Detector-Examiner",
+        "description": "Invoke AI-Text-Detector-Examiner",
+        "verification": {
+          "ok": true,
+          "payer": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+          "amountRaw": "340",
+          "slot": 420892437,
+          "blockTime": 1762888095,
+          "explorerUrl": "https://explorer.solana.com/tx/4ouoocUnTBguz4y4nktRDUizNTKNYvdfbbB6WuoZutA2Z8V9SmLCPkKq5tDD1TVhQsYdgnVCAnshymC2rNAQHYFw?cluster=devnet",
+          "memoMatched": false
+        },
+        "result": {
+          "output": "Watermarking in the context of AI-generated text involves embedding identifiable information within the content, which can be used to indicate whether a piece of text was generated by an AI model. This technique aims to enhance transparency and traceability in the use of AI-generated content, potentially aiding in the detection of such text.\n\nHere are some key points about watermarking:\n\n1. **Purpose**: Watermarking serves to identify AI-generated content, making it easier for educators, publishers, and content creators to distinguish between human-written and machine-generated text.\n\n2. **Methods**: Watermarking can be implemented in various ways, such as:\n   - **Linguistic Watermarking**: Subtle changes in word choice, syntax, or phrasing that can be statistically analyzed.\n   - **Statistical Watermarking**: Modifying the distribution of certain words or phrases in a way that can be detected through analysis.\n\n3. **Advantages**:\n   - It can provide a layer of accountability and help mitigate issues related to plagiarism or misinformation.\n   - Watermarks can be designed to be robust against casual editing, making them harder to remove without significant alteration of the text.\n\n4. **Challenges**:\n   - Effectiveness: Some watermarking techniques can be easily bypassed or detected and removed by savvy users.\n   - False Positives: Watermarked content may be misidentified, leading to legitimate human-written text being flagged incorrectly.\n   - Implementation: Developing watermarking methods that are both effective and unobtrusive can be technically challenging.\n\n5. **Ethical Considerations**: The use of watermarking raises questions about privacy and consent, especially concerning how users might feel knowing their content is being tracked or analyzed.\n\nOverall, while watermarking presents a promising avenue for identifying AI-generated text, its effectiveness and ethical implications require careful consideration and ongoing research to ensure reliability, especially in high-stakes environments.",
+          "usage": {
+            "prompt_tokens": 188,
+            "completion_tokens": 382,
+            "total_tokens": 570,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "audio_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "audio_tokens": 0,
+              "accepted_prediction_tokens": 0,
+              "rejected_prediction_tokens": 0
+            }
+          },
+          "model": "AI-Text-Detector-Examiner",
+          "raw": {
+            "success": true,
+            "data": {
+              "id": "chatcmpl-Cao0vNZvjMN0BJXU0sCl9QDrsEfMq",
+              "object": "chat.completion",
+              "created": 1762888097,
+              "model": "i3-model",
+              "choices": [
+                {
+                  "index": 0,
+                  "message": {
+                    "role": "assistant",
+                    "content": "Watermarking in the context of AI-generated text involves embedding identifiable information within the content, which can be used to indicate whether a piece of text was generated by an AI model. This technique aims to enhance transparency and traceability in the use of AI-generated content, potentially aiding in the detection of such text.\n\nHere are some key points about watermarking:\n\n1. **Purpose**: Watermarking serves to identify AI-generated content, making it easier for educators, publishers, and content creators to distinguish between human-written and machine-generated text.\n\n2. **Methods**: Watermarking can be implemented in various ways, such as:\n   - **Linguistic Watermarking**: Subtle changes in word choice, syntax, or phrasing that can be statistically analyzed.\n   - **Statistical Watermarking**: Modifying the distribution of certain words or phrases in a way that can be detected through analysis.\n\n3. **Advantages**:\n   - It can provide a layer of accountability and help mitigate issues related to plagiarism or misinformation.\n   - Watermarks can be designed to be robust against casual editing, making them harder to remove without significant alteration of the text.\n\n4. **Challenges**:\n   - Effectiveness: Some watermarking techniques can be easily bypassed or detected and removed by savvy users.\n   - False Positives: Watermarked content may be misidentified, leading to legitimate human-written text being flagged incorrectly.\n   - Implementation: Developing watermarking methods that are both effective and unobtrusive can be technically challenging.\n\n5. **Ethical Considerations**: The use of watermarking raises questions about privacy and consent, especially concerning how users might feel knowing their content is being tracked or analyzed.\n\nOverall, while watermarking presents a promising avenue for identifying AI-generated text, its effectiveness and ethical implications require careful consideration and ongoing research to ensure reliability, especially in high-stakes environments.",
+                    "refusal": null,
+                    "annotations": []
+                  },
+                  "logprobs": null,
+                  "finish_reason": "stop"
+                }
+              ],
+              "usage": {
+                "prompt_tokens": 188,
+                "completion_tokens": 382,
+                "total_tokens": 570,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0,
+                  "audio_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "reasoning_tokens": 0,
+                  "audio_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "system_fingerprint": "fp_560af6e559"
+            },
+            "error": null,
+            "status_code": 200,
+            "provider": "i3",
+            "request_id": "chatcmpl-Cao0vNZvjMN0BJXU0sCl9QDrsEfMq"
+          },
+          "error": null,
+          "warning": null
+        }
+      },
+      "type": "infer",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "04ddca72-d8c1-437e-adcd-5a1a88afdb5a",
+      "nonce": "7fc6fc26-5eea-424f-8dd9-4e64db4b62b6",
+      "amount_usdc": 0.00034,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T19:13:11.305Z",
+      "tx_signature": "4ouoocUnTBguz4y4nktRDUizNTKNYvdfbbB6WuoZutA2Z8V9SmLCPkKq5tDD1TVhQsYdgnVCAnshymC2rNAQHYFw",
+      "paid_at": "2025-11-11T19:08:16.649Z",
+      "completed_at": "2025-11-11T19:08:27.455Z"
+    },
+    {
+      "id": "3301df28-9b46-4f7f-8c45-39d1622fc274",
+      "status": "completed",
+      "created_at": "2025-11-11T19:08:40.319Z",
+      "updated_at": "2025-11-11T19:08:48.896Z",
+      "meta": {
+        "auto_router": {
+          "requestId": "f98d22c9-fa97-4757-b22f-23b7bb308d50",
+          "model": {
+            "id": "AI-Text-Detector-Examiner",
+            "version": "latest",
+            "category": "Model Analysis",
+            "pricing": {
+              "currency": "USDC",
+              "pricePerCallUsdc": 0.00009,
+              "gasPerCallUsdc": 0.00025,
+              "sharePriceUsdc": 14.73
+            }
+          },
+          "reasoning": "Selected model \"AI-Text-Detector-Examiner\" with score 99. Prompt length 19 chars"
+        },
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "prompt": "tell me the purpose",
+        "model_name": "AI-Text-Detector-Examiner",
+        "description": "Invoke AI-Text-Detector-Examiner",
+        "verification": {
+          "ok": true,
+          "payer": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+          "amountRaw": "340",
+          "slot": 420892512,
+          "blockTime": 1762888125,
+          "explorerUrl": "https://explorer.solana.com/tx/4FDNMBts8X5C25hsyQ8b6t8sumGnBCN4SgWdcJ9GeNHc7M72xpzTZmwkgFUH6cgX5RSUtdSH9jg6sa6zRqWzDY5y?cluster=devnet",
+          "memoMatched": false
+        },
+        "result": {
+          "output": "The purpose of this study is to empirically evaluate current GPT-generated text detectors, highlighting their limitations and potential for error. By examining their reliance on factors like text perplexity, the study aims to cast doubt on the reliability of these detectors in high-stakes contexts, such as academic integrity and content authenticity. Ultimately, it seeks to inform better detector development and caution educators and publishers against over-relying on detection outputs as definitive evidence of AI usage.",
+          "usage": {
+            "prompt_tokens": 184,
+            "completion_tokens": 89,
+            "total_tokens": 273,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "audio_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "audio_tokens": 0,
+              "accepted_prediction_tokens": 0,
+              "rejected_prediction_tokens": 0
+            }
+          },
+          "model": "AI-Text-Detector-Examiner",
+          "raw": {
+            "success": true,
+            "data": {
+              "id": "chatcmpl-Cao1OckgIvCSkFdNPzxEgGPDljlws",
+              "object": "chat.completion",
+              "created": 1762888126,
+              "model": "i3-model",
+              "choices": [
+                {
+                  "index": 0,
+                  "message": {
+                    "role": "assistant",
+                    "content": "The purpose of this study is to empirically evaluate current GPT-generated text detectors, highlighting their limitations and potential for error. By examining their reliance on factors like text perplexity, the study aims to cast doubt on the reliability of these detectors in high-stakes contexts, such as academic integrity and content authenticity. Ultimately, it seeks to inform better detector development and caution educators and publishers against over-relying on detection outputs as definitive evidence of AI usage.",
+                    "refusal": null,
+                    "annotations": []
+                  },
+                  "logprobs": null,
+                  "finish_reason": "stop"
+                }
+              ],
+              "usage": {
+                "prompt_tokens": 184,
+                "completion_tokens": 89,
+                "total_tokens": 273,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0,
+                  "audio_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "reasoning_tokens": 0,
+                  "audio_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "system_fingerprint": "fp_51db84afab"
+            },
+            "error": null,
+            "status_code": 200,
+            "provider": "i3",
+            "request_id": "chatcmpl-Cao1OckgIvCSkFdNPzxEgGPDljlws"
+          },
+          "error": null,
+          "warning": null
+        }
+      },
+      "type": "infer",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "f5b09166-48e8-4821-9819-704e40154fed",
+      "nonce": "660bb2a8-1169-4772-bc53-9893663ecd12",
+      "amount_usdc": 0.00034,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T19:13:40.319Z",
+      "tx_signature": "4FDNMBts8X5C25hsyQ8b6t8sumGnBCN4SgWdcJ9GeNHc7M72xpzTZmwkgFUH6cgX5RSUtdSH9jg6sa6zRqWzDY5y",
+      "paid_at": "2025-11-11T19:08:45.740Z",
+      "completed_at": "2025-11-11T19:08:48.896Z"
+    },
+    {
+      "id": "0291a2ca-8121-43a6-b308-dabf6d2a0548",
+      "status": "completed",
+      "created_at": "2025-11-11T19:21:22.512Z",
+      "updated_at": "2025-11-11T19:21:35.497Z",
+      "meta": {
+        "auto_router": {
+          "requestId": "6898189d-489d-49cb-a493-5bf79319a4f8",
+          "model": {
+            "id": "AI-Text-Detector-Examiner",
+            "version": "latest",
+            "category": "Model Analysis",
+            "pricing": {
+              "currency": "USDC",
+              "pricePerCallUsdc": 0.00009,
+              "gasPerCallUsdc": 0.00025,
+              "sharePriceUsdc": 14.73
+            }
+          },
+          "reasoning": "Selected model \"AI-Text-Detector-Examiner\" with score 99. Prompt length 31 chars"
+        },
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "prompt": "tell me more about watermarking",
+        "model_name": "AI-Text-Detector-Examiner",
+        "description": "Invoke AI-Text-Detector-Examiner",
+        "verification": {
+          "ok": true,
+          "payer": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+          "amountRaw": "340",
+          "slot": 420894501,
+          "blockTime": 1762888886,
+          "explorerUrl": "https://explorer.solana.com/tx/64nz65XSevggPD8D5LKxPzcsaZMVRL2y6vL8nZeqGdMrkcrqAcM6FkNWRYsA9Aamz1yEv78KYSdhGJunBEfniHjD?cluster=devnet",
+          "memoMatched": false
+        },
+        "result": {
+          "output": "Watermarking in the context of AI-generated text refers to techniques used to embed hidden signals or markers within the text that can indicate its origin or authenticity. This approach aims to help distinguish between human-written and AI-generated content, addressing concerns about misinformation, academic integrity, and content ownership.\n\n### Key Aspects of Watermarking:\n\n1. **Types of Watermarks**:\n   - **Content-based Watermarks**: These alter specific linguistic features or patterns in the text to embed a signature. The changes are subtle enough that they do not significantly impact readability.\n   - **Statistical Watermarks**: These rely on manipulating the statistical properties of the text, such as perplexity or distribution of word frequencies.\n\n2. **Detection**:\n   - Watermarks can be detected through specific algorithms that analyze the text for the embedded markers. This detection can help verify the authorship of the content.\n\n3. **Challenges**:\n   - **Robustness**: Watermarks need to be resilient against common text modifications (e.g., paraphrasing, editing) that might strip them out.\n   - **Evasion**: Users may attempt to remove watermarks intentionally, which can undermine their effectiveness.\n   - **False Positives/Negatives**: There is a risk that legitimate human-written text may be incorrectly flagged as AI-generated, or vice versa.\n\n4. **Applications**:\n   - **Plagiarism Detection**: Watermarking can help in identifying content that has been generated by AI tools, aiding educational institutions in maintaining academic integrity.\n   - **Content Verification**: Publishers may use watermarking to verify the authenticity of submissions and prevent misinformation.\n\n5. **Ethical Considerations**:\n   - Transparency about watermarking practices is crucial. Users should be informed if their content may be watermarked, especially in academic or professional settings.\n\nWhile watermarking serves as a potential tool for distinguishing AI-generated text, its effectiveness is still being evaluated, and it should complement other detection methods rather than serve as a sole solution.",
+          "usage": {
+            "prompt_tokens": 188,
+            "completion_tokens": 408,
+            "total_tokens": 596,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "audio_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "audio_tokens": 0,
+              "accepted_prediction_tokens": 0,
+              "rejected_prediction_tokens": 0
+            }
+          },
+          "model": "AI-Text-Detector-Examiner",
+          "raw": {
+            "success": true,
+            "data": {
+              "id": "chatcmpl-CaoDgZd9XV2mYVlPEF7TYVzOkxtJS",
+              "object": "chat.completion",
+              "created": 1762888888,
+              "model": "i3-model",
+              "choices": [
+                {
+                  "index": 0,
+                  "message": {
+                    "role": "assistant",
+                    "content": "Watermarking in the context of AI-generated text refers to techniques used to embed hidden signals or markers within the text that can indicate its origin or authenticity. This approach aims to help distinguish between human-written and AI-generated content, addressing concerns about misinformation, academic integrity, and content ownership.\n\n### Key Aspects of Watermarking:\n\n1. **Types of Watermarks**:\n   - **Content-based Watermarks**: These alter specific linguistic features or patterns in the text to embed a signature. The changes are subtle enough that they do not significantly impact readability.\n   - **Statistical Watermarks**: These rely on manipulating the statistical properties of the text, such as perplexity or distribution of word frequencies.\n\n2. **Detection**:\n   - Watermarks can be detected through specific algorithms that analyze the text for the embedded markers. This detection can help verify the authorship of the content.\n\n3. **Challenges**:\n   - **Robustness**: Watermarks need to be resilient against common text modifications (e.g., paraphrasing, editing) that might strip them out.\n   - **Evasion**: Users may attempt to remove watermarks intentionally, which can undermine their effectiveness.\n   - **False Positives/Negatives**: There is a risk that legitimate human-written text may be incorrectly flagged as AI-generated, or vice versa.\n\n4. **Applications**:\n   - **Plagiarism Detection**: Watermarking can help in identifying content that has been generated by AI tools, aiding educational institutions in maintaining academic integrity.\n   - **Content Verification**: Publishers may use watermarking to verify the authenticity of submissions and prevent misinformation.\n\n5. **Ethical Considerations**:\n   - Transparency about watermarking practices is crucial. Users should be informed if their content may be watermarked, especially in academic or professional settings.\n\nWhile watermarking serves as a potential tool for distinguishing AI-generated text, its effectiveness is still being evaluated, and it should complement other detection methods rather than serve as a sole solution.",
+                    "refusal": null,
+                    "annotations": []
+                  },
+                  "logprobs": null,
+                  "finish_reason": "stop"
+                }
+              ],
+              "usage": {
+                "prompt_tokens": 188,
+                "completion_tokens": 408,
+                "total_tokens": 596,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0,
+                  "audio_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "reasoning_tokens": 0,
+                  "audio_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "system_fingerprint": "fp_560af6e559"
+            },
+            "error": null,
+            "status_code": 200,
+            "provider": "i3",
+            "request_id": "chatcmpl-CaoDgZd9XV2mYVlPEF7TYVzOkxtJS"
+          },
+          "error": null,
+          "warning": null
+        }
+      },
+      "type": "infer",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "c67a6193-6852-447d-aaf2-a213fca628af",
+      "nonce": "c3abf12e-f8c8-4c95-a476-76e8f233a33c",
+      "amount_usdc": 0.00034,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T19:26:22.512Z",
+      "tx_signature": "64nz65XSevggPD8D5LKxPzcsaZMVRL2y6vL8nZeqGdMrkcrqAcM6FkNWRYsA9Aamz1yEv78KYSdhGJunBEfniHjD",
+      "paid_at": "2025-11-11T19:21:27.721Z",
+      "completed_at": "2025-11-11T19:21:35.497Z"
+    },
+    {
+      "id": "8a60ee8e-0c9e-4192-9075-ac482a03ed46",
+      "status": "completed",
+      "created_at": "2025-11-11T19:21:58.961Z",
+      "updated_at": "2025-11-11T19:22:08.562Z",
+      "meta": {
+        "auto_router": {
+          "requestId": "dc437fde-c31c-464c-9e68-f37d48023ea1",
+          "model": {
+            "id": "AI-Text-Detector-Examiner",
+            "version": "latest",
+            "category": "Model Analysis",
+            "pricing": {
+              "currency": "USDC",
+              "pricePerCallUsdc": 0.00009,
+              "gasPerCallUsdc": 0.00025,
+              "sharePriceUsdc": 14.73
+            }
+          },
+          "reasoning": "Selected model \"AI-Text-Detector-Examiner\" with score 99. Prompt length 45 chars"
+        },
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "prompt": "tell me the purpose in a more descriptive way",
+        "model_name": "AI-Text-Detector-Examiner",
+        "description": "Invoke AI-Text-Detector-Examiner",
+        "verification": {
+          "ok": true,
+          "payer": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+          "amountRaw": "340",
+          "slot": 420894596,
+          "blockTime": 1762888923,
+          "explorerUrl": "https://explorer.solana.com/tx/Nn7snKKHr9c4p6VQk6UTyTAftbGrXyQcAtE5mim8hCm9JV8eFioM97q7JL1Qo7rykNtoYBMB4R18jVZzxeucoo9?cluster=devnet",
+          "memoMatched": false
+        },
+        "result": {
+          "output": "The purpose of this empirical study is to systematically evaluate the performance of current GPT-generated text detectors. These detectors are designed to identify whether a piece of text was created by an AI model or a human. However, preliminary findings suggest that many of these detectors perform inadequately, often yielding false positives or negatives, which raises concerns about their reliability in high-stakes environments.\n\nBy investigating the underlying mechanisms of these detection systems—such as their reliance on text perplexity and other linguistic features—we aim to uncover the reasons behind their shortcomings. This analysis not only sheds light on the limitations of existing technologies but also serves as a cautionary note for educators and publishers who might consider these outputs as definitive evidence of AI usage.\n\nUltimately, our goal is to contribute to the ongoing discourse around AI safety and evaluation, guiding the development of more robust detection systems and encouraging a careful approach to interpreting detector results in academic integrity and other critical applications.",
+          "usage": {
+            "prompt_tokens": 194,
+            "completion_tokens": 183,
+            "total_tokens": 377,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "audio_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "audio_tokens": 0,
+              "accepted_prediction_tokens": 0,
+              "rejected_prediction_tokens": 0
+            }
+          },
+          "model": "AI-Text-Detector-Examiner",
+          "raw": {
+            "success": true,
+            "data": {
+              "id": "chatcmpl-CaoEHZ5mQPggFN1AikQzxNPc1kNvh",
+              "object": "chat.completion",
+              "created": 1762888925,
+              "model": "i3-model",
+              "choices": [
+                {
+                  "index": 0,
+                  "message": {
+                    "role": "assistant",
+                    "content": "The purpose of this empirical study is to systematically evaluate the performance of current GPT-generated text detectors. These detectors are designed to identify whether a piece of text was created by an AI model or a human. However, preliminary findings suggest that many of these detectors perform inadequately, often yielding false positives or negatives, which raises concerns about their reliability in high-stakes environments.\n\nBy investigating the underlying mechanisms of these detection systems—such as their reliance on text perplexity and other linguistic features—we aim to uncover the reasons behind their shortcomings. This analysis not only sheds light on the limitations of existing technologies but also serves as a cautionary note for educators and publishers who might consider these outputs as definitive evidence of AI usage.\n\nUltimately, our goal is to contribute to the ongoing discourse around AI safety and evaluation, guiding the development of more robust detection systems and encouraging a careful approach to interpreting detector results in academic integrity and other critical applications.",
+                    "refusal": null,
+                    "annotations": []
+                  },
+                  "logprobs": null,
+                  "finish_reason": "stop"
+                }
+              ],
+              "usage": {
+                "prompt_tokens": 194,
+                "completion_tokens": 183,
+                "total_tokens": 377,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0,
+                  "audio_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "reasoning_tokens": 0,
+                  "audio_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "system_fingerprint": "fp_560af6e559"
+            },
+            "error": null,
+            "status_code": 200,
+            "provider": "i3",
+            "request_id": "chatcmpl-CaoEHZ5mQPggFN1AikQzxNPc1kNvh"
+          },
+          "error": null,
+          "warning": null
+        }
+      },
+      "type": "infer",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "d999a8ad-ba91-4a4c-8c25-9baf012f79f9",
+      "nonce": "c96ee855-966b-4995-a9e9-862679b4a508",
+      "amount_usdc": 0.00034,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T19:26:58.961Z",
+      "tx_signature": "Nn7snKKHr9c4p6VQk6UTyTAftbGrXyQcAtE5mim8hCm9JV8eFioM97q7JL1Qo7rykNtoYBMB4R18jVZzxeucoo9",
+      "paid_at": "2025-11-11T19:22:04.165Z",
+      "completed_at": "2025-11-11T19:22:08.561Z"
+    },
+    {
+      "id": "bdfdcc2b-ec3e-446d-a94f-18f3c0cac5d4",
+      "status": "completed",
+      "created_at": "2025-11-11T19:22:49.495Z",
+      "updated_at": "2025-11-11T19:22:59.080Z",
+      "meta": {
+        "auto_router": {
+          "requestId": "d5991544-ee4d-40ea-8a33-425091e1fc9a",
+          "model": {
+            "id": "AI-Text-Detector-Examiner",
+            "version": "latest",
+            "category": "Model Analysis",
+            "pricing": {
+              "currency": "USDC",
+              "pricePerCallUsdc": 0.00009,
+              "gasPerCallUsdc": 0.00025,
+              "sharePriceUsdc": 14.73
+            }
+          },
+          "reasoning": "Selected model \"AI-Text-Detector-Examiner\" with score 99. Prompt length 57 chars"
+        },
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "prompt": "tell me te purpose of Distillation-Resistant-Watermarking",
+        "model_name": "AI-Text-Detector-Examiner",
+        "description": "Invoke AI-Text-Detector-Examiner",
+        "verification": {
+          "ok": true,
+          "payer": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+          "amountRaw": "340",
+          "slot": 420894728,
+          "blockTime": 1762888973,
+          "explorerUrl": "https://explorer.solana.com/tx/Eiu4Sfcc4V1k5nK7qVXCqNdfhgG4c1mDLipiFjfYK9FRBpRevbNYGi87hi8dMricXVBxvkDYpaFB5QpEvnbmiBf?cluster=devnet",
+          "memoMatched": false
+        },
+        "result": {
+          "output": "Distillation-Resistant Watermarking is a technique designed to embed unique markers or signatures into AI-generated text that remain intact even after the text undergoes processes like model distillation or fine-tuning. The primary purpose of this method is to ensure that generated content can be reliably traced back to its source, even when the original text is altered or transformed by subsequent models. \n\nKey objectives include:\n\n1. **Authenticity Verification**: It helps confirm whether a piece of text originated from a specific AI model, which is crucial for accountability, especially in high-stakes applications.\n\n2. **Detection Resilience**: By resisting common modifications that might occur during model distillation, the watermarking allows for more robust detection of AI-generated content.\n\n3. **Preventing Misuse**: This technique can help mitigate risks associated with AI-generated misinformation by making it easier to identify and attribute content to its source.\n\nOverall, Distillation-Resistant Watermarking serves as a tool for enhancing the reliability of detection systems, promoting responsible use of AI technologies, and fostering trust in AI-generated materials.",
+          "usage": {
+            "prompt_tokens": 204,
+            "completion_tokens": 219,
+            "total_tokens": 423,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "audio_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "audio_tokens": 0,
+              "accepted_prediction_tokens": 0,
+              "rejected_prediction_tokens": 0
+            }
+          },
+          "model": "AI-Text-Detector-Examiner",
+          "raw": {
+            "success": true,
+            "data": {
+              "id": "chatcmpl-CaoF5U57t7Ga1np0Cv1ilVUR6FbBl",
+              "object": "chat.completion",
+              "created": 1762888975,
+              "model": "i3-model",
+              "choices": [
+                {
+                  "index": 0,
+                  "message": {
+                    "role": "assistant",
+                    "content": "Distillation-Resistant Watermarking is a technique designed to embed unique markers or signatures into AI-generated text that remain intact even after the text undergoes processes like model distillation or fine-tuning. The primary purpose of this method is to ensure that generated content can be reliably traced back to its source, even when the original text is altered or transformed by subsequent models. \n\nKey objectives include:\n\n1. **Authenticity Verification**: It helps confirm whether a piece of text originated from a specific AI model, which is crucial for accountability, especially in high-stakes applications.\n\n2. **Detection Resilience**: By resisting common modifications that might occur during model distillation, the watermarking allows for more robust detection of AI-generated content.\n\n3. **Preventing Misuse**: This technique can help mitigate risks associated with AI-generated misinformation by making it easier to identify and attribute content to its source.\n\nOverall, Distillation-Resistant Watermarking serves as a tool for enhancing the reliability of detection systems, promoting responsible use of AI technologies, and fostering trust in AI-generated materials.",
+                    "refusal": null,
+                    "annotations": []
+                  },
+                  "logprobs": null,
+                  "finish_reason": "stop"
+                }
+              ],
+              "usage": {
+                "prompt_tokens": 204,
+                "completion_tokens": 219,
+                "total_tokens": 423,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0,
+                  "audio_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "reasoning_tokens": 0,
+                  "audio_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "system_fingerprint": "fp_560af6e559"
+            },
+            "error": null,
+            "status_code": 200,
+            "provider": "i3",
+            "request_id": "chatcmpl-CaoF5U57t7Ga1np0Cv1ilVUR6FbBl"
+          },
+          "error": null,
+          "warning": null
+        }
+      },
+      "type": "infer",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "6373d152-fa56-40e0-83a3-657610709810",
+      "nonce": "5dde7553-218c-443b-a5bd-1639ccb574e7",
+      "amount_usdc": 0.00034,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T19:27:49.495Z",
+      "tx_signature": "Eiu4Sfcc4V1k5nK7qVXCqNdfhgG4c1mDLipiFjfYK9FRBpRevbNYGi87hi8dMricXVBxvkDYpaFB5QpEvnbmiBf",
+      "paid_at": "2025-11-11T19:22:54.468Z",
+      "completed_at": "2025-11-11T19:22:59.080Z"
     }
   ]
 }

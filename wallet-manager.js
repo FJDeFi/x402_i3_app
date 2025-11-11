@@ -239,6 +239,64 @@ class WalletManager {
 	  }
 	}
 
+	// 获取Solana devnet USDC余额
+	async updateUSDCBalance() {
+		try {
+			const usdcDisplay = document.getElementById('usdcDisplay');
+			if (!usdcDisplay || !this.solanaConn || !this.solanaAddress) {
+				return;
+			}
+
+			// Solana devnet USDC mint地址
+			const USDC_MINT_DEVNET = '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU';
+			
+			// 动态导入 @solana/spl-token
+			const { getAssociatedTokenAddress, getAccount } = await import('https://esm.sh/@solana/spl-token@0.4.8');
+			const { PublicKey } = window.SOL || {};
+			
+			if (!PublicKey) {
+				console.warn('Solana web3.js not loaded');
+				return;
+			}
+
+			const walletPubkey = new PublicKey(this.solanaAddress);
+			const usdcMintPubkey = new PublicKey(USDC_MINT_DEVNET);
+			
+			// 获取关联的token账户地址
+			const tokenAccountAddress = await getAssociatedTokenAddress(
+				usdcMintPubkey,
+				walletPubkey
+			);
+			
+			try {
+				// 获取token账户信息
+				const tokenAccount = await getAccount(this.solanaConn, tokenAccountAddress);
+				const balance = Number(tokenAccount.amount) / 1e6; // USDC有6位小数
+				const rounded = balance.toFixed(2);
+				
+				usdcDisplay.style.display = 'inline';
+				usdcDisplay.textContent = `${rounded} USDC`;
+				console.log('USDC balance:', rounded);
+			} catch (err) {
+				// Token账户不存在或余额为0
+				if (err.name === 'TokenAccountNotFoundError') {
+					usdcDisplay.style.display = 'inline';
+					usdcDisplay.textContent = '0.00 USDC';
+					console.log('USDC balance: 0.00 (no token account)');
+				} else {
+					throw err;
+				}
+			}
+		} catch (error) {
+			console.warn('Failed to fetch USDC balance:', error);
+			const usdcDisplay = document.getElementById('usdcDisplay');
+			if (usdcDisplay) {
+				usdcDisplay.style.display = 'inline';
+				usdcDisplay.textContent = '-- USDC';
+			}
+		}
+	}
+
 	async connectWalletConnect() {
 	  console.log('Starting AppKit connection...');
 	  if (this.isConnecting) return { success: false, error: 'Connection already in progress' };
@@ -996,7 +1054,7 @@ disconnectWallet() {
 
 	updateUI() {
 		const accountBtnText = document.getElementById('accountBtnText');
-		const creditsDisplay  = document.getElementById('creditsDisplay');
+		const usdcDisplay  = document.getElementById('usdcDisplay');
 		const connectBtn      = document.getElementById('connectWalletBtn');
 		const checkinBtn      = document.getElementById('checkinBtn');
 		const checkinStatus   = document.getElementById('checkinStatus');
@@ -1010,11 +1068,11 @@ disconnectWallet() {
 				accountBtnText.textContent =
 					`${this.walletAddress.slice(0, 6)}...${this.walletAddress.slice(-4)}`;
 			}
-			// 已连接 —— 显示并更新 I3 tokens
-			if (creditsDisplay) {
-				creditsDisplay.style.display = 'inline';
-				const rounded = (Math.round((Number(this.credits) || 0) * 1000) / 1000).toFixed(3);
-				creditsDisplay.textContent = `${rounded} I3 tokens`;
+			// 已连接 —— 如果是Solana钱包，显示USDC余额
+			if (usdcDisplay && this.walletType && this.walletType.includes('solana')) {
+				this.updateUSDCBalance();
+			} else if (usdcDisplay) {
+				usdcDisplay.style.display = 'none';
 			}
 			// Connect/Disconnect 按钮
 			if (connectBtn) {
@@ -1053,12 +1111,12 @@ disconnectWallet() {
 			}
 			if (checkinStatus) checkinStatus.style.display = 'block';
 		} else {
-			// 未连接 —— 只显示 Login，隐藏 I3 tokens
+			// 未连接 —— 只显示 Login，隐藏 USDC
 			if (accountBtnText) {
 				accountBtnText.textContent = 'Login';
 			}
-			if (creditsDisplay) {
-				creditsDisplay.style.display = 'none';
+			if (usdcDisplay) {
+				usdcDisplay.style.display = 'none';
 			}
 			// Connect/Disconnect 按钮
 			if (connectBtn) {

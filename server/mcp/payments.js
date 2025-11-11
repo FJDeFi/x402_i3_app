@@ -71,6 +71,29 @@ function build402Body(entry, extras = {}) {
 function parsePaymentHeader(header) {
   if (!header || typeof header !== 'string') return null;
   const trimmed = header.trim();
+  
+  // 检查是否是 prepaid credits 支付
+  if (trimmed.toLowerCase().startsWith('prepaid')) {
+    const parts = trimmed.split(/\s+/).slice(1).join(' ').split(';').map(p => p.trim()).filter(Boolean);
+    const data = {};
+    for (const part of parts) {
+      const [key, value] = part.split('=');
+      if (!key || typeof value === 'undefined') continue;
+      data[key.trim().toLowerCase()] = value.trim();
+    }
+    return {
+      isPrepaid: true,
+      network: CONFIG.payments.network,
+      tx: 'PREPAID_CREDITS',
+      amount: 0,
+      nonce: data.nonce || null,
+      model: data.model || null,
+      remaining: data.remaining ? Number(data.remaining) : 0,
+      memo: 'PREPAID'
+    };
+  }
+  
+  // 原有的 x402 支付逻辑
   if (!trimmed.toLowerCase().startsWith('x402')) return null;
   const [, ...rest] = trimmed.split(/\s+/);
   const paramsString = rest.join(' ');
@@ -95,6 +118,7 @@ function parsePaymentHeader(header) {
     return null;
   }
   return {
+    isPrepaid: false,
     network: rest[0] || CONFIG.payments.network,
     tx: data.tx,
     amount: Number(data.amount),

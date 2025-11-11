@@ -309,6 +309,12 @@
       cancel: 'Cancelled'
     }[kind] || 'Update';
     const lines = [];
+    
+    // Auto Router 选中的模型信息
+    if (meta.autoRouterModel) {
+      lines.push(`🤖 Auto Router → <strong style="color: #a78bfa;">${meta.autoRouterModel}</strong>`);
+    }
+    
     if (meta.amount) lines.push(`Amount: ${meta.amount} USDC`);
     if (meta.memo) lines.push(`Memo: ${meta.memo}`);
     if (meta.tx) {
@@ -510,10 +516,124 @@
             history: [...history, { type: 'invoice_error', invoice }]
           };
         }
+        
+        // 检查是否有 prepaid credits
+        const prepaidCreditsRaw = localStorage.getItem('prepaidCredits');
+        if (prepaidCreditsRaw) {
+          try {
+            const prepaidCredits = JSON.parse(prepaidCreditsRaw);
+            const modelName = payload.model || payload.modelId || invoice.model_or_node;
+            
+            console.log('[MCPClient] Checking prepaid credits:', {
+              prepaidModel: prepaidCredits.modelName,
+              requestModel: modelName,
+              remaining: prepaidCredits.remainingCalls,
+              invoiceModel: invoice.model_or_node
+            });
+            
+            // 尝试多种方式匹配模型名称
+            const requestedModel = modelName || invoice.model_or_node;
+            const isModelMatch = prepaidCredits.modelName === requestedModel;
+            
+            if (isModelMatch && prepaidCredits.remainingCalls > 0) {
+              console.log(`[MCPClient] ✅ Using prepaid credits: ${prepaidCredits.remainingCalls} calls remaining for ${requestedModel}`);
+              
+              // 减少一次 API call
+              prepaidCredits.remainingCalls -= 1;
+              prepaidCredits.lastUsedAt = new Date().toISOString();
+              
+              // 如果用完了，清除 prepaid credits
+              if (prepaidCredits.remainingCalls <= 0) {
+                console.log('[MCPClient] Prepaid credits exhausted, clearing...');
+                localStorage.removeItem('prepaidCredits');
+                
+                // 显示通知
+                setTimeout(() => {
+                  const notification = document.createElement('div');
+                  notification.style.cssText = `
+                    position: fixed; top: 20px; right: 20px; z-index: 10000;
+                    background: linear-gradient(135deg, #f59e0b, #d97706);
+                    color: white; padding: 16px 24px; border-radius: 12px;
+                    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+                    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+                  `;
+                  notification.innerHTML = `
+                    ⚠️ API calls exhausted!<br>
+                    <span style="font-size: 12px; font-weight: 400;">Purchase more from Modelverse to continue.</span>
+                  `;
+                  document.body.appendChild(notification);
+                  
+                  setTimeout(() => notification.remove(), 5000);
+                }, 500);
+              } else {
+                localStorage.setItem('prepaidCredits', JSON.stringify(prepaidCredits));
+              }
+              
+              // 同步更新 myAssets
+              const myAssetsRaw = localStorage.getItem('myAssets');
+              if (myAssetsRaw) {
+                const myAssets = JSON.parse(myAssetsRaw);
+                const tokenAsset = myAssets.tokens.find(t => t.modelName === modelName);
+                if (tokenAsset && tokenAsset.quantity > 0) {
+                  tokenAsset.quantity -= 1;
+                  localStorage.setItem('myAssets', JSON.stringify(myAssets));
+                  console.log(`[MCPClient] Deducted 1 API call. Remaining: ${tokenAsset.quantity}`);
+                  
+                  // 如果 myAssets 中也用完了，移除该 token
+                  if (tokenAsset.quantity <= 0) {
+                    myAssets.tokens = myAssets.tokens.filter(t => t.modelName !== modelName);
+                    localStorage.setItem('myAssets', JSON.stringify(myAssets));
+                    console.log(`[MCPClient] Removed ${modelName} from myAssets (exhausted)`);
+                  }
+                }
+              }
+              
+              // 使用 prepaid 标记跳过实际支付
+              logStatus('invoice', `Using prepaid credits (${prepaidCredits.remainingCalls} remaining)`, {
+                amount: invoice.amount_usdc,
+                memo: 'PREPAID'
+              });
+              
+              // 设置特殊的支付 header 表示使用 prepaid credits
+              paymentHeaders = {
+                'X-PAYMENT': `prepaid model=${requestedModel}; remaining=${prepaidCredits.remainingCalls}; nonce=${invoice.nonce}`,
+                'X-Prepaid-Credits': 'true',
+                'X-Request-Id': invoice.request_id || invoice.memo
+              };
+              
+              console.log('[MCPClient] Setting prepaid payment headers:', paymentHeaders);
+              
+              // 触发 UI 更新事件
+              window.dispatchEvent(new CustomEvent('prepaidCreditsUsed', { 
+                detail: { 
+                  modelName: requestedModel, 
+                  remaining: prepaidCredits.remainingCalls 
+                } 
+              }));
+              
+              continue;
+            } else {
+              console.log('[MCPClient] Prepaid credits not applicable:', {
+                modelMatch: isModelMatch,
+                hasCredits: prepaidCredits.remainingCalls > 0,
+                prepaidModel: prepaidCredits.modelName,
+                requestedModel: requestedModel
+              });
+            }
+          } catch (err) {
+            console.warn('[MCPClient] Error checking prepaid credits:', err);
+          }
+        }
+        
         history.push({ type: 'invoice', invoice });
+        
+        // 获取 Auto Router 选中的模型信息
+        const autoRouterModel = invoice.auto_router?.model?.id || invoice.model_or_node || payload.model;
+        
         logStatus('invoice', invoice.description || 'Payment required', {
           amount: invoice.amount_usdc,
-          memo: invoice.memo
+          memo: invoice.memo,
+          autoRouterModel: autoRouterModel
         });
         emit('invoice', { endpoint: fullEndpoint, invoice });
         if (typeof opts.onInvoice === 'function') {
@@ -639,6 +759,27 @@
     settleInvoice,
     purchaseShare,
     claimCheckin,
-    logStatus
+    logStatus,
+    // Debug helpers
+    debugPrepaidCredits() {
+      const prepaidCreditsRaw = localStorage.getItem('prepaidCredits');
+      const myAssetsRaw = localStorage.getItem('myAssets');
+      const currentModelRaw = localStorage.getItem('currentModel');
+      
+      console.log('=== Prepaid Credits Debug ===');
+      console.log('1. Prepaid Credits:', prepaidCreditsRaw ? JSON.parse(prepaidCreditsRaw) : 'None');
+      console.log('2. My Assets Tokens:', myAssetsRaw ? JSON.parse(myAssetsRaw).tokens : 'None');
+      console.log('3. Current Model:', currentModelRaw ? JSON.parse(currentModelRaw) : 'None');
+      
+      return {
+        prepaidCredits: prepaidCreditsRaw ? JSON.parse(prepaidCreditsRaw) : null,
+        myAssets: myAssetsRaw ? JSON.parse(myAssetsRaw) : null,
+        currentModel: currentModelRaw ? JSON.parse(currentModelRaw) : null
+      };
+    },
+    clearPrepaidCredits() {
+      localStorage.removeItem('prepaidCredits');
+      console.log('✅ Prepaid credits cleared. Please refresh and use the "Use" button again.');
+    }
   };
 })();

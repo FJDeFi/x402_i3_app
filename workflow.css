@@ -969,10 +969,154 @@ body {
     box-shadow: 0 16px 32px rgba(99, 102, 241, 0.32);
 }
 
+.workflow-run-modal__explorer {
+    margin: 16px 0;
+    padding: 14px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 12px;
+}
+
+.workflow-run-modal__solscan-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.workflow-run-modal__solscan-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+}
+
+/* Workflow Input Section */
+.workflow-input-section {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    padding: 16px 24px;
+    z-index: 9999;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    display: block !important;
+    visibility: visible !important;
+}
+
+.workflow-input-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.workflow-prompt-input {
+    flex: 1;
+    padding: 14px 20px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    color: #111827;
+    background: #f9fafb;
+    transition: all 0.2s ease;
+}
+
+.workflow-prompt-input:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.workflow-prompt-input::placeholder {
+    color: #9ca3af;
+}
+
+.workflow-send-btn {
+    padding: 14px 18px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.workflow-send-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+}
+
+.workflow-send-btn:active {
+    transform: translateY(0);
+}
+
+.workflow-send-btn svg {
+    display: block;
+}
+
+/* Add bottom padding to workflow container to prevent content from being hidden behind input */
+.workflow-container {
+    padding-bottom: 100px;
+}
+
+/* Responsive adjustments for input section */
+@media (max-width: 768px) {
+    .workflow-input-section {
+        padding: 12px 16px;
+    }
+    
+    .workflow-prompt-input {
+        font-size: 14px;
+        padding: 12px 16px;
+    }
+    
+    .workflow-send-btn {
+        padding: 12px 14px;
+    }
+}
+
+/* Prompt Ready Indicator */
+.prompt-ready-indicator {
+    margin: 24px auto;
+    max-width: 1200px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.05));
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 12px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .workflow-payment-toast {
     position: fixed;
     right: 28px;
-    bottom: 28px;
+    bottom: 110px;
     width: 320px;
     max-width: calc(100% - 40px);
     background: rgba(15, 23, 42, 0.92);

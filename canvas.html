@@ -621,8 +621,8 @@
             <!-- Right Section -->
 			<div class="header-right">
                 <button id="networkBadge" class="network-badge" type="button" style="display:none" onclick="openNetworkPickerModal()">
-				  <img class="network-badge__icon" src="" alt="">
-				  <span class="network-badge__text">Network</span>
+				  <img id="networkBadgeIcon" class="network-badge__icon" src="" alt="">
+				  <span id="networkBadgeText" class="network-badge__text">Network</span>
 			        <svg class="network-badge__caret" width="12" height="12" viewBox="0 0 24 24">
 				        <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/>
 				    </svg>
@@ -712,7 +712,7 @@
                                 <path d="M12 1v6m0 6v6"/>
                                 <path d="m21 12-6-3-6 3-6-3"/>
                             </svg>
-                            Token Models
+                            My Purchased Models
                         </h4>
                         <span class="models-count" id="modelsCount">0 models</span>
                     </div>

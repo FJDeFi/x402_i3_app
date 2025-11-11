@@ -456,6 +456,7 @@ function addToCartStorage(modelName, tokenQuantity = 1, shareQuantity = 0) {
     if (ex) {
       ex.tokenQuantity = (ex.tokenQuantity || 0) + tokenQuantity;
       ex.shareQuantity = (ex.shareQuantity || 0) + shareQuantity;
+      ex.lastUpdated = new Date().toISOString();
     } else {
       items.push({
         modelName,
@@ -619,7 +620,6 @@ function renderModelTable() {
       <td class="total-score">${totalScoreText}</td>
       <td class="action-cell">
         <div class="invest">
-          <button class="model-card-btn">Details</button>
           <button class="try-btn">Try</button>
           <button class="add-cart-btn">Add to Cart</button>
         </div>

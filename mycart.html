@@ -636,8 +636,8 @@
             <!-- Right Section -->
 			<div class="header-right">
                 <button id="networkBadge" class="network-badge" type="button" style="display:none" onclick="openNetworkPickerModal()">
-				  <img class="network-badge__icon" src="" alt="">
-				  <span class="network-badge__text">Network</span>
+				  <img id="networkBadgeIcon" class="network-badge__icon" src="" alt="">
+				  <span id="networkBadgeText" class="network-badge__text">Network</span>
 			        <svg class="network-badge__caret" width="12" height="12" viewBox="0 0 24 24">
 				        <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/>
 				    </svg>
@@ -646,24 +646,6 @@
 			    <div id="accountDropdownMount"></div>
 			  </div>
 			</div>
-        </div>
-    </header>
-
-                <!-- Right Section -->
-            <div class="header-right">
-                <!-- Current Network badge (shows only after wallet connected) -->
-                <button id="networkBadge" class="network-badge" type="button" style="display:none" onclick="openNetworkPickerModal()">
-				  <img class="network-badge__icon" src="" alt="">
-				  <span class="network-badge__text">Network</span>
-			        <svg class="network-badge__caret" width="12" height="12" viewBox="0 0 24 24">
-				        <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/>
-				    </svg>
-				</button>
-                <div id="networkPickerMount"></div>
-                <div class="user-section">
-                    <div id="accountDropdownMount"></div>
-                </div>
-            </div>
         </div>
     </header>
 
@@ -780,7 +762,7 @@
                                 <tr>
                                     <th>Model</th>
                                     <th>Category</th>
-                                    <th>Tokens Purchase</th>
+                                    <th>Number of API Calls</th>
                                     <th>Shares Investment</th>
                                     <th>Total</th>
                                     <th>Action</th>
@@ -821,17 +803,17 @@
                         <span class="summary-value" id="modalModels">0</span>
                     </div>
                     <div class="summary-item">
-                        <span class="summary-label">Total Tokens:</span>
-                        <span class="summary-value" id="modalTokens">0.00K</span>
+                        <span class="summary-label">Total API Calls:</span>
+                        <span class="summary-value" id="modalTokens">0K</span>
                     </div>
                     <div class="summary-item">
                         <span class="summary-label">Total Shares:</span>
-                        <span class="summary-value" id="modalShares">0.00K</span>
+                        <span class="summary-value" id="modalShares">0</span>
                     </div>
                     <div class="summary-divider"></div>
                     <div class="summary-item total-price">
                         <span class="summary-label">Total Price:</span>
-                        <span class="summary-value" id="modalTotal">0.00 <img src="svg/i3-token-logo.svg" class="token-icon" alt="i3"></span>
+                        <span class="summary-value" id="modalTotal">0.00 USDC</span>
                     </div>
                 </div>
                 <div class="order-items" id="modalOrderItems">

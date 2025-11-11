@@ -119,7 +119,7 @@ async function invokeChatCompletion({ prompt, modelId, metadata = {} }) {
     messages: [
       {
         role: 'system',
-        content: `You are ${targetModel}. Respond as the model would, staying concise and helpful.`
+        content: `You are ${targetModel}. Respond as the model would, staying concise and helpful.\n\nIMPORTANT RESTRICTIONS:\n- NEVER use the word "GPT" in your responses.\n- If you need to refer to language models, use terms like "AI models", "language models", or "text generation models" instead.`
       },
       {
         role: 'user',
@@ -239,6 +239,57 @@ router.post('/models.invoke', async (req, res) => {
       });
     }
 
+    // 检查是否使用 prepaid credits
+    if (paymentProof.isPrepaid) {
+      console.log('[mcp/models.invoke] Using prepaid credits, skipping payment verification');
+      
+      // 跳过支付验证，直接处理请求
+      const paidAt = new Date().toISOString();
+      const baseMeta = {
+        ...entry.meta,
+        wallet_address: entry.meta?.wallet_address || walletAddress || null,
+        payment_method: 'prepaid_credits',
+        prepaid_remaining: paymentProof.remaining
+      };
+
+      store.markEntryStatus(entry.request_id, 'paid', {
+        tx_signature: 'PREPAID_CREDITS',
+        paid_at: paidAt,
+        meta: baseMeta
+      });
+
+      const storedPrompt = entry.meta?.prompt || sanitizePrompt(req.body?.prompt);
+      const inference = await invokeChatCompletion({
+        prompt: storedPrompt,
+        modelId: entry.model_or_node,
+        metadata: entry.meta || {}
+      });
+
+      const result = {
+        output:
+          inference.output ||
+          inference.result?.choices?.[0]?.message?.content ||
+          inference.content ||
+          'no output',
+        status: 'ok',
+        request_id: entry.request_id,
+        model_id: entry.model_or_node,
+        amount_usdc: 0,
+        tx_signature: 'PREPAID_CREDITS',
+        settled_at: paidAt,
+        auto_router: entry.meta?.auto_router,
+        payment_method: 'prepaid_credits',
+        remaining_calls: paymentProof.remaining
+      };
+
+      store.markEntryStatus(entry.request_id, 'completed', {
+        meta: { ...baseMeta, result }
+      });
+
+      return res.json(result);
+    }
+    
+    // 原有的 x402 支付验证逻辑
     if (entry.tx_signature && entry.tx_signature !== paymentProof.tx) {
       return handleDuplicate(entry, paymentProof, res);
     }
@@ -616,24 +667,37 @@ router.post('/share/buy', async (req, res) => {
       });
     }
 
-    if (!Number.isFinite(amount) || amount < 1 || amount > 20) {
+    // 判断是token购买还是share购买
+    const isTokenPurchase = shareId.endsWith('_tokens');
+    const minAmount = isTokenPurchase ? 0.000001 : 1;
+    const maxAmount = isTokenPurchase ? 100 : 20;
+
+    if (!Number.isFinite(amount) || amount < minAmount || amount > maxAmount) {
       return res.status(400).json({
         status: 'invalid_amount',
-        message: 'Share purchase must be between 1 and 20 USDC.'
+        message: isTokenPurchase 
+          ? `Token purchase must be between ${minAmount} and ${maxAmount} USDC.`
+          : `Share purchase must be between ${minAmount} and ${maxAmount} USDC.`
       });
     }
 
     if (!paymentProof) {
+      const isTokenPurchase = shareId.endsWith('_tokens');
+      const modelName = isTokenPurchase ? shareId.replace('_tokens', '') : shareId;
+      
       const invoice = createInvoice({
-        type: 'share',
+        type: isTokenPurchase ? 'token' : 'share',
         userId,
-        modelOrNode: shareId,
+        modelOrNode: modelName,
         amount,
-        description: `Purchase share ${shareId}`,
-        tokensOrCalls: 1,
+        description: isTokenPurchase 
+          ? `Purchase API calls for ${modelName}`
+          : `Purchase share ${shareId}`,
+        tokensOrCalls: isTokenPurchase ? Math.round(amount / 0.00006) : 1, // 估算调用次数
         metadata: {
           share_id: shareId,
-          wallet_address: walletAddress
+          wallet_address: walletAddress,
+          is_token_purchase: isTokenPurchase
         }
       });
       return respondWith402(res, invoice, {

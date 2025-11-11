@@ -525,13 +525,13 @@ function initializeWalletUI() {
 }
 
 /**
- * 更新钱包UI显示 - 更新为I3 tokens术语
+ * 更新钱包UI显示
  * @param {string} address - 钱包地址
- * @param {number} credits - I3 tokens数量
+ * @param {number} credits - 不再使用
  */
 function updateWalletUI(address, credits) {
     const accountBtnText = document.getElementById('accountBtnText');
-    const creditsDisplay = document.getElementById('creditsDisplay');
+    const usdcDisplay = document.getElementById('usdcDisplay');
 
     if (accountBtnText && address) {
         // 已连接：显示截断的钱包地址
@@ -543,14 +543,12 @@ function updateWalletUI(address, credits) {
 
     setWalletTypeIcon(window.walletManager?.walletType || null);
 
-    if (creditsDisplay && address && typeof credits === 'number') {
-        // 已连接：显示并更新 I3 tokens
-        creditsDisplay.style.display = 'inline';
-        const rounded = (Math.round((Number(credits) || 0) * 1000) / 1000).toFixed(3);
-        creditsDisplay.textContent = `${rounded} I3 tokens`;
-    } else if (creditsDisplay) {
-        // 未连接：隐藏 token
-        creditsDisplay.style.display = 'none';
+    // 不再显示I3 tokens，改为显示USDC（仅Solana）
+    if (usdcDisplay && address && window.walletManager?.walletType?.includes('solana')) {
+        window.walletManager?.updateUSDCBalance?.();
+    } else if (usdcDisplay) {
+        // 未连接或非Solana钱包：隐藏
+        usdcDisplay.style.display = 'none';
     }
 }
 
@@ -560,15 +558,15 @@ function updateWalletUI(address, credits) {
  */
 function resetWalletUI() {
     const accountBtnText = document.getElementById('accountBtnText');
-    const creditsDisplay = document.getElementById('creditsDisplay');
+    const usdcDisplay = document.getElementById('usdcDisplay');
     
     if (accountBtnText) {
         accountBtnText.textContent = 'Login';
     }
     setWalletTypeIcon(null);
     
-    if (creditsDisplay) {
-      creditsDisplay.style.display = 'none';
+    if (usdcDisplay) {
+      usdcDisplay.style.display = 'none';
     }
 
 }
@@ -784,11 +782,10 @@ window.addEventListener('dailyCheckinSuccess', function(event) {
     console.log('Daily checkin success event received:', event.detail);
     const { reward, newBalance, totalCheckins } = event.detail;
     
-    // 更新I3 tokens显示
-    const creditsDisplay = document.getElementById('creditsDisplay');
-    if (creditsDisplay) {
-        const rounded = (Math.round((Number(newBalance) || 0) * 1000) / 1000).toFixed(3);
-        creditsDisplay.textContent = `${rounded} I3 tokens`;
+    // 不再显示I3 tokens
+    // 如果是Solana钱包，更新USDC余额
+    if (window.walletManager?.walletType?.includes('solana')) {
+        window.walletManager?.updateUSDCBalance?.();
     }
     
     updateCheckinButton();
@@ -801,11 +798,10 @@ window.addEventListener('creditsSpent', function(event) {
     console.log('Credits spent event received:', event.detail);
     const { amount, newBalance, reason } = event.detail;
     
-    // 更新I3 tokens显示
-    const creditsDisplay = document.getElementById('creditsDisplay');
-    if (creditsDisplay) {
-        const rounded = (Math.round((Number(newBalance) || 0) * 1000) / 1000).toFixed(3);
-        creditsDisplay.textContent = `${rounded} I3 tokens`;
+    // 不再显示I3 tokens
+    // 如果是Solana钱包，更新USDC余额
+    if (window.walletManager?.walletType?.includes('solana')) {
+        window.walletManager?.updateUSDCBalance?.();
     }
     
     showNotification(`Spent ${amount} I3 tokens for ${reason}`, 'success');

@@ -754,6 +754,9 @@ function tryWorkflow(workflowId) {
 
 // Load workflow to canvas
 function loadWorkflowToCanvas(workflow) {
+    // Get user prompt if exists
+    const userPrompt = localStorage.getItem('workflowUserPrompt');
+    
     // Save workflow data to localStorage
     const workflowData = {
         id: workflow.id,
@@ -770,6 +773,7 @@ function loadWorkflowToCanvas(workflow) {
         lastPaymentExplorer: workflow.lastPaymentExplorer || null,
         lastPaymentAt: workflow.lastPaymentAt || null,
         lastPaymentMemo: workflow.lastPaymentMemo || null,
+        userPrompt: userPrompt || null,
         status: 'ready',
         createdAt: new Date().toISOString()
     };
@@ -789,13 +793,112 @@ function loadWorkflowToCanvas(workflow) {
         lastPaymentTx: workflow.lastPaymentTx || null,
         lastPaymentExplorer: workflow.lastPaymentExplorer || null,
         lastPaymentAt: workflow.lastPaymentAt || null,
-        lastPaymentMemo: workflow.lastPaymentMemo || null
+        lastPaymentMemo: workflow.lastPaymentMemo || null,
+        userPrompt: userPrompt || null
     };
     localStorage.setItem('currentWorkflow', JSON.stringify(currentWorkflow));
+    
+    // Clear the prompt after using it
+    localStorage.removeItem('workflowUserPrompt');
     
     // Redirect to canvas page
     window.location.href = 'canvas.html';
 }
+
+// Prepare workflow execution with user input
+function prepareWorkflowExecution() {
+    const input = document.getElementById('workflowPromptInput');
+    const prompt = input ? input.value.trim() : '';
+    
+    if (!prompt) {
+        alert('Please enter a prompt or question to process with the workflow.');
+        if (input) input.focus();
+        return;
+    }
+    
+    // Store the prompt for use in workflow execution
+    localStorage.setItem('workflowUserPrompt', prompt);
+    
+    // Scroll to top to show workflows
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Keep the input value until workflow is selected
+    // Don't clear immediately - user might want to modify it
+    
+    // Show a visual indicator that prompt is ready
+    showPromptReadyIndicator(prompt);
+}
+
+// Show indicator that user prompt is ready
+function showPromptReadyIndicator(prompt) {
+    // Remove any existing indicator
+    const existing = document.querySelector('.prompt-ready-indicator');
+    if (existing) existing.remove();
+    
+    // Create new indicator
+    const indicator = document.createElement('div');
+    indicator.className = 'prompt-ready-indicator';
+    indicator.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 12l2 2 4-4"/>
+                <circle cx="12" cy="12" r="10"/>
+            </svg>
+            <div style="flex: 1;">
+                <div style="font-weight: 600; color: #10b981; margin-bottom: 4px;">Prompt Ready</div>
+                <div style="font-size: 13px; color: #6b7280; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${prompt}</div>
+            </div>
+            <button onclick="clearWorkflowPrompt()" style="padding: 6px 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; color: #6b7280; cursor: pointer; font-size: 13px;">Clear</button>
+        </div>
+    `;
+    
+    // Insert after search section
+    const searchSection = document.querySelector('.search-filter-section');
+    if (searchSection) {
+        searchSection.insertAdjacentElement('afterend', indicator);
+    }
+}
+
+// Clear workflow prompt
+function clearWorkflowPrompt() {
+    localStorage.removeItem('workflowUserPrompt');
+    const indicator = document.querySelector('.prompt-ready-indicator');
+    if (indicator) indicator.remove();
+    
+    // Clear input field
+    const input = document.getElementById('workflowPromptInput');
+    if (input) input.value = '';
+}
+
+// Check if prompt exists on page load and show indicator
+document.addEventListener('DOMContentLoaded', function() {
+    // Ensure input section is always visible
+    const inputSection = document.querySelector('.workflow-input-section');
+    if (inputSection) {
+        inputSection.style.display = 'block';
+        inputSection.style.visibility = 'visible';
+    }
+    
+    const savedPrompt = localStorage.getItem('workflowUserPrompt');
+    if (savedPrompt) {
+        showPromptReadyIndicator(savedPrompt);
+        // Restore saved prompt to input
+        const input = document.getElementById('workflowPromptInput');
+        if (input) {
+            input.value = savedPrompt;
+        }
+    }
+    
+    // Add Enter key support for input
+    const input = document.getElementById('workflowPromptInput');
+    if (input) {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                prepareWorkflowExecution();
+            }
+        });
+    }
+});
 
 // Export functions for global access
 window.filterWorkflows = filterWorkflows;
@@ -803,6 +906,8 @@ window.showWorkflowDetails = showWorkflowDetails;
 window.hideWorkflowDetailsModal = hideWorkflowDetailsModal;
 window.tryWorkflow = tryWorkflow;
 window.hideTokenPurchaseModal = hideTokenPurchaseModal;
+window.prepareWorkflowExecution = prepareWorkflowExecution;
+window.clearWorkflowPrompt = clearWorkflowPrompt;
 
 function generateWorkflowPaymentRequestId() {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -934,12 +1039,42 @@ function offerCanvasNavigation(workflow) {
         const modal = document.createElement('div');
         modal.id = 'workflow-run-modal';
         modal.className = 'workflow-run-modal';
+        
+        // Build explorer link section if transaction data is available
+        let explorerSection = '';
+        if (workflow.lastPaymentTx && workflow.lastPaymentExplorer) {
+            const shortTx = `${workflow.lastPaymentTx.slice(0, 8)}...${workflow.lastPaymentTx.slice(-8)}`;
+            explorerSection = `
+                <div class="workflow-run-modal__explorer">
+                    <p style="margin: 12px 0 8px; font-size: 13px; color: #94a3b8;">
+                        <strong>Payment Transaction:</strong>
+                    </p>
+                    <a href="${workflow.lastPaymentExplorer}" 
+                       target="_blank" 
+                       rel="noopener noreferrer"
+                       class="workflow-run-modal__solscan-link"
+                       title="View on Solana Explorer">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                            <polyline points="15 3 21 3 21 9"/>
+                            <line x1="10" y1="14" x2="21" y2="3"/>
+                        </svg>
+                        ${shortTx}
+                    </a>
+                    <p style="margin: 8px 0 0; font-size: 12px; color: #64748b;">
+                        ${workflow.prepaidAmountUsdc ? `Amount: ${workflow.prepaidAmountUsdc.toFixed(6)} USDC` : ''}
+                    </p>
+                </div>
+            `;
+        }
+        
         modal.innerHTML = `
             <div class="workflow-run-modal__content">
                 <button class="workflow-run-modal__close" aria-label="Close">×</button>
                 <h3>Workflow Ready</h3>
                 <p>Your workflow <strong>${workflow.name}</strong> is paid and ready to execute.</p>
-                <p>Would you like to open it on the canvas to review or run the pipeline now?</p>
+                ${explorerSection}
+                <p style="margin-top: 16px;">Would you like to open it on the canvas to review or run the pipeline now?</p>
                 <div class="workflow-run-modal__actions">
                     <button type="button" class="workflow-run-modal__later">Maybe Later</button>
                     <button type="button" class="workflow-run-modal__open">Open Canvas</button>

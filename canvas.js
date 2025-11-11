@@ -124,7 +124,7 @@ function createNodeElement(nodeData) {
                 <path d="M12 1v6m0 6v6"/>
                 <path d="m21 12-6-3-6 3-6-3"/>
             </svg>
-            ${nodeData.quantity}K tokens
+            ${nodeData.quantity} API calls
         </div>
     `;
     
@@ -220,7 +220,7 @@ function restoreWorkflowFromData(workflowData) {
                     <path d="M12 1v6m0 6v6"/>
                     <path d="m21 12-6-3-6 3-6-3"/>
                 </svg>
-                ${restoredNode.quantity}K tokens
+                ${restoredNode.quantity} API calls
             </div>
         `;
         
@@ -699,7 +699,7 @@ function createModelElement(model) {
                     <path d="M12 1v6m0 6v6"/>
                 <path d="m21 12-6-3-6 3-6-3"/>
                 </svg>
-            ${quantity}K tokens
+            ${quantity} API calls
         </div>
     `;
     
@@ -879,7 +879,7 @@ function createWorkflowNode(model, x, y) {
                 <path d="M12 1v6m0 6v6"/>
                 <path d="m21 12-6-3-6 3-6-3"/>
             </svg>
-            ${quantity}K tokens
+            ${quantity} API calls
         </div>
     `;
     

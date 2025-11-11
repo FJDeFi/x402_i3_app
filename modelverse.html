@@ -422,8 +422,8 @@
             <!-- Right Section -->
 			<div class="header-right">
                 <button id="networkBadge" class="network-badge" type="button" style="display:none" onclick="openNetworkPickerModal()">
-				  <img class="network-badge__icon" src="" alt="">
-				  <span class="network-badge__text">Network</span>
+				  <img id="networkBadgeIcon" class="network-badge__icon" src="" alt="">
+				  <span id="networkBadgeText" class="network-badge__text">Network</span>
 			        <svg class="network-badge__caret" width="12" height="12" viewBox="0 0 24 24">
 				        <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/>
 				    </svg>
@@ -584,8 +584,50 @@
 	</script>
     <!-- Main Content -->
     
+    <!-- 钱包选择模态框 -->
+    <div id="walletModal" class="wallet-modal">
+        <div class="wallet-modal-content">
+            <button class="wallet-close-btn" onclick="closeWalletModal()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            
+            <div class="wallet-modal-header">
+                <h2 class="wallet-modal-title">Log in or sign up</h2>
+                <p class="wallet-modal-subtitle">Log in and connect wallet to earn USDC credits</p>
+            </div>
 
+            <div class="wallet-options">
+                <div class="wallet-option available" onclick="connectSolanaPhantom()">
+                    <span class="wallet-icon-wrap">
+                        <img src="svg/phantom.svg" alt="Phantom">
+                    </span>
+                    <div class="wallet-info">
+                        <div class="wallet-name">Phantom (Solana Devnet)</div>
+                        <div class="wallet-desc">Pay and check in with USDC on Solana Devnet</div>
+                    </div>
+                </div>
+
+                <div class="wallet-footer">
+                    By Intelligence Cubed
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="api-manager.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="wallet-manager.js"></script>
+    <script src="wallet-integration.js"></script>
     <script src="account-dropdown.js"></script>
+    <script type="module" src="chains.js"></script>
+    <script type="module" src="solana-wallet.js"></script>
+    <script type="module" src="solana-checkin.js"></script>
+    <script src="onchain-checkin.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function(){
         try { injectAccountDropdown('#accountDropdownMount'); } catch (e) { console.warn('injectAccountDropdown failed:', e); }

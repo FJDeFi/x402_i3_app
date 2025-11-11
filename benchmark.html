@@ -760,8 +760,8 @@
             <!-- Right Section -->
 			<div class="header-right">
                 <button id="networkBadge" class="network-badge" type="button" style="display:none" onclick="openNetworkPickerModal()">
-				  <img class="network-badge__icon" src="" alt="">
-				  <span class="network-badge__text">Network</span>
+				  <img id="networkBadgeIcon" class="network-badge__icon" src="" alt="">
+				  <span id="networkBadgeText" class="network-badge__text">Network</span>
 			        <svg class="network-badge__caret" width="12" height="12" viewBox="0 0 24 24">
 				        <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/>
 				    </svg>
@@ -770,24 +770,6 @@
 			    <div id="accountDropdownMount"></div>
 			  </div>
 			</div>
-        </div>
-    </header>
-
-                <!-- Right Section -->
-            <div class="header-right">
-                <!-- Current Network badge (shows only after wallet connected) -->
-                <button id="networkBadge" class="network-badge" type="button" style="display:none" onclick="openNetworkPickerModal()">
-				  <img class="network-badge__icon" src="" alt="">
-				  <span class="network-badge__text">Network</span>
-			        <svg class="network-badge__caret" width="12" height="12" viewBox="0 0 24 24">
-				        <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/>
-				    </svg>
-				</button>
-                <div id="networkPickerMount"></div>
-                <div class="user-section">
-                    <div id="accountDropdownMount"></div>
-                </div>
-            </div>
         </div>
     </header>
 

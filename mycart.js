@@ -1,6 +1,15 @@
 // 🛒 MyCart页面 - 购物车功能 (修复版 - 添加真正的支付验证)
 console.log('🛒 加载 MyCart 页面...');
 
+// 获取模型数据
+function getModelData(modelName) {
+    if (typeof MODEL_DATA === 'undefined') {
+        console.error('⚠️ MODEL_DATA not loaded');
+        return null;
+    }
+    return MODEL_DATA[modelName] || null;
+}
+
 // 购物车数据存储
 let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
 
@@ -134,8 +143,22 @@ function populateCartTable() {
         const tokenQuantity = item.tokenQuantity || 0;
         const shareQuantity = item.shareQuantity || 0;
         
-        const tokenSubtotal = (modelData.tokenPrice * tokenQuantity).toFixed(2);
-        const shareSubtotal = (modelData.sharePrice * shareQuantity).toFixed(2);
+        // 使用与modelverse一致的价格计算方式
+        let tokenPricePerCall, sharePriceUsdc;
+        if (window.PricingUtils && typeof window.PricingUtils.normalizeModelPricing === 'function') {
+            const pricing = window.PricingUtils.normalizeModelPricing(modelData);
+            tokenPricePerCall = pricing.pricePerCallUsdc;
+            sharePriceUsdc = pricing.sharePriceUsdc;
+        } else {
+            // 回退方案
+            const tokenPricePerK = Number(modelData.tokenPriceUsdc || modelData.tokenPrice || 0);
+            tokenPricePerCall = tokenPricePerK / 1000;
+            sharePriceUsdc = Number(modelData.sharePriceUsdc || (modelData.sharePrice ? modelData.sharePrice / 10 : 0));
+        }
+        
+        // tokenQuantity 是实际的API调用次数，不是K
+        const tokenSubtotal = (tokenPricePerCall * tokenQuantity).toFixed(6);
+        const shareSubtotal = (sharePriceUsdc * shareQuantity).toFixed(6);
 
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -150,20 +173,22 @@ function populateCartTable() {
             </td>
             <td class="price-display">
                 <div class="purchase-option">
-                    <div class="price-info">${modelData.tokenPrice}/K<img src="svg/i3-token-logo.svg" class="token-logo" alt="i3"></div>
+                    <div class="price-info">${tokenPricePerCall.toFixed(6)} USDC/call</div>
                     <div class="quantity-controls">
                         <button class="quantity-btn" onclick="updateTokenQuantity(${index}, ${tokenQuantity - 1})" ${tokenQuantity <= 0 ? 'disabled' : ''}>−</button>
-                        <input type="number" class="quantity-input" value="${tokenQuantity}" min="0" max="999" 
+                        <input type="number" class="quantity-input" value="${tokenQuantity}" min="0" max="999999" 
                                onchange="updateTokenQuantity(${index}, parseInt(this.value))" 
-                               onkeypress="if(event.key==='Enter') updateTokenQuantity(${index}, parseInt(this.value))">
-                        <button class="quantity-btn" onclick="updateTokenQuantity(${index}, ${tokenQuantity + 1})" ${tokenQuantity >= 999 ? 'disabled' : ''}>+</button>
+                               onkeypress="if(event.key==='Enter') updateTokenQuantity(${index}, parseInt(this.value))"
+                               placeholder="API调用次数"
+                               title="输入API调用次数（例如：2 = 2次调用）">
+                        <button class="quantity-btn" onclick="updateTokenQuantity(${index}, ${tokenQuantity + 1})" ${tokenQuantity >= 999999 ? 'disabled' : ''}>+</button>
                     </div>
-                    <div class="subtotal-small">Subtotal: ${tokenSubtotal}<img src="svg/i3-token-logo.svg" class="token-logo" alt="i3"></div>
+                    <div class="subtotal-small">Subtotal: ${tokenSubtotal} USDC (${tokenQuantity.toLocaleString()} API calls)</div>
                 </div>
             </td>
             <td class="price-display">
                 <div class="purchase-option">
-                    <div class="price-info">${modelData.sharePrice}K<img src="svg/i3-token-logo.svg" class="token-logo" alt="i3"></div>
+                    <div class="price-info">${sharePriceUsdc.toFixed(6)} USDC</div>
                     <div class="quantity-controls">
                         <button class="quantity-btn" onclick="updateShareQuantity(${index}, ${shareQuantity - 1})" ${shareQuantity <= 0 ? 'disabled' : ''}>−</button>
                         <input type="number" class="quantity-input" value="${shareQuantity}" min="0" max="999" 
@@ -171,11 +196,11 @@ function populateCartTable() {
                                onkeypress="if(event.key==='Enter') updateShareQuantity(${index}, parseInt(this.value))">
                         <button class="quantity-btn" onclick="updateShareQuantity(${index}, ${shareQuantity + 1})" ${shareQuantity >= 999 ? 'disabled' : ''}>+</button>
                     </div>
-                    <div class="subtotal-small">Subtotal: ${shareSubtotal}K<img src="svg/i3-token-logo.svg" class="token-logo" alt="i3"></div>
+                    <div class="subtotal-small">Subtotal: ${shareSubtotal} USDC (${shareQuantity} shares)</div>
                 </div>
             </td>
             <td class="total-subtotal">
-                <div class="total-amount">${(parseFloat(tokenSubtotal) + parseFloat(shareSubtotal) * 1000).toFixed(2)}<img src="svg/i3-token-logo.svg" class="token-logo" alt="i3"></div>
+                <div class="total-amount">${(parseFloat(tokenSubtotal) + parseFloat(shareSubtotal)).toFixed(6)} USDC</div>
             </td>
             <td>
                 <button class="remove-btn" onclick="removeFromCart(${index})">Remove</button>
@@ -287,8 +312,21 @@ function showCheckoutModal() {
             totalTokenQuantity += tokenQuantity;
             totalShareQuantity += shareQuantity;
             
-            const tokenSubtotal = modelData.tokenPrice * tokenQuantity;
-            const shareSubtotal = modelData.sharePrice * shareQuantity;
+            // 使用与modelverse一致的价格计算方式
+            let tokenPricePerCall, sharePriceUsdc;
+            if (window.PricingUtils && typeof window.PricingUtils.normalizeModelPricing === 'function') {
+                const pricing = window.PricingUtils.normalizeModelPricing(modelData);
+                tokenPricePerCall = pricing.pricePerCallUsdc;
+                sharePriceUsdc = pricing.sharePriceUsdc;
+            } else {
+                // 回退方案
+                const tokenPricePerK = Number(modelData.tokenPriceUsdc || modelData.tokenPrice || 0);
+                tokenPricePerCall = tokenPricePerK / 1000;
+                sharePriceUsdc = Number(modelData.sharePriceUsdc || (modelData.sharePrice ? modelData.sharePrice / 10 : 0));
+            }
+            
+            const tokenSubtotal = tokenPricePerCall * tokenQuantity; // tokenQuantity是实际调用次数
+            const shareSubtotal = sharePriceUsdc * shareQuantity;
             tokenPriceTotal += tokenSubtotal;
             sharePriceTotal += shareSubtotal;
             
@@ -297,9 +335,9 @@ function showCheckoutModal() {
                     <div class="order-item">
                         <div class="order-item-name">${item.modelName}</div>
                         <div class="order-item-details">
-                            ${tokenQuantity > 0 ? `${tokenQuantity}K tokens` : ''}
+                            ${tokenQuantity > 0 ? `${tokenQuantity.toLocaleString()} API calls (${tokenSubtotal.toFixed(6)} USDC)` : ''}
                             ${tokenQuantity > 0 && shareQuantity > 0 ? ' + ' : ''}
-                            ${shareQuantity > 0 ? `${shareQuantity} shares` : ''}
+                            ${shareQuantity > 0 ? `${shareQuantity} shares (${shareSubtotal.toFixed(6)} USDC)` : ''}
                         </div>
                     </div>
                 `;
@@ -307,13 +345,13 @@ function showCheckoutModal() {
         }
     });
 
-    const grandTotal = tokenPriceTotal + (sharePriceTotal * 1000);
+    const grandTotal = tokenPriceTotal + sharePriceTotal;
 
     // 更新弹窗内容
     document.getElementById('modalModels').textContent = modelCount;
-    document.getElementById('modalTokens').textContent = totalTokenQuantity + 'K Tokens';
+    document.getElementById('modalTokens').textContent = totalTokenQuantity.toLocaleString() + ' API Calls';
     document.getElementById('modalShares').textContent = totalShareQuantity;
-    document.getElementById('modalTotal').innerHTML = `${grandTotal.toFixed(2)} <img src="svg/i3-token-logo.svg" class="token-logo" alt="i3">`;
+    document.getElementById('modalTotal').textContent = `${grandTotal.toFixed(6)} USDC`;
     document.getElementById('modalOrderItems').innerHTML = orderItemsHtml;
 
     // 显示弹窗
@@ -346,31 +384,62 @@ function savePurchaseToAssets(cartItems, resultSummary) {
 
         const receipts = Array.isArray(resultSummary?.receipts) ? resultSummary.receipts : [];
 
-        receipts.forEach(({ order, receipt }) => {
-            const existingShare = myAssets.shares.find(share => share.modelName === order.modelName);
-            if (existingShare) {
-                existingShare.quantity += order.quantity;
-                existingShare.totalInvested = Number((existingShare.totalInvested + receipt.amount_usdc).toFixed(6));
-                existingShare.lastUpdated = purchaseDate;
-            } else {
-                myAssets.shares.push({
+        receipts.forEach(({ type, order, receipt }) => {
+            if (type === 'token') {
+                // 处理Token购买
+                const existingToken = myAssets.tokens.find(token => token.modelName === order.modelName);
+                if (existingToken) {
+                    existingToken.quantity += order.quantity;
+                    existingToken.totalSpent = Number((existingToken.totalSpent + order.amount).toFixed(6));
+                    existingToken.lastUpdated = purchaseDate;
+                } else {
+                    const modelData = getModelData(order.modelName);
+                    myAssets.tokens.push({
+                        modelName: order.modelName,
+                        quantity: order.quantity, // 实际API调用次数
+                        pricePerCall: order.pricePerCall,
+                        totalSpent: order.amount,
+                        category: modelData?.category || 'AI Research',
+                        acquiredAt: purchaseDate,
+                        lastUpdated: purchaseDate
+                    });
+                }
+
+                myAssets.history.push({
+                    type: 'token_purchase',
                     modelName: order.modelName,
                     quantity: order.quantity,
-                    pricePerShare: order.pricePerShare,
-                    totalInvested: receipt.amount_usdc,
-                    acquiredAt: purchaseDate,
-                    lastUpdated: purchaseDate
+                    amount_usdc: order.amount,
+                    tx_signature: receipt.tx_signature,
+                    purchasedAt: purchaseDate
+                });
+            } else {
+                // 处理Share购买
+                const existingShare = myAssets.shares.find(share => share.modelName === order.modelName);
+                if (existingShare) {
+                    existingShare.quantity += order.quantity;
+                    existingShare.totalInvested = Number((existingShare.totalInvested + receipt.amount_usdc).toFixed(6));
+                    existingShare.lastUpdated = purchaseDate;
+                } else {
+                    myAssets.shares.push({
+                        modelName: order.modelName,
+                        quantity: order.quantity,
+                        pricePerShare: order.pricePerShare,
+                        totalInvested: receipt.amount_usdc,
+                        acquiredAt: purchaseDate,
+                        lastUpdated: purchaseDate
+                    });
+                }
+
+                myAssets.history.push({
+                    type: 'share_purchase',
+                    modelName: order.modelName,
+                    quantity: order.quantity,
+                    amount_usdc: receipt.amount_usdc,
+                    tx_signature: receipt.tx_signature,
+                    purchasedAt: purchaseDate
                 });
             }
-
-            myAssets.history.push({
-                type: 'share_purchase',
-                modelName: order.modelName,
-                quantity: order.quantity,
-                amount_usdc: receipt.amount_usdc,
-                tx_signature: receipt.tx_signature,
-                purchasedAt: purchaseDate
-            });
         });
 
         localStorage.setItem('myAssets', JSON.stringify(myAssets));
@@ -380,7 +449,7 @@ function savePurchaseToAssets(cartItems, resultSummary) {
     }
 }
 
-// 下单功能 - 在这里进行所有验证
+// 下单功能 - 支持tokens和shares购买
 function placeOrder() {
     const cartItems = getCartItems();
     if (!cartItems.length) {
@@ -388,6 +457,34 @@ function placeOrder() {
         return;
     }
 
+    // 准备Token订单
+    const tokenOrders = cartItems
+        .filter(item => (item.tokenQuantity || 0) > 0)
+        .map(item => {
+            const model = getModelData(item.modelName);
+            if (!model) return null;
+            const quantity = Number(item.tokenQuantity || 0); // 实际API调用次数
+            
+            // 使用与modelverse一致的价格计算
+            let pricePerCall;
+            if (window.PricingUtils && typeof window.PricingUtils.normalizeModelPricing === 'function') {
+                const pricing = window.PricingUtils.normalizeModelPricing(model);
+                pricePerCall = pricing.pricePerCallUsdc;
+            } else {
+                const pricePerK = Number(model.tokenPriceUsdc || model.tokenPrice || 0);
+                pricePerCall = pricePerK / 1000;
+            }
+            
+            return {
+                modelName: item.modelName,
+                quantity, // 实际调用次数
+                amount: Number((pricePerCall * quantity).toFixed(6)),
+                pricePerCall
+            };
+        })
+        .filter(Boolean);
+
+    // 准备Share订单
     const shareOrders = cartItems
         .filter(item => (item.shareQuantity || 0) > 0)
         .map(item => {
@@ -404,13 +501,47 @@ function placeOrder() {
         })
         .filter(Boolean);
 
-    if (!shareOrders.length) {
-        alert('⚠️ 当前购物车暂只支持使用 x402 购买模型份额 (Share)。');
+    if (!tokenOrders.length && !shareOrders.length) {
+        alert('⚠️ 购物车中没有有效的商品。');
         return;
     }
 
     (async () => {
         const receipts = [];
+        
+        // 处理Token购买
+        for (const order of tokenOrders) {
+            MCPClient.logStatus('invoice', `准备购买 ${order.modelName} API调用`, {
+                description: `${order.quantity}K calls × ${order.pricePerK} USDC`
+            });
+            const response = await MCPClient.purchaseShare({
+                share_id: order.modelName + '_tokens',
+                amount_usdc: order.amount
+            }, {
+                onInvoice(invoice) {
+                    MCPClient.logStatus('invoice', `Token 402: ${invoice.description || order.modelName}`, {
+                        amount: invoice.amount_usdc,
+                        memo: invoice.memo || invoice.request_id
+                    });
+                },
+                onPayment(invoice, tx) {
+                    MCPClient.logStatus('payment', '已完成 Token 支付', {
+                        amount: invoice.amount_usdc,
+                        memo: invoice.memo || invoice.request_id,
+                        tx
+                    });
+                }
+            });
+
+            if (response.status !== 'ok') {
+                alert('❌ Token 购买取消或失败，订单中止。');
+                return;
+            }
+
+            receipts.push({ type: 'token', order, receipt: response.result });
+        }
+
+        // 处理Share购买
         for (const order of shareOrders) {
             MCPClient.logStatus('invoice', `准备购买 ${order.modelName} 份额`, {
                 description: `${order.quantity} × ${order.pricePerShare} USDC`
@@ -439,20 +570,105 @@ function placeOrder() {
                 return;
             }
 
-            receipts.push({ order, receipt: response.result });
+            receipts.push({ type: 'share', order, receipt: response.result });
         }
 
         savePurchaseToAssets(cartItems, { receipts });
 
-        alert(`🎉 Share 购买完成！\n\n共处理 ${receipts.length} 个模型，详见右下角 402 状态面板。`);
+        // 显示交易链接
+        const allTxSignatures = receipts.map(r => r.receipt?.tx_signature || r.receipt?.signature).filter(Boolean);
+        if (allTxSignatures.length > 0) {
+            allTxSignatures.forEach((signature, index) => {
+                const receipt = receipts[index];
+                const explorerUrl = `https://explorer.solana.com/tx/${signature}?cluster=devnet`;
+                showPurchaseSuccessToast(signature, receipt.order, explorerUrl);
+            });
+        }
+
+        const tokenCount = tokenOrders.length;
+        const shareCount = shareOrders.length;
+        let message = '🎉 购买完成！\n\n';
+        if (tokenCount > 0) message += `✅ Tokens: ${tokenCount} 个模型\n`;
+        if (shareCount > 0) message += `✅ Shares: ${shareCount} 个模型\n`;
+        message += '\n📋 查看交易详情请点击右下角通知';
+        
+        alert(message);
 
         localStorage.removeItem('cartItems');
         updateCartDisplay();
         closeCheckoutModal();
         setTimeout(() => {
             window.location.href = 'myassets.html';
-        }, 800);
+        }, 1500);
     })();
+}
+
+// 显示购买成功通知
+function showPurchaseSuccessToast(signature, order, explorerUrl) {
+    try {
+        const toastId = `purchase-toast-${Date.now()}`;
+        const toast = document.createElement('div');
+        toast.id = toastId;
+        toast.className = 'purchase-success-toast';
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 20px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+            z-index: 10000;
+            max-width: 400px;
+            animation: slideInRight 0.3s ease-out;
+        `;
+        
+        const amount = order.amount ? `${order.amount.toFixed(6)} USDC` : 'N/A';
+        const quantity = order.quantity ? `${order.quantity.toLocaleString()} API calls` : `${order.quantity} shares`;
+        
+        toast.innerHTML = `
+            <button onclick="this.parentElement.remove()" style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.2);border:none;color:white;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:16px;line-height:1;">×</button>
+            <h4 style="margin:0 0 8px 0;font-size:16px;font-weight:600;">🎉 购买成功！</h4>
+            <p style="margin:0 0 4px 0;font-size:14px;opacity:0.95;"><strong>${order.modelName}</strong></p>
+            <p style="margin:0 0 4px 0;font-size:13px;opacity:0.9;">数量: ${quantity}</p>
+            <p style="margin:0 0 12px 0;font-size:13px;opacity:0.9;">金额: ${amount}</p>
+            <a href="${explorerUrl}" target="_blank" rel="noopener noreferrer" 
+               style="display:inline-block;background:rgba(255,255,255,0.2);color:white;padding:8px 16px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;transition:all 0.2s;"
+               onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                📋 查看交易详情 →
+            </a>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // 10秒后自动关闭
+        setTimeout(() => {
+            try { toast.remove(); } catch (_) {}
+        }, 10000);
+    } catch (err) {
+        console.warn('Failed to show purchase success toast', err);
+    }
+}
+
+// 添加动画
+if (!document.getElementById('purchase-toast-animation')) {
+    const style = document.createElement('style');
+    style.id = 'purchase-toast-animation';
+    style.textContent = `
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 // 点击弹窗外部关闭弹窗

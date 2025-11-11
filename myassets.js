@@ -1,6 +1,15 @@
 // My Assets Page JavaScript - Updated for new data structure
 console.log('📊 Loading My Assets page...');
 
+// 获取模型数据
+function getModelData(modelName) {
+    if (typeof MODEL_DATA === 'undefined') {
+        console.error('⚠️ MODEL_DATA not loaded');
+        return null;
+    }
+    return MODEL_DATA[modelName] || null;
+}
+
 // ========== DATA FUNCTIONS ==========
 
 // Get purchased items from localStorage (new structure)
@@ -108,20 +117,10 @@ function calculateShareStats() {
 
 // ========== UPDATE DISPLAY FUNCTIONS ==========
 
-// 更新 USDC 余额显示
+// 更新 USDC 余额显示（已移除卡片，保留函数以防其他地方调用）
 function updateI3TokenBalance() {
-    const i3BalanceElement = document.getElementById('i3TokenBalance');
-    
-    if (i3BalanceElement) {
-        if (window.walletManager) {
-            const userInfo = window.walletManager.getUserInfo();
-            const balance = userInfo.isConnected ? userInfo.credits : 0;
-            console.log('🧮 MyAssets balance render - using walletManager.credits:', balance);
-            i3BalanceElement.innerHTML = `${balance} <img src="svg/i3-token-logo.svg" class="token-logo" alt="i3">`;
-        } else {
-            i3BalanceElement.innerHTML = `0 <img src="svg/i3-token-logo.svg" class="token-logo" alt="i3">`;
-        }
-    }
+    // USDC Balance card has been removed from the UI
+    return;
 }
 
 // Update overview cards with detailed information
@@ -134,7 +133,7 @@ function updateOverview() {
     const totalTokenValueK = tokenStats.totalUsdcSpent.toFixed(6);
     document.getElementById('totalTokenValue').innerHTML = `
         ${tokenStats.totalTokensK}K tokens
-        <small>Value: ${totalTokenValueK}K <img src="svg/i3-token-logo.svg" class="token-logo" alt="i3"></small>
+        <small>Value: ${totalTokenValueK}K <img src="svg/usdc.svg" class="token-logo" alt="USDC" style="width: 16px; height: 16px; vertical-align: middle;"></small>
     `;
     
     // Update Total Share Value card with detailed info
@@ -144,7 +143,7 @@ function updateOverview() {
     
     document.getElementById('totalShareValue').innerHTML = `
         ${shareStats.totalShares} shares
-        <small>Value: ${totalShareValueK}K <img src="svg/i3-token-logo.svg" class="token-logo" alt="i3"></small>
+        <small>Value: ${totalShareValueK}K <img src="svg/usdc.svg" class="token-logo" alt="USDC" style="width: 16px; height: 16px; vertical-align: middle;"></small>
     `;
     // Remove share change display
     document.getElementById('totalShareChange').style.display = 'none';
@@ -178,10 +177,21 @@ function updateTokensDisplay() {
         const modelData = getModelData(token.modelName);
         if (!modelData) return;
         
-        const estimatedUses = calculateEstimatedUses(token.quantity);
-        const totalValue = modelData.tokenPrice * token.quantity;
+        // quantity就是实际的API调用次数
+        const apiCalls = token.quantity.toLocaleString();
         
-        const totalValueK = totalValue.toFixed(2); // Keep original value, just add K suffix
+        // 使用与modelverse一致的价格计算
+        let pricePerCall;
+        if (window.PricingUtils && typeof window.PricingUtils.normalizeModelPricing === 'function') {
+            const pricing = window.PricingUtils.normalizeModelPricing(modelData);
+            pricePerCall = pricing.pricePerCallUsdc;
+        } else {
+            const tokenPricePerK = Number(modelData.tokenPriceUsdc || modelData.tokenPrice || 0);
+            pricePerCall = tokenPricePerK / 1000;
+        }
+        
+        const totalValueUsdc = (pricePerCall * token.quantity).toFixed(6);
+        
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>
@@ -190,10 +200,8 @@ function updateTokensDisplay() {
                 </div>
             </td>
             <td><span class="category">${token.category}</span></td>
-            <td><strong>${token.quantity}K</strong></td>
-            <td><span class="estimated-uses">${estimatedUses.toLocaleString()} uses</span></td>
-            <td>${modelData.tokenPrice.toFixed(2)} <img src="svg/i3-token-logo.svg" class="token-logo" alt="i3"></td>
-            <td><strong>${totalValueK}K <img src="svg/i3-token-logo.svg" class="token-logo" alt="i3"></strong></td>
+            <td><strong class="api-calls-count">${apiCalls} API calls</strong></td>
+            <td><strong>${totalValueUsdc} <img src="svg/usdc.svg" class="token-logo" alt="USDC" style="width: 16px; height: 16px; vertical-align: middle;"></strong></td>
             <td>
                 <div class="action-buttons">
                     <button class="action-btn use-btn" onclick="useTokens('${token.modelName}')">Use</button>
@@ -241,10 +249,10 @@ function updateSharesDisplay() {
             </td>
             <td><span class="category">${share.category}</span></td>
             <td><strong>${share.quantity}</strong></td>
-            <td>${modelData.sharePrice.toFixed(2)}K <img src="svg/i3-token-logo.svg" class="token-logo" alt="i3"></td>
+            <td>${modelData.sharePrice.toFixed(2)}K <img src="svg/usdc.svg" class="token-logo" alt="USDC" style="width: 16px; height: 16px; vertical-align: middle;"></td>
             <td><span class="market-change ${changeClass}">${changeSymbol}${modelData.change.toFixed(2)}%</span></td>
             <td><span class="pool-ownership">${poolOwnership}%</span></td>
-            <td><strong>${totalValueK}K <img src="svg/i3-token-logo.svg" class="token-logo" alt="i3"></strong></td>
+            <td><strong>${totalValueK}K <img src="svg/usdc.svg" class="token-logo" alt="USDC" style="width: 16px; height: 16px; vertical-align: middle;"></strong></td>
             <td>
                 <div class="action-buttons">
                     <button class="action-btn use-btn" onclick="useShares('${share.modelName}')">Use</button>
@@ -340,17 +348,35 @@ function showTab(tabName) {
 
 // Action functions for tokens
 function useTokens(modelName) {
-    const confirmed = confirm(`Are you sure you want to use tokens for ${modelName}?`);
+    // 检查用户是否有足够的 API calls
+    const myAssets = getMyAssets();
+    const tokenAsset = myAssets.tokens.find(t => t.modelName === modelName);
+    
+    if (!tokenAsset || tokenAsset.quantity <= 0) {
+        alert(`❌ You don't have any API calls for ${modelName}. Please purchase from Modelverse.`);
+        return;
+    }
+    
+    const confirmed = confirm(`Use ${modelName}?\n\nYou have ${tokenAsset.quantity} API calls remaining.\nEach conversation will consume API calls based on usage.`);
     if (confirmed) {
         // Set current model and redirect to index.html for usage
         const modelData = getModelData(modelName);
         if (modelData) {
+            // 设置 prepaid credits 标记，包含可用的 API calls 数量
+            localStorage.setItem('prepaidCredits', JSON.stringify({
+                modelName: modelName,
+                remainingCalls: tokenAsset.quantity,
+                activatedAt: new Date().toISOString()
+            }));
+            
             localStorage.setItem('currentModel', JSON.stringify({
                 name: modelName,
                 category: modelData.category,
                 industry: modelData.industry,
                 purpose: modelData.purpose,
-                useCase: modelData.useCase
+                useCase: modelData.useCase,
+                hasPrepaidCredits: true,  // 标记有预付费额度
+                remainingCalls: tokenAsset.quantity
             }));
             
             // Set auto router off and create running workflow
@@ -358,8 +384,11 @@ function useTokens(modelName) {
             localStorage.setItem('currentWorkflow', JSON.stringify({
                 name: modelName,
                 status: 'running',
-                startedAt: new Date().toISOString()
+                startedAt: new Date().toISOString(),
+                usePrepaidCredits: true
             }));
+            
+            console.log(`✅ Activated ${tokenAsset.quantity} prepaid API calls for ${modelName}`);
             
             // Redirect to index.html
             window.location.href = 'index.html?tryModel=' + encodeURIComponent(modelName);
