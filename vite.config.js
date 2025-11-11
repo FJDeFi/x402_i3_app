@@ -7,6 +7,10 @@ export default defineConfig({
     host: '0.0.0.0', // Allow external access
     port: 3000,
     strictPort: true,
+    fs: {
+      // Allow serving files from outside the root
+      strict: false
+    }
   },
   build: {
     outDir: 'dist',
@@ -49,7 +53,6 @@ export default defineConfig({
           'wallet-manager.js',
           'wallet-integration.js',
           'account-dropdown.js',
-          'bsc-testnet-guide.js',
           'modelverse.js',
           'benchmark.js',
           'canvas.js',

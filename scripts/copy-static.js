@@ -6,7 +6,6 @@ const DIST = path.join(ROOT, 'dist');
 
 const FILES = [
   'pricing.js',
-  'mcp-client.js',
   'model-data.js',
   'config.js',
   'api-manager.js',
@@ -15,7 +14,6 @@ const FILES = [
   'account-dropdown.js',
   'onchain-checkin.js',
   'social-tasks.js',
-  'bsc-testnet-guide.js',
   'contract-config.js',
   'svg/usdc.svg'
 ];

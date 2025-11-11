@@ -11574,6 +11574,135 @@
       "tx_signature": "2ukn5TtAHouDfbwGSnWWMGt69hQkS6xfhERQ1B5Lii4FZpNtQ9GMSaXUhoWS8QG4iAsnpBrDRCwaePx9XSss5eRk",
       "paid_at": "2025-11-10T08:22:58.952Z",
       "completed_at": "2025-11-10T08:22:59.931Z"
+    },
+    {
+      "id": "f07178fb-019b-4957-ac18-d442b439a8c9",
+      "status": "completed",
+      "created_at": "2025-11-11T13:00:53.682Z",
+      "updated_at": "2025-11-11T13:01:26.214Z",
+      "meta": {
+        "auto_router": {
+          "requestId": "7603647a-5aac-49c9-a57f-be9c35dc90a2",
+          "model": {
+            "id": "AI-Text-Detector-Examiner",
+            "version": "latest",
+            "category": "Model Analysis",
+            "pricing": {
+              "currency": "USDC",
+              "pricePerCallUsdc": 0.00009,
+              "gasPerCallUsdc": 0.00025,
+              "sharePriceUsdc": 14.73
+            }
+          },
+          "reasoning": "Selected model \"AI-Text-Detector-Examiner\" with score 99. Prompt length 17 chars"
+        },
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "prompt": "what does this do",
+        "model_name": "AI-Text-Detector-Examiner",
+        "description": "Invoke AI-Text-Detector-Examiner",
+        "verification": {
+          "ok": true,
+          "payer": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+          "amountRaw": "340",
+          "slot": 420835230,
+          "blockTime": 1762866083,
+          "explorerUrl": "https://explorer.solana.com/tx/FKdtYLSCG7LwZz52Vhuiitvj61Q8e4yQRA7V4EZtEsSKDYSbYGATCbn7aWx97Ps1R57zCspGsNmCAPXJ1SRTPYz?cluster=devnet",
+          "memoMatched": false
+        },
+        "result": {
+          "output": "This tool analyzes the effectiveness of text detectors designed to identify AI-generated content. It evaluates their performance, highlights limitations, and investigates why they may produce unreliable results, particularly in high-stakes situations. The insights gained can inform the development of more robust detection methods and guide educators and publishers in interpreting detection outputs.",
+          "usage": {
+            "prompt_tokens": 184,
+            "completion_tokens": 61,
+            "total_tokens": 245,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "audio_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "audio_tokens": 0,
+              "accepted_prediction_tokens": 0,
+              "rejected_prediction_tokens": 0
+            }
+          },
+          "model": "AI-Text-Detector-Examiner",
+          "raw": {
+            "success": true,
+            "data": {
+              "id": "chatcmpl-CaiHtDXH0nPisk4QFtJoGttB6Xal9",
+              "object": "chat.completion",
+              "created": 1762866085,
+              "model": "i3-model",
+              "choices": [
+                {
+                  "index": 0,
+                  "message": {
+                    "role": "assistant",
+                    "content": "This tool analyzes the effectiveness of text detectors designed to identify AI-generated content. It evaluates their performance, highlights limitations, and investigates why they may produce unreliable results, particularly in high-stakes situations. The insights gained can inform the development of more robust detection methods and guide educators and publishers in interpreting detection outputs.",
+                    "refusal": null,
+                    "annotations": []
+                  },
+                  "logprobs": null,
+                  "finish_reason": "stop"
+                }
+              ],
+              "usage": {
+                "prompt_tokens": 184,
+                "completion_tokens": 61,
+                "total_tokens": 245,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0,
+                  "audio_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "reasoning_tokens": 0,
+                  "audio_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "system_fingerprint": "fp_560af6e559"
+            },
+            "error": null,
+            "status_code": 200,
+            "provider": "i3",
+            "request_id": "chatcmpl-CaiHtDXH0nPisk4QFtJoGttB6Xal9"
+          },
+          "error": null,
+          "warning": null
+        }
+      },
+      "type": "infer",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "a6308146-6b19-4d76-bf72-f2005c7433c0",
+      "nonce": "9afc360b-511a-4260-90b9-52ea44cacba6",
+      "amount_usdc": 0.00034,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T13:05:53.682Z",
+      "tx_signature": "FKdtYLSCG7LwZz52Vhuiitvj61Q8e4yQRA7V4EZtEsSKDYSbYGATCbn7aWx97Ps1R57zCspGsNmCAPXJ1SRTPYz",
+      "paid_at": "2025-11-11T13:01:23.506Z",
+      "completed_at": "2025-11-11T13:01:26.214Z"
+    },
+    {
+      "id": "b093882a-117c-4e65-a424-d0cfa18dc171",
+      "status": "pending_payment",
+      "created_at": "2025-11-11T13:02:16.515Z",
+      "updated_at": "2025-11-11T13:02:16.515Z",
+      "meta": {
+        "share_id": "AI-Text-Detector-Examiner",
+        "wallet_address": "5Qj4LVKBNUNNUcw4Caijb1zYgwN9tsRDFHV8HehYfrw6",
+        "description": "Purchase share AI-Text-Detector-Examiner"
+      },
+      "type": "share",
+      "user_id": "wallet:5qj4lvkbnunnucw4caijb1zygwn9tsrdfhv8hehyfrw6",
+      "request_id": "640f4c6e-178d-41bc-8df6-6ad473137832",
+      "nonce": "6325b485-6507-4afb-91ac-8b88e36c5baf",
+      "amount_usdc": 14.73,
+      "model_or_node": "AI-Text-Detector-Examiner",
+      "tokens_or_calls": 1,
+      "expires_at": "2025-11-11T13:07:16.515Z"
     }
   ]
 }
