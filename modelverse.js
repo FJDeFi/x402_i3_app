@@ -243,14 +243,15 @@ function showModelCard(modelName, signOverride) {
   }
   const $ = (sel) => modal.querySelector(sel);
 
-  const titleEl    = $('#modelCartTitle');
-  const purposeEl  = $('#modelPurpose');
-  const useCaseEl  = $('#modelUseCase');
-  const categoryEl = $('#modelCategory');
-  const industryEl = $('#modelIndustry');
-  const priceEl    = $('#modelPrice');
-  const changeEl   = $('#modelChange');
-  const ratingEl   = $('#modelRating');
+  const titleEl     = $('#modelCartTitle');
+  const purposeEl   = $('#modelPurpose');
+  const useCaseEl   = $('#modelUseCase');
+  const paperLinkEl = $('#modelPaperLink');
+  const categoryEl  = $('#modelCategory');
+  const industryEl  = $('#modelIndustry');
+  const priceEl     = $('#modelPrice');
+  const changeEl    = $('#modelChange');
+  const ratingEl    = $('#modelRating');
 
   if (titleEl)    titleEl.textContent = `${modelName} Details`;
   if (purposeEl) {
@@ -280,6 +281,17 @@ function showModelCard(modelName, signOverride) {
         View Full Content
       </a>
     `;
+  }
+  if (paperLinkEl) {
+    const paperLink = data.paperLink || '';
+    const linkEl = paperLinkEl.querySelector('a');
+    if (linkEl && paperLink && paperLink !== 'nan' && paperLink.startsWith('http')) {
+      linkEl.href = paperLink;
+      linkEl.style.display = 'inline-flex';
+    } else {
+      linkEl.style.display = 'none';
+      paperLinkEl.innerHTML = '<span style="color: #9ca3af;">No paper available</span>';
+    }
   }
   if (categoryEl) categoryEl.textContent = data.category || '—';
   if (industryEl) industryEl.textContent = data.industry || '—';
