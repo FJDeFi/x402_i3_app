@@ -11,7 +11,7 @@ A decentralized Modelverse where AI models are discoverable, comparable, composa
 ## 🔗 Hackathon Resources
 
 
-* **Demo Video (≤ 3 min):** <TODO: YouTube link>
+* **Demo Video (≤ 3 min):** <https://www.youtube.com/watch?v=aUPYiAM4obg>
 
 ---
 
