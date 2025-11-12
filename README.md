@@ -1,153 +1,396 @@
-# Intelligence Cubed Homepage
+# Intelligence Cubed – x402 AI Agent Hub
 
-A modern, responsive homepage for Intelligence Cubed built with Node.js, Vite, and modern web technologies. Features a clean white and gray design theme with light purple accent colors.
+> Multi-model AI agent marketplace where every model and workflow call is paid with **x402 on Solana Devnet**.
 
-## 🚀 Features
+**Submission:** Solana x402 Hackathon – **Best x402 Agent Application**  
+**Status:** Fully working prototype with on-chain payments, model marketplace, benchmarks, workflows, and Canvas editor.
 
-- **Modern Tech Stack**: Built with Node.js, Vite, and Express.js
-- **Clean Design**: Modern interface with white/gray theme and light purple (#8B7CF6) primary colors
-- **Responsive Layout**: Works seamlessly on desktop, tablet, and mobile devices
-- **Interactive Elements**: 
-  - Hover tooltips on the Auto button (positioned inside textbox at bottom-left)
-  - Clickable suggestion items
-  - Navigation menu with active states
-  - Search functionality
-- **Modern Typography**: Uses Inter font family for a professional look
-- **Development Tools**: ESLint, Prettier, and hot reload for development
+---
 
-## 📋 Prerequisites
+## 🔗 Hackathon Resources
 
-- **Node.js** (version 14 or higher)
-- **npm** or **yarn** package manager
+> Replace `<TODO>` with your real links.
 
-## 🛠 Installation
+* **Live Demo:** <TODO: https://...>
+* **Demo Video (≤ 3 min):** <TODO: YouTube link>
+* **Pitch Deck:** <TODO: Google Slides / PDF>
+* **Sample Paid Tx (Solana Explorer):** https://explorer.solana.com/tx/2GDfhQHtEZEMcLtnsExDdYKHxK2CQK3oTqtZEgcQTKCs6uLi2W6rAqWUH57bBevHJhFDaYykdf24dfakXWFnvbcx?cluster=devnet
+* **Repository:** <TODO: GitHub repo URL>
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd intelligence-cubed-homepage
-   ```
+---
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+## 📚 Table of Contents
 
-## 🚦 Development
+1. [Overview](#-overview)
+2. [Problem & Solution](#-problem--solution)
+3. [Key Features](#-key-features)
+4. [How x402 & Solana Payments Work](#-how-x402--solana-payments-work)
+5. [Architecture & Tech Stack](#-architecture--tech-stack)
+6. [Getting Started](#-getting-started)
+7. [Local Development](#-local-development)
+8. [Testing Guide for Judges](#-testing-guide-for-judges)
+9. [Limitations & Roadmap](#-limitations--roadmap)
+10. [Team](#-team)
+11. [License](#-license)
 
-### Start Development Server
+---
+
+## 1️⃣ Overview
+
+**Intelligence Cubed** is a multi-page AI hub that lets users:
+
+* Discover curated AI models with **transparent USDC pricing**
+* Benchmark and compare models
+* Build and run **multi-step workflows** in a Canvas editor
+* Chat with any model or workflow via a unified **Chats** interface
+
+Every paid action (single model call or workflow run) is gated through **x402-style invoices** and settled in **USDC on Solana Devnet** via **Phantom**. Only after a payment is confirmed on-chain will the app invoke the underlying model(s) and stream back the answer.
+
+This turns our website into a real **x402 AI agent application** rather than just a front-end demo.
+
+---
+
+## 2️⃣ Problem & Solution
+
+### Problem
+
+Today, AI users face two gaps:
+
+1. **Model discovery gap** – It’s hard to find the “right” model for a specific task. Model lists are long, pricing opaque, and routing logic is often a black box.
+2. **Payment gap** – Most AI apps are centralized, credit-based, or subscription-based. There is no standard way for third-party agents to programmatically *pay* for model usage and get verifiable receipts on-chain.
+
+### Solution
+
+**Intelligence Cubed** addresses both:
+
+* A **Modelverse + Benchmark + Workflows + Canvas** UI for discovering, comparing, and composing models.
+* A **unified x402 payment layer**:
+
+  * Each model and workflow has a **price per API call in USDC**.
+  * The MCP backend issues **402 responses**, prompts Phantom, and verifies **Solana Devnet** settlement.
+  * Only after the invoice is **Paid** do we call the model or run the workflow.
+
+Any external AI agent (e.g., MCP-enabled IDE, LLM tool) can call the same backend to **pay with x402 + invoke our models** in an autonomous, verifiable way.
+
+---
+
+## 3️⃣ Key Features
+
+### Multi-Page AI Hub
+
+* **Chats (`index.html`)**  
+  Single-model or Auto Router chat interface with a central input box:
+
+  * “Ask AI anything…” prompt
+  * **Auto Router** toggle: when enabled, the system scores hundreds of models and picks the best suited one for the user’s query.
+
+* **Modelverse (`modelverse.html`)**  
+  Model marketplace with:
+
+  * Name, category, industry
+  * **Price / API call (USDC)**
+  * Usage, compatibility, total score
+  * Actions: **Try** (jump into Chats) & **Add to Cart**
+
+* **Benchmark (`benchmark.html`)**  
+  Model benchmark leaderboard showing:
+
+  * Performance scores
+  * Usage metrics
+  * Price & market stats
+  * One-click “Try” into Chats.
+
+* **Workflows (`workflow.html`)**  
+  Workflow leaderboard:
+
+  * Each card shows **Compute Cost**, **Estimated Gas**, and **Total (x402)** in USDC.
+  * Actions: **Details**, **Pay with x402**.
+
+* **Canvas (`canvas.html`)**  
+  Visual workflow editor:
+
+  * Drag-and-drop nodes (models)
+  * Connect them into multi-step pipelines
+  * Click **Run** to execute the pipeline, paying node-by-node through x402.
+
+### x402 & On-chain Payments
+
+* **402 Payment Progress widget** in the bottom-right shows:
+
+  * Invoice status (Pending → Paid / Cancelled)
+  * Amount, memo, and Solana tx link.
+* **Phantom (Solana Devnet)** integration:
+
+  * Users log in and confirm each payment.
+  * Every payment is visible on **Solana Explorer**.
+
+---
+
+## 4️⃣ How x402 & Solana Payments Work
+
+### A. Single-Model Chat Flow
+
+1. User opens **Chats** (`index.html`), selects a model (or enables Auto Router), and sends a question, e.g. `“What does this do?”`.
+2. The frontend sends the request to the MCP server; the server:
+
+   * Calculates the model price in USDC.
+   * Creates a **402 response** describing the required payment.
+3. The UI shows a **402 Payment Progress** card and prompts the user to **connect Phantom (Solana Devnet)**.
+4. Phantom pops up:
+
+   * User enters password (if locked) and approves the USDC transfer (plus small SOL network fee).
+5. Once the transaction is confirmed:
+
+   * The 402 card shows **Paid – Payment settled on Solana**, including:
+
+     * Amount (USDC)
+     * Memo (invoice ID)
+     * `Tx` link to **Solana Explorer**.
+6. Only then does the MCP server forward the prompt to the selected model and stream the answer back into the chat.
+
+### B. Modelverse / Benchmark “Try” Flow
+
+1. User visits **Modelverse** or **Benchmark** and clicks **Try** next to a model.
+2. They are redirected to **Chats** with that model pre-selected.
+3. They ask a question; the **same x402 flow** (invoice → Phantom → Explorer → answer) runs automatically.
+
+### C. Workflow & Canvas Flow
+
+1. User opens **Workflows** and chooses a workflow card (e.g. “AI Safety & Watermarking Pipeline”), then clicks **Pay with x402**.
+2. The app opens **Canvas**, pre-loading the workflow graph.
+3. User optionally edits the graph and clicks **Run**.
+4. Backend:
+
+   * Calculates the required price for the first node and returns a 402.
+   * After payment, verifies the Solana transfer and executes that node.
+   * Repeats the 402/payment cycle for each remaining node until the workflow completes.
+5. Final results surface back through the **Chats** interface.
+
+---
+
+## 5️⃣ Architecture & Tech Stack
+
+### Frontend
+
+* **Vite multi-page app** (`index.html`, `modelverse.html`, `benchmark.html`, `workflow.html`, `canvas.html`)
+* Modern layout with light purple accent (`#8B7CF6`), responsive design
+* Custom components for:
+
+  * Chats input + Auto Router toggle
+  * Model tables & workflow cards
+  * 402 Payment Progress widget
+
+### Backend
+
+* **Express.js** server (`serve.js`)
+
+  * Serves static assets for all pages
+  * Provides REST APIs: `/api/health`, `/api/models`, etc.
+  * Hosts **MCP routes** under `/mcp/*` to:
+
+    * Create x402-style invoices
+    * Poll invoice/payment status
+    * Proxy model calls after successful payment
+
+### Payments & On-chain
+
+* x402-compatible payment flow for invoice creation & validation
+* **Solana Devnet**:
+
+  * **USDC mint** as payment token
+  * **Merchant/agent recipient address** for all usage fees
+  * User payments via **Phantom** wallet
+* **Billing logs**:
+
+  * `data/billing-entries.json` stores local logs of each paid run for debugging and reconciliation (JSON shape: `{ "entries": [...] }`).
+
+### Optional Tooling
+
+* Firebase CLI (hosting & emulators)
+* Solana CLI / Anchor (program compilation & deployment)
+* Docker (containerized deployment)
+
+---
+
+## 6️⃣ Getting Started
+
+### Prerequisites
+
+* **Node.js** ≥ 18
+* **npm** ≥ 8 (or `yarn`)
+* **Phantom** wallet installed in your browser, set to **Solana Devnet**
+* Optional but recommended: some DEVNET SOL & USDC in Phantom for testing.
+
+### Clone & Install
+
+```bash
+git clone <TODO: repository-url>
+cd x402_i3_app
+npm install
+# or
+yarn install
+```
+
+### Environment Variables
+
+You can export these in your shell or use a `.env` file (with `dotenv` wired into `serve.js`):
+
+* **Server basics**
+
+  * `PORT` – default `3000` (often mapped to `8080` in production)
+  * `HOST` – default `127.0.0.1` (use `0.0.0.0` to listen on all interfaces)
+  * `NODE_ENV` – `development` or `production`
+
+* **Model proxy**
+
+  * `I3_API_KEY` – key for your internal model/vector proxy
+  * `I3_PROXY_BASE` – base URL of the proxy (e.g. `http://localhost:8000`)
+
+* **x402 / Solana settings** (can also live in `server/mcp/config.js`)
+
+  * `X402_NETWORK` – e.g. `solana-devnet`
+  * `X402_MINT` – USDC mint address on Devnet
+  * `X402_RECIPIENT` – your merchant/agent wallet address
+  * `X402_PAYMENT_URL` – optional x402 facilitator endpoint
+  * `X402_EXPLORER_URL` – Solana Explorer base URL
+  * `X402_RPC_URL` – Solana RPC endpoint
+  * `X402_DECIMALS` – token decimals (usually `6` for USDC)
+  * `X402_EXPIRES_SECONDS` – invoice expiry duration in seconds
+
+Ensure that `data/billing-entries.json` exists, is writable, and follows `{ "entries": [] }`. The repo ships with a sample file; replace it with an empty structure if you need a clean slate.
+
+---
+
+## 7️⃣ Local Development
+
+### Frontend (Vite dev server)
+
 ```bash
 npm run dev
 # or
 yarn dev
 ```
-This will start Vite development server on `http://localhost:3000` with hot reload.
 
-### Build for Production
-```bash
-npm run build
-# or
-yarn build
-```
+* Default: `http://localhost:3000`
+* Hot reload enabled.
+* `vite.config.js` is configured with `host: '0.0.0.0'` so you can access it from other devices on your LAN.
 
-### Preview Production Build
-```bash
-npm run preview
-# or
-yarn preview
-```
+### Backend / MCP server
 
-### Start Production Server
+In a separate terminal:
+
 ```bash
 npm start
 # or
 yarn start
 ```
 
-## 🧹 Code Quality
+This launches `serve.js`, which:
 
-### Lint Code
+* Serves static files (for production build)
+* Exposes `/api/*` and `/mcp/*` routes
+* Handles 402 invoice creation, polling, and post-payment model calls
+
+### Production Build
+
 ```bash
-npm run lint
-# or
-yarn lint
+npm run build
+npm run preview     # optional local preview of the built assets
 ```
 
-### Format Code
-```bash
-npm run format
-# or
-yarn format
-```
+In production, you typically:
 
-## 📁 Project Structure
+1. `npm run build`
+2. `npm start` (or `node serve.js`) behind a reverse proxy.
 
-```
-intelligence-cubed-homepage/
-├── public/
-│   ├── index.html                    # Main HTML file
-│   └── svg/I3 logo.svg            # Logo file
-├── src/
-│   ├── styles.css                    # CSS styling
-│   └── script.js                     # JavaScript functionality
-├── server.js                         # Express.js production server
-├── vite.config.js                    # Vite configuration
-├── package.json                      # Node.js dependencies and scripts
-├── .eslintrc.js                      # ESLint configuration
-├── .prettierrc                       # Prettier configuration
-└── README.md                         # This file
-```
+---
 
-## 🎯 Navigation Menu
+## 8️⃣ Testing Guide for Judges
 
-The header includes the following navigation items:
-- **Chats** (active by default)
-- **Modelverse** 
-- **Benchmark**
-- **Canvas**
-- **Workflows**
-- **MyCart**
-- **My Account** (right-aligned)
+> Minimal steps so judges can reproduce the x402 payment experience quickly.
 
-## ⭐ Main Features
+### A. Single-Model Chat Pay-per-Call
 
-### Central Terminal
-- **Title**: "Intelligence Cubed Terminal"
-- **Subtitle**: "Use the most suitable, practical, and specific model to get answers."
-- **Search Input**: "Ask AI anything" placeholder with Auto button inside at bottom-left
-- **Auto Button**: Shows tooltip on hover explaining the model selection process
+1. Open the demo (or `http://localhost:3000/index.html`).
+2. Connect Phantom when prompted and ensure it’s on **Solana Devnet**.
+3. In the model selector, choose **“AI-Text-Detector-Examiner”** (or any listed model).
+4. In the chat box, type  
+   `What does this do?` and press **Send**.
+5. Observe:
 
-### Auto Button Tooltip
-When hovering over the Auto button, it displays:
-"The system is analyzing hundreds of models in Intelligence Cubed's Modelverse to find the most suitable one to answer your question."
+   * A **“402 Payment Progress”** widget appears at the bottom-right.
+   * Phantom pops up asking to **Confirm Transaction**.
+6. Click **Confirm** in Phantom.
+7. After a few seconds:
 
-### Suggestion Cards
-Pre-populated suggestion cards for common queries related to cryptocurrency and market analysis.
+   * The widget shows **Paid – Payment settled on Solana** with:
 
-## 🎨 Customization
+     * Amount in USDC
+     * Memo (invoice ID)
+     * `Tx` link
+8. Click the `Tx` link to open **Solana Explorer** and verify the on-chain transaction.
+9. Switch back to the app: the chat now displays the model’s answer to your question.
 
-### Logo Replacement
-Replace `svg/I3 logo.svg` with your actual logo file and update the src attribute in the HTML files.
+### B. From Modelverse / Benchmark
 
-### Color Customization
-The primary color (#8B7CF6 - light purple) can be modified in `src/styles.css`. Search for this hex code to update all instances.
+1. Navigate to **Modelverse** or **Benchmark** in the top navigation bar.
+2. Locate **AI-Text-Detector-Examiner** and click **Try**.
+3. You’ll be redirected to **Chats** with that model pre-selected.
+4. Repeat steps 4–9 from the previous section.
 
-## 🌐 API Endpoints
+### C. Workflows & Canvas
 
-The Express.js server provides the following endpoints:
+1. Go to **Workflows**.
+2. Choose a workflow card (e.g. **“AI Safety & Watermarking Pipeline”**) and click **Pay with x402**.
+3. The app opens **Canvas** with the workflow graph preloaded.
+4. Click **Run**; you will move through one or more 402 invoices (one per workflow node) and confirm each in Phantom.
+5. After the final invoice is **Paid**, the workflow finishes running and the combined output is streamed into the chat.
 
-- `GET /` - Serve the homepage
-- `GET /api/health` - Health check endpoint
+---
 
-## 🖥 Browser Support
+## 9️⃣ Limitations & Roadmap
 
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
+### Current Limitations
 
-## 📄 License
+* Runs on **Solana Devnet** only (no Mainnet deployment yet).
+* Payments use **USDC** via a single facilitator & merchant wallet.
+* Model list & workflows are curated; there is no public self-service onboarding for third-party model providers (yet).
 
-MIT License - see LICENSE file for details. 
+### Roadmap
+
+* **Mainnet-beta deployment** with production-grade RPC and observability.
+* **Model provider onboarding**:
+
+  * Let external developers list models/workflows with their own x402 pricing and recipient addresses.
+* **More wallets & platforms**:
+
+  * Support additional Solana wallets and mobile-first flows.
+* **Agent API**:
+
+  * Document and expose MCP endpoints so external AI agents can programmatically:
+
+    * Discover models
+    * Quote prices
+    * Pay with x402
+    * Invoke models and workflows
+
+---
+
+## 🔟 Team
+
+> Update with your real names / roles.
+
+* **BOB YANG** – Product, frontend, Solana/x402 integration
+* <TODO: Teammate 2> – 
+* <TODO: Teammate 3> – 
+
+If you’re interested in collaborating or integrating your model/workflow into Intelligence Cubed, feel free to open an issue or reach out via <TODO: contact / Twitter / email>.
+
+---
+
+## 🧾 License
+
+> Choose one that matches your goals (MIT is common for hackathons).
+
+This project is licensed under the **MIT License** – see the [`LICENSE`](./LICENSE) file for details.
+
