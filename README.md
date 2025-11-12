@@ -1,4 +1,6 @@
-# Intelligence Cubed – x402 AI Agent Hub
+# Intelligence Cubed – x402 
+
+A decentralized Modelverse where AI models are discoverable, comparable, composable—and payable via x402 payments end-to-end.
 
 > Multi-model AI agent marketplace where every model and workflow call is paid with **x402 on Solana Devnet**.
 
@@ -15,58 +17,95 @@
 ---
 
 ## 📚 Table of Contents
+1. [Hackathon Resources](#hackathon-resources)
+2. [Overview](#1-overview)
+3. [What the Product *Is*](#2-what-the-product-is)
+4. [Problem & Solution](#3-problem--solution)
+5. [Core Concepts](#4-core-concepts)
+6. [Key Features](#key-features)
+   - [Multi-Page AI Hub](#multi-page-ai-hub)
+   - [x402 & On-chain Payments](#x402--on-chain-payments)
+7. [How x402 & Solana Payments Work](#how-x402--solana-payments-work)
+   - [A) Single-Model Chat Flow](#a-single-model-chat-flow)
+   - [B) Modelverse / Benchmark “Try” Flow](#b-modelverse--benchmark-try-flow)
+   - [C) Workflow & Canvas Flow](#c-workflow--canvas-flow)
+8. [Architecture & Tech Stack](#architecture--tech-stack)
+   - [Frontend](#frontend)
+   - [Backend](#backend)
+   - [Payments & On-chain](#payments--on-chain)
+9. [Getting Started](#getting-started)
+   - [Prerequisites](#prerequisites)
+   - [Clone & Install](#clone--install)
+   - [Environment Variables](#environment-variables)
+10. [Local Development](#local-development)
+    - [Frontend (Vite dev server)](#frontend-vite-dev-server)
+    - [Backend / MCP server](#backend--mcp-server)
+    - [Production Build](#production-build)
+11. [Roadmap](#roadmap)
+12. [License](#license)
 
-1. [Overview](#-overview)
-2. [Problem & Solution](#-problem--solution)
-3. [Key Features](#-key-features)
-4. [How x402 & Solana Payments Work](#-how-x402--solana-payments-work)
-5. [Architecture & Tech Stack](#-architecture--tech-stack)
-6. [Getting Started](#-getting-started)
-7. [Local Development](#-local-development)
-8. [Testing Guide for Judges](#-testing-guide-for-judges)
-9. [Limitations & Roadmap](#-limitations--roadmap)
-10. [Team](#-team)
-11. [License](#-license)
+---
+# Intelligence Cubed (i³)
+
+> A decentralized **Modelverse** — think **Hugging Face × Uniswap** — where models are both **Model-as-a-Service (MaaS)** and **liquid, revenue-sharing assets**. Discover, compare, and compose models in a visual Canvas; pay per call with transparent USDC pricing; and get verifiable on-chain receipts via **x402**.
 
 ---
 
-## 1️⃣ Overview
+## 1) Overview
 
-**Intelligence Cubed** is a decentralized modelverse that lets users:
+**Intelligence Cubed (i³)** is a decentralized modelverse that lets users:
 
-* Discover curated AI models with **transparent USDC pricing**
-* Benchmark and compare models
-* Build and run **multi-step workflows** in a Canvas editor
-* Chat with any model or workflow via a unified **Chats** interface
+- Discover curated AI models with transparent **USDC** pricing  
+- Benchmark and compare models with community-driven **Proof of Intelligence**  
+- Build and run multi-step workflows in a **Canvas** editor  
+- Chat with any model or workflow via a unified **Chats** interface
 
-Every paid action (single model call or workflow run) is gated through **x402-style invoices** and settled in **USDC on Solana Devnet** via **Phantom**. Only after a payment is confirmed on-chain will the app invoke the underlying model(s) and stream back the answer.
+Every paid action (single model call or workflow run) is **gated by x402 invoices** and settled in **USDC on Solana Devnet** via **Phantom**. Only **after** on-chain payment confirmation does the app invoke the underlying model(s) and stream back the answer.
 
+---
+
+## 2) What the Product *Is*
+
+i³ is four layers that work together:
+
+1. **Model-as-a-Service (MaaS)**  
+   Call models directly via chat/API, chain them into workflows, and enable fine-tuning and secondary creation.
+
+2. **Model as a Liquid Asset**  
+   Tokenize models through **IMO (Initial Model Offering)** so ownership and usage revenues are shared transparently.
+
+3. **Co-Creation (Canvas)**  
+   Drag-and-drop to compose multi-step pipelines; derivative models automatically return royalties to ancestors.
+
+4. **Democratic Benchmark (Proof of Intelligence)**  
+   Usage-driven rankings and indices so the best models rise on merit, not just lab tests.
+
+> **Open-source threshold:** when **>51%** of a model’s ownership is publicly held, the model transitions to open source to accelerate adoption and remixing.
 
 ---
 
-## 2️⃣ Problem & Solution
+## 3) Problem & Solution
 
-### Problem
+### Problems
+- **Model discovery gap:** Lists are long, quality varies, pricing is opaque, and router logic is often a black box.  
+- **Payment gap:** Most AI apps are centralized, credit- or subscription-based. There’s no standard way for third-party agents to **programmatically** pay per call and obtain **verifiable on-chain receipts**.
 
-Today, AI users face two gaps:
-
-1. **Model discovery gap** – It’s hard to find the “right” model for a specific task. Model lists are long, pricing opaque, and routing logic is often a black box.
-2. **Payment gap** – Most AI apps are centralized, credit-based, or subscription-based. There is no standard way for third-party agents to programmatically *pay* for model usage and get verifiable receipts on-chain.
-
-### Solution
-
-**Intelligence Cubed** addresses both:
-
-* A **Modelverse + Benchmark + Workflows + Canvas** UI for discovering, comparing, and composing models.
-* A **unified x402 payment layer**:
-
-  * Each model and workflow has a **price per API call in USDC**.
-  * The MCP backend issues **402 responses**, prompts Phantom, and verifies **Solana Devnet** settlement.
-  * Only after the invoice is **Paid** do we call the model or run the workflow.
-
-Any external AI agent (e.g., MCP-enabled IDE, LLM tool) can call the same backend to **pay with x402 + invoke our models** in an autonomous, verifiable way.
+### Our Solution
+- **Modelverse + Benchmark + Workflows + Canvas** for one-stop **discover → compare → compose**.  
+- **Tokenized ownership & royalties** (IMO + derivative revenue share) for sustainable creator incentives.  
+- **Unified x402 payment layer**: each call is invoiced, paid, verified on-chain, then executed.
 
 ---
+
+## 4) Core Concepts
+
+- **IMO (Initial Model Offering):** Creators mint model ownership, fund development, and share future usage revenues.  
+- **Royalties Accumulation:** Derivative models automatically pay upstream royalties across the lineage.  
+- **Proof of Intelligence:** Continuous, usage-driven scoring and vertical indices (quality, usage, momentum).  
+- **Democratic Pricing:** Stablecoin-anchored pricing that reflects demand and capacity, not arbitrary fees.
+
+---
+
 
 ## 3️⃣ Key Features
 
