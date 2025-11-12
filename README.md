@@ -1,8 +1,7 @@
 # Intelligence Cubed – x402 
 
-A decentralized Modelverse where AI models are discoverable, comparable, composable—and payable via x402 payments end-to-end.
+A decentralized Modelverse where AI models are discoverable, comparable, composable—and payable via x402 payments end-to-end on Solana Devnet.
 
-> Multi-model AI agent marketplace where every model and workflow call is paid with **x402 on Solana Devnet**.
 
 **Submission:** Solana x402 Hackathon – **Best x402 Agent Application**  
 **Status:** Fully working prototype with on-chain payments, model marketplace, benchmarks, workflows, and Canvas editor.
@@ -352,8 +351,6 @@ In production, you typically:
 ---
 
 ## 🧾 License
-
-> Choose one that matches your goals (MIT is common for hackathons).
 
 This project is licensed under the **MIT License** – see the [`LICENSE`](./LICENSE) file for details.
 
