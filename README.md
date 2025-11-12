@@ -9,13 +9,8 @@
 
 ## 🔗 Hackathon Resources
 
-> Replace `<TODO>` with your real links.
 
-* **Live Demo:** <TODO: https://...>
 * **Demo Video (≤ 3 min):** <TODO: YouTube link>
-* **Pitch Deck:** <TODO: Google Slides / PDF>
-* **Sample Paid Tx (Solana Explorer):** https://explorer.solana.com/tx/2GDfhQHtEZEMcLtnsExDdYKHxK2CQK3oTqtZEgcQTKCs6uLi2W6rAqWUH57bBevHJhFDaYykdf24dfakXWFnvbcx?cluster=devnet
-* **Repository:** <TODO: GitHub repo URL>
 
 ---
 
@@ -37,7 +32,7 @@
 
 ## 1️⃣ Overview
 
-**Intelligence Cubed** is a multi-page AI hub that lets users:
+**Intelligence Cubed** is a decentralized modelverse that lets users:
 
 * Discover curated AI models with **transparent USDC pricing**
 * Benchmark and compare models
@@ -46,7 +41,6 @@
 
 Every paid action (single model call or workflow run) is gated through **x402-style invoices** and settled in **USDC on Solana Devnet** via **Phantom**. Only after a payment is confirmed on-chain will the app invoke the underlying model(s) and stream back the answer.
 
-This turns our website into a real **x402 AI agent application** rather than just a front-end demo.
 
 ---
 
@@ -134,8 +128,8 @@ Any external AI agent (e.g., MCP-enabled IDE, LLM tool) can call the same backen
 2. The frontend sends the request to the MCP server; the server:
 
    * Calculates the model price in USDC.
-   * Creates a **402 response** describing the required payment.
-3. The UI shows a **402 Payment Progress** card and prompts the user to **connect Phantom (Solana Devnet)**.
+   * Creates a **x402 payment** describing the required payment.
+3. The UI shows a **x402 Payment Progress** card and prompts the user to **connect Phantom (Solana Devnet)**.
 4. Phantom pops up:
 
    * User enters password (if locked) and approves the USDC transfer (plus small SOL network fee).
@@ -204,12 +198,6 @@ Any external AI agent (e.g., MCP-enabled IDE, LLM tool) can call the same backen
 
   * `data/billing-entries.json` stores local logs of each paid run for debugging and reconciliation (JSON shape: `{ "entries": [...] }`).
 
-### Optional Tooling
-
-* Firebase CLI (hosting & emulators)
-* Solana CLI / Anchor (program compilation & deployment)
-* Docker (containerized deployment)
-
 ---
 
 ## 6️⃣ Getting Started
@@ -243,7 +231,6 @@ You can export these in your shell or use a `.env` file (with `dotenv` wired int
 
 * **Model proxy**
 
-  * `I3_API_KEY` – key for your internal model/vector proxy
   * `I3_PROXY_BASE` – base URL of the proxy (e.g. `http://localhost:8000`)
 
 * **x402 / Solana settings** (can also live in `server/mcp/config.js`)
@@ -305,57 +292,6 @@ In production, you typically:
 
 ---
 
-## 8️⃣ Testing Guide for Judges
-
-> Minimal steps so judges can reproduce the x402 payment experience quickly.
-
-### A. Single-Model Chat Pay-per-Call
-
-1. Open the demo (or `http://localhost:3000/index.html`).
-2. Connect Phantom when prompted and ensure it’s on **Solana Devnet**.
-3. In the model selector, choose **“AI-Text-Detector-Examiner”** (or any listed model).
-4. In the chat box, type  
-   `What does this do?` and press **Send**.
-5. Observe:
-
-   * A **“402 Payment Progress”** widget appears at the bottom-right.
-   * Phantom pops up asking to **Confirm Transaction**.
-6. Click **Confirm** in Phantom.
-7. After a few seconds:
-
-   * The widget shows **Paid – Payment settled on Solana** with:
-
-     * Amount in USDC
-     * Memo (invoice ID)
-     * `Tx` link
-8. Click the `Tx` link to open **Solana Explorer** and verify the on-chain transaction.
-9. Switch back to the app: the chat now displays the model’s answer to your question.
-
-### B. From Modelverse / Benchmark
-
-1. Navigate to **Modelverse** or **Benchmark** in the top navigation bar.
-2. Locate **AI-Text-Detector-Examiner** and click **Try**.
-3. You’ll be redirected to **Chats** with that model pre-selected.
-4. Repeat steps 4–9 from the previous section.
-
-### C. Workflows & Canvas
-
-1. Go to **Workflows**.
-2. Choose a workflow card (e.g. **“AI Safety & Watermarking Pipeline”**) and click **Pay with x402**.
-3. The app opens **Canvas** with the workflow graph preloaded.
-4. Click **Run**; you will move through one or more 402 invoices (one per workflow node) and confirm each in Phantom.
-5. After the final invoice is **Paid**, the workflow finishes running and the combined output is streamed into the chat.
-
----
-
-## 9️⃣ Limitations & Roadmap
-
-### Current Limitations
-
-* Runs on **Solana Devnet** only (no Mainnet deployment yet).
-* Payments use **USDC** via a single facilitator & merchant wallet.
-* Model list & workflows are curated; there is no public self-service onboarding for third-party model providers (yet).
-
 ### Roadmap
 
 * **Mainnet-beta deployment** with production-grade RPC and observability.
@@ -373,18 +309,6 @@ In production, you typically:
     * Quote prices
     * Pay with x402
     * Invoke models and workflows
-
----
-
-## 🔟 Team
-
-> Update with your real names / roles.
-
-* **BOB YANG** – Product, frontend, Solana/x402 integration
-* <TODO: Teammate 2> – 
-* <TODO: Teammate 3> – 
-
-If you’re interested in collaborating or integrating your model/workflow into Intelligence Cubed, feel free to open an issue or reach out via <TODO: contact / Twitter / email>.
 
 ---
 
