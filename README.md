@@ -1,22 +1,43 @@
-# Intelligence Cubed – x402 
+# Intelligence Cubed (i³) – x402 Edition
 
-A decentralized Modelverse where AI models are discoverable, comparable, composable—and payable via x402 payments end-to-end on Solana Devnet.
+<div align="center">
 
+![Intelligence Cubed Logo](svg/I3%20logo.svg)
 
-**Submission:** Solana x402 Hackathon – **Best x402 Agent Application**  
-**Status:** Fully working prototype with on-chain payments, model marketplace, benchmarks, workflows, and Canvas editor.
+**A Decentralized AI Marketplace with x402 Payments**
+
+Where AI models are both **Model-as-a-Service (MaaS)** and **liquid, revenue-sharing assets**. Discover, compare, and compose models in a visual Canvas with transparent **USDC pricing** and **on-chain x402 payments** on **Solana Devnet**.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
+[![Solana Devnet](https://img.shields.io/badge/Solana-Devnet-14F195)](https://solana.com/)
+[![x402 Payments](https://img.shields.io/badge/x402-Enabled-9945FF)](https://solana.com/)
+[![USDC Payments](https://img.shields.io/badge/Payment-USDC-2775CA)](https://www.circle.com/usdc)
+
+[Litepaper](http://intelligencecubed.com/) | [Twitter](https://x.com/I3_Cubed) | [Telegram](https://t.me/I3_Cubed)
+
+</div>
 
 ---
 
-## 🔗 Hackathon Resources
+## 🏆 Hackathon Submission
 
+**Hackathon:** Solana x402 Hackathon – **Best x402 Agent Application**  
+**Status:** Fully working prototype with on-chain x402 payments, model marketplace, benchmarks, workflows, and Canvas editor  
+**Demo Video (≤ 3 min):** <https://www.youtube.com/watch?v=aUPYiAM4obg>
 
-* **Demo Video (≤ 3 min):** <https://www.youtube.com/watch?v=aUPYiAM4obg>
+### 🚀 What Makes This Special
+
+- ✅ **x402 Payment Protocol** – Every AI model call is paid via x402 invoices
+- ✅ **Solana Devnet Integration** – Fast, low-cost on-chain payment settlement
+- ✅ **USDC-Based Pricing** – Transparent, stablecoin-denominated pricing for all models
+- ✅ **Phantom Wallet Integration** – Seamless payment experience for users
+- ✅ **Verifiable On-Chain Receipts** – Every transaction is traceable on Solana Explorer
 
 ---
 
 ## 📚 Table of Contents
-1. [Hackathon Resources](#hackathon-resources)
+1. [Hackathon Submission](#-hackathon-submission)
 2. [Overview](#1-overview)
 3. [What the Product *Is*](#2-what-the-product-is)
 4. [Problem & Solution](#3-problem--solution)
