@@ -416,7 +416,7 @@ sequenceDiagram
 graph TB
     subgraph Client["🖥️ Frontend Layer"]
         UI[Multi-Page Web App]
-        Pages[Chat | Modelverse | Benchmark | Workflow | Canvas]
+        Pages[Chat • Modelverse • Benchmark • Workflow • Canvas]
         Payment402[x402 Payment Widget]
         UI --> Pages
         UI --> Payment402
